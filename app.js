@@ -259,6 +259,11 @@
     });
   }
 
+  // ซิงค์อัตโนมัติเป็นช่วงๆ (สำรองนอกเหนือ event 'online') — flushSync เช็คคิวว่าง/ออฟไลน์เองอยู่แล้ว
+  setInterval(function () {
+    if (navigator.onLine && typeof window.flushSync === 'function') { try { window.flushSync(); } catch (e) {} }
+  }, 30000);
+
   /* ---------- ประกอบ UI ตามสถานะล็อกอิน ---------- */
   ready(function () {
     if (!auth) { buildLoginOverlay(); }

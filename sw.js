@@ -7,7 +7,9 @@
  *    (ออฟไลน์ = fetch ล้มเหลว → outbox ในหน้าเว็บจะ retry เอง)
  *  *** เปลี่ยน CACHE เวอร์ชันทุกครั้งที่แก้ไฟล์ static เพื่อล้างแคชเก่า ***
  * ===================================================================== */
-const CACHE = 'eld-pwa-v4';
+const CACHE = 'eld-pwa-v5';
+// CDN ที่ให้แคชไว้ใช้ออฟไลน์ (ฟอนต์ + ไลบรารีสแกน QR) — โหลดครั้งแรกครั้งเดียว
+const CDN = /fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net/;
 const SHELL = [
   './',
   './index.html',
@@ -52,7 +54,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(req).then((cached) => {
       const net = fetch(req).then((res) => {
-        if (res && res.status === 200 && res.type === 'basic') {
+        if (res && res.status === 200 && (res.type === 'basic' || CDN.test(req.url))) {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(req, copy));
         }

@@ -7,10 +7,37 @@
 - ฉีด <head> ของ PWA (manifest/theme/CSS overlay) + ปุ่มสแกน QR ข้างช่อง CID
 รัน: python3 build_pwa.py
 """
-import pathlib, sys
+import pathlib, sys, re, json
 
 PWA = pathlib.Path(__file__).parent
 SRC = PWA.parent / 'elderly-dashboard'
+
+PROVINCE_KEEP = 'ปัตตานี'   # ตัดข้อมูลที่อยู่เหลือเฉพาะจังหวัดนี้ (ลดขนาด/เร็วขึ้น). อยากได้ทั้งประเทศ = ตั้ง None
+
+def trim_address(addr_html):
+    """กรอง THAI_ADDRESS_DATA ให้เหลือเฉพาะจังหวัด PROVINCE_KEEP (ดึงจากข้อมูลจริง ไม่ hardcode รหัส)"""
+    if not PROVINCE_KEEP:
+        return addr_html
+    m = re.search(r'window\.THAI_ADDRESS_DATA\s*=\s*(\{.*\})\s*;?\s*</script>', addr_html, re.S)
+    if not m:
+        print('  ⚠️ trim_address: หา object ไม่เจอ — ใช้ข้อมูลเต็ม'); return addr_html
+    try:
+        data = json.loads(m.group(1))
+        pv = [p for p in data['provinces'] if p[1] == PROVINCE_KEEP]
+        if not pv:
+            print('  ⚠️ trim_address: ไม่พบจังหวัด ' + PROVINCE_KEEP + ' — ใช้ข้อมูลเต็ม'); return addr_html
+        code = pv[0][0]
+        dists = data['districtsByProvince'].get(code, [])
+        dcodes = set(d[0] for d in dists)
+        sbyd = {k: v for k, v in data['subdistrictsByDistrict'].items() if k in dcodes}
+        trimmed = {'provinces': pv, 'districtsByProvince': {code: dists}, 'subdistrictsByDistrict': sbyd}
+        out = '<script>window.THAI_ADDRESS_DATA=' + json.dumps(trimmed, ensure_ascii=False, separators=(',', ':')) + ';</script>'
+        print('  ✓ ตัดที่อยู่เหลือ ' + PROVINCE_KEEP + ' (รหัส ' + code + '): ' +
+              str(len(dists)) + ' อำเภอ, ' + str(sum(len(v) for v in sbyd.values())) + ' ตำบล · ' +
+              str(len(addr_html)) + '→' + str(len(out)) + ' bytes')
+        return out
+    except Exception as e:
+        print('  ⚠️ trim_address ผิดพลาด: ' + str(e) + ' — ใช้ข้อมูลเต็ม'); return addr_html
 
 def read(p):
     return (SRC / p).read_text(encoding='utf-8')
@@ -24,7 +51,7 @@ html = read('Assess.html')
 # 1) inline ThaiAddressData (Assess เดิมใช้ <?!= include('ThaiAddressData') ?>)
 inc = "<?!= include('ThaiAddressData') ?>"
 need(html, inc)
-html = html.replace(inc, read('ThaiAddressData.html'))
+html = html.replace(inc, trim_address(read('ThaiAddressData.html')))
 
 # 2) แทนบรรทัด __SP (server template) ด้วยสคริปต์ฝั่ง PWA (โหลด "ก่อน" สคริปต์หลัก)
 sp_line = "<script>window.__SP = <?!= qp ?>;</script>"
