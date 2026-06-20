@@ -55,8 +55,9 @@ PWA_HEAD = """
     background:radial-gradient(circle at 30% 25%,#5eead4,#38bdf8);box-shadow:0 0 26px rgba(94,234,212,.5)}
   #pwaLogin h2{font-size:18px;color:#e8eefc;margin-bottom:6px}
   .pwa-sub{font-size:12.5px;color:#9fb0d0;line-height:1.5}
-  #pwaLogin input{width:100%;margin-top:12px;padding:13px 14px;border-radius:12px;background:rgba(7,11,22,.7);
+  #pwaLogin input,#pwaLogin select{width:100%;margin-top:12px;padding:13px 14px;border-radius:12px;background:rgba(7,11,22,.7);
     border:1px solid rgba(125,211,252,.22);color:#e8eefc;font-family:inherit;font-size:15px}
+  #pwaLogin select{appearance:none;-webkit-appearance:none}
   #pwaLogin .pwa-tabs{display:flex;gap:8px;margin:16px 0 4px}
   #pwaLogin .pwa-tabs button{flex:1;width:auto;margin:0;padding:9px;border-radius:10px;font-size:13px;font-weight:500;
     background:rgba(7,11,22,.5);border:1px solid rgba(125,211,252,.18);color:#9fb0d0}

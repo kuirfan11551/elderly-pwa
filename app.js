@@ -87,7 +87,11 @@
           '<p class="pwa-sub" style="margin:2px 0 0">ไม่ต้องมีรหัสผ่าน — กรอกข้อมูลผู้ประเมินเพื่อยืนยันตัวตน (ใช้งานออฟไลน์ได้)</p>' +
           '<input id="pwaGCid" inputmode="numeric" maxlength="13" placeholder="เลขบัตรประชาชนผู้ประเมิน (13 หลัก)">' +
           '<input id="pwaGName" placeholder="ชื่อ-สกุลผู้ประเมิน">' +
-          '<input id="pwaGPos" placeholder="ตำแหน่ง (เช่น อสม.)" value="อสม.">' +
+          '<select id="pwaGPosSel">' +
+            '<option value="อสม.">อสม.</option>' +
+            '<option value="เจ้าหน้าที่">เจ้าหน้าที่</option>' +
+          '</select>' +
+          '<input id="pwaGPosOther" class="hidden" placeholder="ระบุตำแหน่ง (เช่น พยาบาลวิชาชีพ, แพทย์แผนไทย)">' +
           '<input id="pwaGAff" placeholder="ต้นสังกัด (เช่น รพ.สต.ระแว้ง)">' +
           '<button id="pwaGuestBtn">เริ่มประเมิน</button>' +
         '</div>' +
@@ -132,10 +136,15 @@
     function doGuest() {
       var cid = (document.getElementById('pwaGCid').value || '').replace(/\D/g, '');
       var name = document.getElementById('pwaGName').value.trim();
-      var pos = document.getElementById('pwaGPos').value.trim();
+      var posSel = document.getElementById('pwaGPosSel').value;
+      var pos = posSel;
+      if (posSel === 'เจ้าหน้าที่') {
+        pos = document.getElementById('pwaGPosOther').value.trim();
+        if (!pos) { err.textContent = 'กรุณาระบุตำแหน่งเจ้าหน้าที่ (เช่น พยาบาลวิชาชีพ)'; return; }
+      }
       var aff = document.getElementById('pwaGAff').value.trim();
       if (cid.length !== 13) { err.textContent = 'กรอกเลขบัตรประชาชนผู้ประเมิน 13 หลัก'; return; }
-      if (!name || !pos || !aff) { err.textContent = 'กรอกชื่อ ตำแหน่ง และต้นสังกัดให้ครบ'; return; }
+      if (!name || !aff) { err.textContent = 'กรอกชื่อ-สกุล และต้นสังกัดให้ครบ'; return; }
       var display = name + ' (' + pos + ' · ' + aff + ')';
       gbtn.disabled = true; gbtn.textContent = 'กำลังเข้า...'; err.textContent = '';
       apiCall('guestLogin', [{ cid: cid, name: name, position: pos, affiliation: aff }]).then(function (r) {
@@ -149,6 +158,15 @@
       });
     }
     gbtn.addEventListener('click', doGuest);
+
+    // ตำแหน่ง: เลือก "เจ้าหน้าที่" → โชว์ช่องระบุวิชาชีพ
+    var posSel = document.getElementById('pwaGPosSel');
+    var posOther = document.getElementById('pwaGPosOther');
+    posSel.addEventListener('change', function () {
+      var staff = posSel.value === 'เจ้าหน้าที่';
+      posOther.classList.toggle('hidden', !staff);
+      if (staff) posOther.focus();
+    });
   }
 
   function buildTopbar() {
