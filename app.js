@@ -74,16 +74,42 @@
       '<div class="pwa-card">' +
         '<div class="pwa-logo"></div>' +
         '<h2>' + (CFG.clinicName || 'คลินิกผู้สูงอายุ') + '</h2>' +
-        '<p class="pwa-sub">เข้าสู่ระบบเพื่อประเมิน (ใช้งานออฟไลน์ได้หลังเข้าครั้งแรก)</p>' +
-        '<input id="pwaUser" placeholder="ชื่อผู้ใช้ / เลขบัตรประชาชน" autocomplete="username">' +
-        '<input id="pwaPass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">' +
-        '<button id="pwaLoginBtn">เข้าสู่ระบบ</button>' +
+        '<div class="pwa-tabs">' +
+          '<button type="button" id="pwaTabStaff" class="on">เจ้าหน้าที่</button>' +
+          '<button type="button" id="pwaTabGuest">ผู้ช่วยประเมิน (อสม.)</button>' +
+        '</div>' +
+        '<div id="pwaStaffForm">' +
+          '<input id="pwaUser" placeholder="ชื่อผู้ใช้ / เลขบัตรประชาชน" autocomplete="username">' +
+          '<input id="pwaPass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">' +
+          '<button id="pwaLoginBtn">เข้าสู่ระบบ</button>' +
+        '</div>' +
+        '<div id="pwaGuestForm" class="hidden">' +
+          '<p class="pwa-sub" style="margin:2px 0 0">ไม่ต้องมีรหัสผ่าน — กรอกข้อมูลผู้ประเมินเพื่อยืนยันตัวตน (ใช้งานออฟไลน์ได้)</p>' +
+          '<input id="pwaGCid" inputmode="numeric" maxlength="13" placeholder="เลขบัตรประชาชนผู้ประเมิน (13 หลัก)">' +
+          '<input id="pwaGName" placeholder="ชื่อ-สกุลผู้ประเมิน">' +
+          '<input id="pwaGPos" placeholder="ตำแหน่ง (เช่น อสม.)" value="อสม.">' +
+          '<input id="pwaGAff" placeholder="ต้นสังกัด (เช่น รพ.สต.ระแว้ง)">' +
+          '<button id="pwaGuestBtn">เริ่มประเมิน</button>' +
+        '</div>' +
         '<div id="pwaLoginErr" class="pwa-err"></div>' +
         (ENDPOINT ? '' : '<div class="pwa-err">⚠️ ยังไม่ได้ตั้งค่า apiUrl ใน config.js</div>') +
       '</div>';
     document.body.appendChild(el);
-    var btn = document.getElementById('pwaLoginBtn');
     var err = document.getElementById('pwaLoginErr');
+
+    // สลับแท็บ เจ้าหน้าที่ / ผู้ช่วยประเมิน
+    var tabS = document.getElementById('pwaTabStaff'), tabG = document.getElementById('pwaTabGuest');
+    var formS = document.getElementById('pwaStaffForm'), formG = document.getElementById('pwaGuestForm');
+    function show(guest) {
+      formS.classList.toggle('hidden', guest); formG.classList.toggle('hidden', !guest);
+      tabS.classList.toggle('on', !guest); tabG.classList.toggle('on', guest);
+      err.textContent = '';
+    }
+    tabS.addEventListener('click', function () { show(false); });
+    tabG.addEventListener('click', function () { show(true); });
+
+    // เข้าสู่ระบบ (เจ้าหน้าที่)
+    var btn = document.getElementById('pwaLoginBtn');
     function doLogin() {
       var u = document.getElementById('pwaUser').value.trim();
       var p = document.getElementById('pwaPass').value;
@@ -92,7 +118,7 @@
       apiCall('authenticate', [u, p]).then(function (r) {
         if (!r || !r.ok) { err.textContent = (r && r.message) || 'เข้าสู่ระบบไม่สำเร็จ'; btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ'; return; }
         setAuth({ token: r.token, by: r.displayName || u, role: r.role || '' });
-        location.reload();   // โหลดใหม่ → __SP ติดก่อนสคริปต์หลัก
+        location.reload();
       }, function (e) {
         err.textContent = 'เชื่อมต่อไม่ได้: ' + (e && e.message || e) + ' (ตรวจ apiUrl/อินเทอร์เน็ต)';
         btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
@@ -100,6 +126,29 @@
     }
     btn.addEventListener('click', doLogin);
     document.getElementById('pwaPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+
+    // ผู้ช่วยประเมิน (อสม.) — เปิดตลอด + ออฟไลน์ได้
+    var gbtn = document.getElementById('pwaGuestBtn');
+    function doGuest() {
+      var cid = (document.getElementById('pwaGCid').value || '').replace(/\D/g, '');
+      var name = document.getElementById('pwaGName').value.trim();
+      var pos = document.getElementById('pwaGPos').value.trim();
+      var aff = document.getElementById('pwaGAff').value.trim();
+      if (cid.length !== 13) { err.textContent = 'กรอกเลขบัตรประชาชนผู้ประเมิน 13 หลัก'; return; }
+      if (!name || !pos || !aff) { err.textContent = 'กรอกชื่อ ตำแหน่ง และต้นสังกัดให้ครบ'; return; }
+      var display = name + ' (' + pos + ' · ' + aff + ')';
+      gbtn.disabled = true; gbtn.textContent = 'กำลังเข้า...'; err.textContent = '';
+      apiCall('guestLogin', [{ cid: cid, name: name, position: pos, affiliation: aff }]).then(function (r) {
+        if (!r || !r.ok) { err.textContent = (r && r.message) || 'เข้าใช้งานไม่สำเร็จ'; gbtn.disabled = false; gbtn.textContent = 'เริ่มประเมิน'; return; }
+        setAuth({ token: r.token, by: r.displayName || display, role: 'GUEST', guest: true, cid: cid });
+        location.reload();
+      }, function () {
+        // ออฟไลน์: เริ่มแบบในเครื่องก่อน (ไม่มีโทเค็น) — บันทึกเก็บไว้ ซิงค์อัตโนมัติเมื่อมีเน็ต
+        setAuth({ token: '', by: display, role: 'GUEST', guest: true, cid: cid, offline: true });
+        location.reload();
+      });
+    }
+    gbtn.addEventListener('click', doGuest);
   }
 
   function buildTopbar() {
