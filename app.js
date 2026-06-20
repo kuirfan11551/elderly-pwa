@@ -173,6 +173,7 @@
     var bar = document.createElement('div');
     bar.id = 'pwaTopbar';
     bar.innerHTML =
+      '<span class="pwa-tb-logo"></span>' +
       '<span class="pwa-who">👤 ' + (auth ? (auth.by || '') : '') + '</span>' +
       '<button id="pwaLogout" class="pwa-mini">ออกจากระบบ</button>';
     document.body.appendChild(bar);
@@ -236,9 +237,25 @@
   window.pwaScanCID = openScanner;
 
   /* ---------- service worker ---------- */
+  function showUpdateBanner() {
+    if (document.getElementById('pwaUpd')) return;
+    var b = document.createElement('div');
+    b.id = 'pwaUpd'; b.className = 'show';
+    b.textContent = '✨ มีเวอร์ชันใหม่ • แตะเพื่ออัปเดต';
+    b.addEventListener('click', function () { location.reload(); });
+    document.body.appendChild(b);
+  }
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('SW register failed', e); });
+      navigator.serviceWorker.register('./sw.js').then(function (reg) {
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateBanner();
+          });
+        });
+      }).catch(function (e) { console.warn('SW register failed', e); });
     });
   }
 

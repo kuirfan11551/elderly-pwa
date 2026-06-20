@@ -51,8 +51,13 @@ PWA_HEAD = """
     background:radial-gradient(60% 60% at 50% 20%,rgba(14,21,48,.96),rgba(5,7,15,.98))}
   #pwaLogin .pwa-card{width:100%;max-width:380px;background:rgba(18,26,48,.7);border:1px solid rgba(125,211,252,.2);
     border-radius:22px;padding:28px 24px;box-shadow:0 18px 50px rgba(0,0,0,.55);text-align:center}
-  #pwaLogin .pwa-logo{width:62px;height:62px;margin:0 auto 14px;border-radius:18px;
-    background:radial-gradient(circle at 30% 25%,#5eead4,#38bdf8);box-shadow:0 0 26px rgba(94,234,212,.5)}
+  #pwaLogin .pwa-logo{width:78px;height:78px;margin:0 auto 14px;border-radius:20px;
+    background:#0a0f1f url('icons/icon-192.png') center/cover;box-shadow:0 0 26px rgba(94,234,212,.45)}
+  #pwaTopbar .pwa-tb-logo{width:26px;height:26px;border-radius:7px;flex:0 0 auto;
+    background:#0a0f1f url('icons/icon-192.png') center/cover}
+  #pwaUpd{position:fixed;left:0;right:0;bottom:0;z-index:300;display:none;align-items:center;justify-content:center;gap:8px;
+    padding:12px;background:linear-gradient(120deg,#5eead4,#38bdf8);color:#03121a;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  #pwaUpd.show{display:flex}
   #pwaLogin h2{font-size:18px;color:#e8eefc;margin-bottom:6px}
   .pwa-sub{font-size:12.5px;color:#9fb0d0;line-height:1.5}
   #pwaLogin input,#pwaLogin select{width:100%;margin-top:12px;padding:13px 14px;border-radius:12px;background:rgba(7,11,22,.7);
@@ -76,6 +81,12 @@ PWA_HEAD = """
 """
 need(html, "</head>")
 html = html.replace("</head>", PWA_HEAD + "</head>", 1)
+
+# 3b) ฟอนต์เว็บ → โหลดแบบไม่บล็อกการแสดงผล (เปิดหน้าเร็วขึ้น; ออฟไลน์ตกไปฟอนต์ระบบ)
+font_link = 'family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">'
+if font_link in html:
+    html = html.replace(font_link,
+        'family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">')
 
 # 4) ปุ่มสแกน QR ข้างช่อง CID
 cid_fld = '<div class="fld"><label>เลขบัตรประชาชน</label><input id="cid" inputmode="numeric" maxlength="13" placeholder="13 หลัก" onblur="peekCase()"></div>'
