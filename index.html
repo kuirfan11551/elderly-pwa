@@ -254,11 +254,62 @@ body.light .btn.ghost{background:rgba(20,50,90,.06)}
 </style>
 </head>
 <body>
+<style>
+.testbar{display:flex;flex-direction:column;gap:9px;margin:0 0 14px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(244,114,182,.1) 60%,rgba(167,139,250,.12));border:1px solid rgba(245,158,11,.5);box-shadow:0 6px 26px rgba(245,158,11,.18),inset 0 0 0 1px rgba(255,255,255,.04);color:var(--ink)}
+.testbar .tb-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.testbar .tb-title{font-size:13.5px;font-weight:600;flex:1 1 auto;min-width:150px}
+.testbar .tb-title b{color:#fbbf24}
+.testbar .tb-count{flex:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(251,191,36,.18);border:1px solid rgba(251,191,36,.5);color:#fbbf24;white-space:nowrap}
+.testbar .tb-exit{flex:none;padding:6px 12px;border-radius:9px;border:1px solid rgba(245,158,11,.55);background:rgba(245,158,11,.16);color:#fbbf24;font-weight:700;font-family:inherit;font-size:12.5px;cursor:pointer}
+.testbar .tb-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.testbar .tb-lbl{font-size:12px;color:var(--ink-dim);font-weight:700}
+.testbar .tb-tools button{flex:none;padding:7px 12px;border-radius:999px;border:1px solid rgba(125,211,252,.3);background:rgba(7,11,22,.5);color:var(--ink);font-weight:600;font-family:inherit;font-size:12.5px;cursor:pointer;transition:transform .08s,border-color .15s}
+.testbar .tb-tools button:hover{transform:translateY(-1px);border-color:rgba(125,211,252,.6)}
+.testbar .tb-tools button:active{transform:scale(.95)}
+.testbar .tb-magic{background:linear-gradient(135deg,#f59e0b,#f472b6)!important;color:#1a1208!important;font-weight:800!important;border:none!important;box-shadow:0 4px 16px rgba(244,114,182,.4)}
+body.test-mode::before{content:"";position:fixed;inset:0;border:3px solid rgba(245,158,11,.6);pointer-events:none;z-index:9998;box-shadow:inset 0 0 30px rgba(245,158,11,.12)}
+#testBtn.on{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.6);color:#fbbf24}
+#syncBadge.test{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.5);color:#fbbf24}
+.pg{margin:0 0 15px;border-radius:15px;border:1px solid rgba(94,234,212,.32);background:linear-gradient(160deg,rgba(94,234,212,.09),rgba(56,189,248,.05));overflow:hidden;box-shadow:0 6px 22px rgba(56,189,248,.1)}
+.pg>summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:800;font-size:14px;color:#5eead4;display:flex;align-items:center;gap:9px;background:linear-gradient(90deg,rgba(94,234,212,.14),rgba(56,189,248,.06))}
+.pg>summary::-webkit-details-marker{display:none}
+.pg .pg-ic{font-size:18px;flex:none}
+.pg .pg-hint{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--ink-dim);white-space:nowrap}
+.pg .pg-body{padding:13px 15px;display:flex;flex-direction:column;gap:10px}
+.pg .pg-what,.pg .pg-gear,.pg .pg-score,.pg .pg-tips{font-size:13px;line-height:1.6;color:var(--ink);padding:10px 12px;border-radius:11px;background:rgba(7,11,22,.42)}
+.pg .pg-what b,.pg .pg-gear b,.pg .pg-score b,.pg .pg-tips b{color:#bfe9ff}
+.pg .pg-score{border-left:3px solid #fbbf24}
+.pg .pg-score b{color:#fbbf24}
+.pg .pg-tips{border-left:3px solid #5eead4}
+.pg ol.pg-steps{list-style:none;counter-reset:pg;margin:1px 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pg ol.pg-steps li{counter-increment:pg;position:relative;padding:11px 13px 11px 46px;border-radius:11px;background:rgba(7,11,22,.55);font-size:13px;line-height:1.55;color:var(--ink)}
+.pg ol.pg-steps li::before{content:counter(pg);position:absolute;left:11px;top:9px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:800;color:#03121a;background:linear-gradient(135deg,#5eead4,#38bdf8);box-shadow:0 2px 8px rgba(56,189,248,.35)}
+body.light .pg .pg-what b,body.light .pg .pg-gear b{color:#0369a1}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:hidden}
+.confetti-wrap i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:confFall 2.2s linear forwards}
+@keyframes confFall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(106vh) rotate(680deg)}}
+@media print{body.test-mode #s4{position:relative}body.test-mode #s4::before{content:"เอกสารฝึกซ้อม — ไม่ใช่เอกสารจริง";position:fixed;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:46px;font-weight:900;color:rgba(245,158,11,.18);white-space:nowrap;pointer-events:none;z-index:9999}}
+</style>
 <div class="viewctl">
+  <button id="testBtn" type="button" onclick="toggleTestMode()" title="โหมดซ้อม — ฝึกประเมินเหมือนจริง โดยไม่บันทึกลงฐานข้อมูล">🧪 ซ้อม</button>
   <button id="themeBtn" type="button" onclick="toggleTheme()" title="สลับโหมดสว่าง/มืด">🌙 มืด</button>
   <button id="fontBtn" type="button" onclick="cycleFont()" title="ปรับขนาดตัวอักษร">ก+</button>
 </div>
 <div class="wrap">
+  <div id="testBanner" class="testbar" style="display:none">
+    <div class="tb-head">
+      <span class="tb-title">🧪 <b>โหมดทดสอบ (ซ้อม)</b> · ทุกอย่างเหมือนจริง คะแนน/แปลผลครบ แต่ไม่บันทึกลงฐานข้อมูล</span>
+      <span class="tb-count" id="tbCount">🏆 ฝึกแล้ว 0 เคส</span>
+      <button type="button" class="tb-exit" onclick="toggleTestMode()">ออก ✕</button>
+    </div>
+    <div class="tb-tools">
+      <span class="tb-lbl">เคสตัวอย่าง:</span>
+      <button type="button" onclick="loadDemoCase(0)">👵 ยายสมศรี</button>
+      <button type="button" onclick="loadDemoCase(1)">🧓 ตามานะ</button>
+      <button type="button" onclick="loadDemoCase(2)">👴 ยายเจ๊ะมิง</button>
+      <button type="button" class="tb-magic" onclick="practiceAutoFill()">🎲 สุ่มกรอกให้</button>
+    </div>
+  </div>
   <div class="prog" id="prog">
     <div class="pbar"><div class="pfill" id="pfill"></div></div>
     <div class="pmeta"><span id="pmetaText">ความคืบหน้า 0%</span><button class="cont" type="button" onclick="continueNext()">ทำต่อจากที่ค้าง ▸</button></div>
@@ -632,7 +683,7 @@ function go(n){
   if(n>1 && !step1Complete()){ var miss=step1Missing(); alert('ทำ “ขั้นตอนที่ 1 ข้อมูลพื้นฐาน” ให้ครบก่อนจึงไปขั้นต่อไปได้\nที่ยังขาด: '+miss.slice(0,8).join(', ')+(miss.length>8?' …และอื่นๆ':'')); n=1; }
   ['s1','s2','s3','s4'].forEach(function(id,i){document.getElementById(id).classList.toggle('hidden',i!==n-1);});
   document.querySelectorAll('.stepper .st').forEach(function(st){var k=+st.dataset.st; st.classList.toggle('active',k===n); st.classList.toggle('done',k<n);});
-  if(n===2) flow(); if(n===3) renderModules(); if(n===4){ window.__s4seen=true; buildSummary(); } updateProgress(); window.scrollTo({top:0,behavior:'smooth'}); }
+  if(n===2) flow(); if(n===3) renderModules(); if(n===4){ window.__s4seen=true; buildSummary(); if(TEST_MODE) celebratePractice_(); } updateProgress(); window.scrollTo({top:0,behavior:'smooth'}); }
 function depressionConfirmed(){ return (q2Score()>0 && q9Done() && q9Sum()>=7) || (tgdsDone() && tgdsSum()>=13); }
 function domainIcon(d){ var m={'การรู้คิด':'💭','การเคลื่อนไหว':'🦵','กิจวัตรประจำวัน':'🧍','โภชนาการ':'🍚','ภาวะเปราะบาง':'🍂','มวลกล้ามเนื้อ':'💪','กิจกรรมทางกาย':'🏃','คุณภาพชีวิต':'🌿','ช่องปาก':'🦷'}; return m[d]||'•'; }
 /* แปลผลรายด้านแบบ pure (เกณฑ์เดียวกับโมดูล) สำหรับหน้าสรุป */
@@ -874,7 +925,8 @@ function sendReferral(btn){
   if(btn){ btn.disabled=true; btn.textContent='⏳ กำลังส่ง...'; }
   function done(r){ if(r&&r.success){ var mt=document.getElementById('refMeta'); if(mt) mt.innerHTML='✓ ส่งต่อแล้ว · นัด '+(fmtThaiDate(r.appointDate||date)||'-')+(gasAvailable()?' · ☁️':''); toast('ส่งต่อโรงพยาบาลยะรังเรียบร้อย ✓'); if(btn){ btn.textContent='✓ ส่งต่อแล้ว'; } }
     else { alert((r&&r.message)||'ส่งต่อไม่สำเร็จ'); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } } }
-  if(gasAvailable()){ google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ alert('ส่งต่อไม่สำเร็จ: '+e); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } }).createReferral(payload); }
+  if(TEST_MODE){ done({success:true,appointDate:date,message:'(ซ้อม) ส่งต่อจำลอง — ไม่บันทึกจริง'}); }
+  else if(gasAvailable()){ google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ alert('ส่งต่อไม่สำเร็จ: '+e); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } }).createReferral(payload); }
   else done({success:true,appointDate:date,message:'(preview) ส่งต่อจำลอง'});
 }
 function saveDemo(){ var t0=performance.now();
@@ -995,6 +1047,7 @@ function openModule(key){
     var panel=body.querySelector('.modpanel')||body;
     panel.insertAdjacentHTML('beforeend','<div class="savebar"><button class="btn primary" id="modSaveBtn" style="flex:0 0 auto;padding:11px 18px" onclick="saveModule(\''+key+'\',this)">💾 บันทึกการประเมินนี้</button><span id="modSaveMeta" class="savemeta"></span></div>');
     refreshSaveMeta(key);
+    if(TEST_MODE) injectModuleGuide_(key);   // โหมดซ้อม: คู่มือ infographic ทีละขั้น บนสุดของโมดูล
   }
   else { body.innerHTML='<div class="modpanel"><h3>'+m.icon+' '+m.name+'</h3>'+
     '<div style="color:var(--ink-dim);font-size:13px;line-height:1.7">แม่แบบเดียวกับโมดูลหกล้ม — กำลังทยอยทำในเฟสถัดไป โดย<b style="color:var(--neon)"> ยกสูตรคิดคะแนนเดิมมาทุกตัว</b> (เช่น MNA, FRAIL, WHOQOL ฯลฯ) คิดในเครื่องทันทีเหมือนกัน</div></div>'; }
@@ -1850,6 +1903,7 @@ function scoreMoca(){
 
 /* ===== บันทึก/โหลด offline-first + sync ลงชีต (Google Sheet ผ่าน GAS) ===== */
 var LS_REC='eldRecords', LS_OUT='eldOutbox';
+var TEST_MODE=false, TEST_STORE={}, _savedPocBy=null, _practiceCelebrated=false;   // โหมดซ้อม: ข้อมูลอยู่ใน TEST_STORE (in-memory) ไม่แตะ localStorage จริง/ฐานข้อมูล
 var SAVEABLE=[
  {key:'basic',name:'ข้อมูลพื้นฐาน'},{key:'mood',name:'คัดกรองอารมณ์/ซึมเศร้า'},
  {key:'falls',name:'หกล้ม (TUG/SPPB/Morse)'},{key:'adl',name:'Basic/IADL/Advance ADL'},
@@ -1858,8 +1912,8 @@ var SAVEABLE=[
  {key:'mmse',name:'MMSE-Thai'},{key:'moca',name:'MoCA'},{key:'note',name:'ความเห็นแพทย์/ผู้ประเมิน'}
 ];
 function saveableName(key){ for(var i=0;i<SAVEABLE.length;i++) if(SAVEABLE[i].key===key) return SAVEABLE[i].name; return key; }
-function lsGet(k,def){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?def:v; }catch(e){ return def; } }
-function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function lsGet(k,def){ if(TEST_MODE){ try{ return (k in TEST_STORE)?JSON.parse(TEST_STORE[k]):def; }catch(e){ return def; } } try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?def:v; }catch(e){ return def; } }
+function lsSet(k,v){ if(TEST_MODE){ try{ TEST_STORE[k]=JSON.stringify(v); }catch(e){} return; } try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function recAll(){ return lsGet(LS_REC,{}); }
 function recOf(cid){ return recAll()[cid]||null; }
 function currentCid(){ var el=document.getElementById('cid'); return el?(el.value||'').trim():''; }
@@ -2141,7 +2195,7 @@ function clearFormState(){
   var bm=document.getElementById('basicSaveMeta'); if(bm) bm.textContent='';
   var nsm=document.getElementById('noteSaveMeta'); if(nsm) nsm.textContent='';
   document.querySelectorAll('.opt.on').forEach(function(o){ o.classList.remove('on','risk'); });
-  window.__s4seen=false;
+  window.__s4seen=false; _practiceCelebrated=false;   // ฟอร์มใหม่ = เคสฝึกใหม่ (ฉลองได้อีกครั้งเมื่อทำถึงสรุป)
 }
 /* ล้างฟอร์มเริ่มผู้รับบริการคนใหม่ */
 function newPatient(){
@@ -2159,6 +2213,171 @@ function saveAll(){
   MODULES.filter(function(m){return isModDone(m.key);}).forEach(function(m){ if(saveModule(m.key)) n++; });
   toast('บันทึกทั้งหมดแล้ว ✓ (รวม '+n+' การประเมิน)');
 }
+/* ===== โหมดทดสอบ/ซ้อม (ให้ อสม. ฝึกใช้แบบประเมิน) — ทำงานเหมือนจริงทุกอย่าง คะแนน/แปลผลครบ แต่ไม่บันทึกลงฐานข้อมูล; ออก/รีเฟรช = ข้อมูลซ้อมหายหมด ===== */
+function toggleTestMode(){ if(TEST_MODE) exitTestMode(); else enterTestMode(); }
+function enterTestMode(){
+  if(!formIsFresh() && !confirm('เข้าโหมดซ้อม?\nฟอร์มปัจจุบันจะถูกล้าง (ข้อมูลที่ยังไม่ได้บันทึกจะหาย)')) return;
+  TEST_MODE=true; TEST_STORE={};
+  _savedPocBy=window.__pocBy;
+  if(!String(window.__pocBy||'').trim()) window.__pocBy='ผู้ฝึกซ้อม (ทดสอบ)';   // ให้บันทึก/ส่งต่อจำลองได้แม้ยังไม่มีชื่อผู้ประเมิน
+  document.body.classList.add('test-mode');
+  var bn=document.getElementById('testBanner'); if(bn) bn.style.display='';
+  var tb=document.getElementById('testBtn'); if(tb){ tb.classList.add('on'); tb.textContent='🧪 ออกจากซ้อม'; }
+  clearFormState(); go(1); updateProgress(); updateSyncBadge(); setPracticeCount_(practiceCount_());
+  try{ injectStaticGuide_('s1','basic'); injectStaticGuide_('s2','mood'); }catch(e){}   // คู่มือ Step 1/2
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  toast('🧪 เข้าโหมดซ้อมแล้ว — ลองกด “เคสตัวอย่าง” หรือ 🎲 สุ่มกรอกให้ ฝึกได้เลย ข้อมูลไม่ถูกบันทึกจริง');
+}
+function exitTestMode(){
+  if(!confirm('ออกจากโหมดซ้อม?\nข้อมูลที่กรอกในโหมดซ้อมจะถูกล้างทิ้งทั้งหมด (ไม่ได้บันทึกอยู่แล้ว)')) return;
+  TEST_MODE=false; TEST_STORE={};
+  window.__pocBy=_savedPocBy;
+  document.body.classList.remove('test-mode');
+  removeStaticGuides_();   // เอาคู่มือ Step 1/2 ออก (คู่มือในโมดูลหายเองตอน body ถูกล้าง)
+  var bn=document.getElementById('testBanner'); if(bn) bn.style.display='none';
+  var tb=document.getElementById('testBtn'); if(tb){ tb.classList.remove('on'); tb.textContent='🧪 ซ้อม'; }
+  clearFormState(); go(1); updateProgress(); updateSyncBadge();
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  toast('ออกจากโหมดซ้อมแล้ว — ล้างข้อมูลซ้อมเรียบร้อย ✓');
+}
+/* ----- โหมดซ้อมพรีเมียม: เคสตัวอย่าง + สุ่มกรอก + ฉลอง (ทำงานเฉพาะ TEST_MODE) ----- */
+var DEMO_CASES=[
+  {emoji:'👵', name:'นางสมศรี ใจดี', gender:'หญิง', age:'71', phone:'081-234-5678', edu:'ประถมศึกษา',
+   pcu:'โรงพยาบาลส่งเสริมสุขภาพตำบลยะรัง', addr:'12/3 หมู่ที่ 2', tambon:'ยะรัง',
+   wt:'58', ht:'156', arm:'27', calf:'33', sbp:'126', dbp:'78', pulse:'74', dx:[0], smoke:false},
+  {emoji:'🧓', name:'นายมานะ สุขทวี', gender:'ชาย', age:'69', phone:'089-111-2233', edu:'มัธยมศึกษา',
+   pcu:'โรงพยาบาลส่งเสริมสุขภาพตำบลระแว้ง', addr:'88 หมู่ที่ 4', tambon:'ระแว้ง',
+   wt:'63', ht:'166', arm:'26', calf:'31', sbp:'146', dbp:'90', pulse:'80', dx:[1,7], smoke:true},
+  {emoji:'👴', name:'นางเจ๊ะมิง สาและ', gender:'หญิง', age:'82', phone:'086-555-7788', edu:'ไม่ได้เรียนหนังสือ',
+   pcu:'โรงพยาบาลส่งเสริมสุขภาพตำบลสะดาวา', addr:'5 หมู่ที่ 1', tambon:'สะดาวา',
+   wt:'41', ht:'150', arm:'21', calf:'28', sbp:'138', dbp:'82', pulse:'78', dx:[1,2], smoke:false}
+];
+function setInput_(el,val){ if(!el) return; el.value=(val==null?'':val); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); }
+function thaiCid_(){ var d=[1+Math.floor(Math.random()*8)]; for(var i=1;i<12;i++) d.push(Math.floor(Math.random()*10)); var s=0; for(var j=0;j<12;j++) s+=d[j]*(13-j); d.push((11-(s%11))%10); return d.join(''); }
+function applyDemo_(P){
+  clearFormState();
+  setInput_(document.getElementById('cid'), thaiCid_());
+  setInput_(document.getElementById('pname'), P.name);
+  setInput_(document.getElementById('gender'), P.gender);
+  setInput_(document.getElementById('age'), P.age);
+  setInput_(document.getElementById('phone'), P.phone);
+  setInput_(document.getElementById('edu'), P.edu);
+  var u=document.getElementById('unit'); if(u && !String(u.value||'').trim()) u.value='คลินิกผู้สูงอายุ โรงพยาบาลยะรัง';
+  setInput_(document.getElementById('pcu'), P.pcu);
+  setInput_(document.getElementById('addr'), P.addr);
+  try{ applyAddress('ปัตตานี','ยะรัง',P.tambon||'ยะรัง',''); }catch(e){}
+  ['wt','ht','arm','calf','sbp','dbp','pulse'].forEach(function(k){ setInput_(document.getElementById(k), P[k]); });
+  (P.dx||[]).forEach(function(i){ if(!ST.dx[i]){ try{ toggleDx(i); }catch(e){} } });
+  var smk=document.getElementById('smoke'); if(smk) smk.checked=!!P.smoke;
+  try{ sumDx(); calcBMI(); calcBP(); }catch(e){}
+  go(1); updateProgress();
+}
+function loadDemoCase(i){ if(!TEST_MODE){ toast('ใช้ได้เฉพาะในโหมดซ้อม'); return; } var P=DEMO_CASES[i]; if(!P) return; applyDemo_(P); toast('โหลดเคสตัวอย่าง '+P.emoji+' '+P.name+' แล้ว — ขั้นตอน 1 ครบ กด “ถัดไป” หรือขั้นตอน 3 เพื่อเริ่มประเมิน'); }
+function fillContainer_(root){
+  if(!root) return 0; var n=0;
+  root.querySelectorAll('.opts').forEach(function(g){ if(g.offsetParent===null) return; var o=g.querySelectorAll('.opt'); if(o.length){ o[Math.floor(Math.random()*o.length)].click(); n++; } });
+  root.querySelectorAll('select').forEach(function(sel){ if(sel.offsetParent===null) return; var idx=[],i; for(i=0;i<sel.options.length;i++){ var op=sel.options[i]; if((op.value!==''&&op.value!=null&&op.value!=='—')||(i>0&&op.text.indexOf('เลือก')<0&&op.text.trim()!=='—'&&op.text.trim()!=='')) idx.push(i); } if(!idx.length){ for(i=1;i<sel.options.length;i++) idx.push(i); } if(idx.length){ sel.selectedIndex=idx[Math.floor(Math.random()*idx.length)]; sel.dispatchEvent(new Event('change',{bubbles:true})); n++; } });
+  root.querySelectorAll('input[type=number]').forEach(function(inp){ if(inp.disabled||inp.offsetParent===null) return; var v; if(inp.max!==''){ var mn=inp.min!==''?+inp.min:0, mx=+inp.max; v=mn+Math.floor(Math.random()*(mx-mn+1)); } else { v=(8+Math.random()*22).toFixed(1); } setInput_(inp,v); n++; });
+  root.querySelectorAll('input[type=checkbox]').forEach(function(cb){ if(cb.offsetParent===null) return; var want=Math.random()<0.4; if(cb.checked!==want){ cb.checked=want; cb.dispatchEvent(new Event('change',{bubbles:true})); } });
+  return n;
+}
+function fillActiveModule_(){ return fillContainer_(document.getElementById('moduleBody')); }
+function practiceAutoFill(){
+  if(!TEST_MODE){ toast('ใช้ได้เฉพาะในโหมดซ้อม'); return; }
+  var body=document.getElementById('moduleBody'), s2=document.getElementById('s2');
+  if(activeMod && body && body.children.length){ var n=fillActiveModule_(); toast('🎲 สุ่มคำตอบให้แล้ว ('+n+' กลุ่มคำถาม) — ดูคะแนน/แปลผลเด้งได้เลย'); }
+  else if(s2 && !s2.classList.contains('hidden')){ var m=fillContainer_(s2); try{ flow(); }catch(e){} toast('🎲 สุ่มคำตอบคัดกรองอารมณ์ให้แล้ว ('+m+' ข้อ) — ถ้าผลเป็นบวกจะมี 9Q/8Q ต่อ กด 🎲 อีกครั้งได้'); }
+  else if(!step1Complete()){ applyDemo_(DEMO_CASES[Math.floor(Math.random()*DEMO_CASES.length)]); toast('🎲 สุ่มข้อมูลพื้นฐานให้แล้ว — กด “ถัดไป” เพื่อประเมิน'); }
+  else { go(3); toast('🎲 เปิดแบบประเมินสักอัน แล้วกด 🎲 อีกครั้ง เพื่อสุ่มคำตอบ'); }
+}
+function practiceCount_(){ try{ return +sessionStorage.getItem('eldPracticeCount')||0; }catch(e){ return 0; } }
+function setPracticeCount_(n){ try{ sessionStorage.setItem('eldPracticeCount', String(n)); }catch(e){} var el=document.getElementById('tbCount'); if(el) el.textContent='🏆 ฝึกแล้ว '+n+' เคส'; }
+function confettiBurst_(){ var c=['#f59e0b','#34d399','#38bdf8','#f472b6','#a78bfa','#fbbf24']; var w=document.createElement('div'); w.className='confetti-wrap'; for(var i=0;i<54;i++){ var p=document.createElement('i'); p.style.left=(Math.random()*100)+'vw'; p.style.background=c[i%c.length]; p.style.animationDelay=(Math.random()*0.5)+'s'; p.style.height=(10+Math.random()*10)+'px'; w.appendChild(p); } document.body.appendChild(w); setTimeout(function(){ if(w.parentNode) w.parentNode.removeChild(w); },2800); }
+function celebratePractice_(){ if(!TEST_MODE||_practiceCelebrated) return; _practiceCelebrated=true; setPracticeCount_(practiceCount_()+1); confettiBurst_(); toast('🎉 เก่งมาก! ฝึกประเมินครบ 1 เคสแล้ว — ฝึกต่อได้เรื่อยๆ ไม่กระทบข้อมูลจริง'); }
+/* ----- คู่มือ infographic ทีละขั้น (เฉพาะโหมดซ้อม) ----- */
+var GUIDE={
+  basic:{title:'ข้อมูลพื้นฐาน & การวัดร่างกาย', what:'เก็บข้อมูลตัวตน + วัดร่างกายที่เป็นฐานของหลายแบบประเมิน (BMI, รอบน่อง, ความดัน)',
+    gear:['เครื่องชั่งน้ำหนัก','ที่วัดส่วนสูง','สายวัด (รอบแขน/รอบน่อง)','เครื่องวัดความดัน'],
+    steps:['กรอกเลขบัตร 13 หลัก + ชื่อ-สกุล + อายุ + ที่อยู่/รพ.สต. ต้นสังกัด','ชั่งน้ำหนัก (ถอดรองเท้า/ของหนัก) และวัดส่วนสูง — ระบบคิด BMI ให้อัตโนมัติ','วัดรอบวงน่อง (Calf) จุดที่ใหญ่ที่สุด นั่งห้อยขางอ 90 องศา สายวัดแนบไม่รัด','วัดรอบแขน (MAC) กึ่งกลางต้นแขนข้างที่ไม่ถนัด','วัดความดัน+ชีพจร หลังนั่งพัก 5 นาที — ระบบแปลผลความดันให้','เลือกโรคประจำตัว และสถานะสูบบุหรี่'],
+    score:'ไม่มีคะแนน แต่เป็นฐานของ BMI / MNA / มวลกล้ามเนื้อ / ความดัน — ต้องกรอกครบทุกช่องก่อนไปขั้นต่อไป',
+    tips:['นั่งพักก่อนวัดความดันเสมอ','รอบน่อง < 31 ซม. = สัญญาณกล้ามเนื้อน้อย','วัดแขน/ขาข้างเดิมทุกครั้งเพื่อเทียบได้']},
+  mood:{title:'คัดกรองอารมณ์ซึมเศร้า (2Q / 9Q / 8Q)', what:'คัดกรองภาวะซึมเศร้าและความเสี่ยงฆ่าตัวตาย',
+    gear:['ถามปากเปล่าด้วยน้ำเสียงนุ่มนวล ไม่ตัดสิน'],
+    steps:['ถาม 2Q: ใน 2 สัปดาห์ที่ผ่านมา (1) เบื่อ/เศร้า/ท้อแท้ และ (2) เบื่อ ไม่อยากทำอะไร — ตอบ มี/ไม่มี','ถ้า 2Q ตอบ มี อย่างน้อย 1 ข้อ = ผลบวก → ทำ 9Q ต่อ (9 ข้อ ความถี่ 0-3)','ถ้า 9Q ตั้งแต่ 7 คะแนนขึ้นไป → ประเมิน 8Q ความเสี่ยงฆ่าตัวตาย','ถามคำถามฆ่าตัวตายตรงๆ อย่างเห็นอกเห็นใจ'],
+    score:'9Q: 7-12 น้อย / 13-18 ปานกลาง / 19 ขึ้นไป รุนแรง · 8Q: 1-8 น้อย / 9-16 ปานกลาง / 17 ขึ้นไป สูง',
+    tips:['พบความเสี่ยงฆ่าตัวตาย = แจ้งทีม/ส่งต่อทันที สายด่วนสุขภาพจิต 1323','เก็บของอันตรายออกจากผู้มีความเสี่ยง']},
+  mmse:{title:'MMSE-Thai (คัดกรองสมองเสื่อม)', what:'คัดกรองภาวะสมองเสื่อม/การรู้คิด เต็ม 30 คะแนน',
+    gear:['กระดาษ + ปากกา','ภาพรูปห้าเหลี่ยมซ้อน (มีในระบบ)'],
+    steps:['เลือกบริบท (บ้าน/รพ.) + ระดับการศึกษา — ระบบปรับจุดตัด/ยกเว้นข้อให้','การรับรู้เวลา-สถานที่ (Orientation)','การจดจำ: บอก 3 คำ ให้ผู้สูงอายุทวน','สมาธิ: ลบ 100 ทีละ 7 (หรือสะกดคำถอยหลังถ้าอ่านไม่ออก)','ความจำ: ให้ทวน 3 คำเมื่อครู่','ภาษา + วาดรูปห้าเหลี่ยมซ้อนกัน'],
+    score:'จุดตัดตามการศึกษา: ไม่ได้เรียน < 14 · ประถม < 17 · มัธยมขึ้นไป < 22 = สงสัยสมองเสื่อม',
+    tips:['ผู้ที่อ่าน-เขียนไม่ได้ ระบบยกเว้นข้อ 4, 9, 10 ให้','ทำในที่เงียบ ห้ามมีคนช่วยตอบ']},
+  moca:{title:'MoCA (ประเมินการรู้คิดละเอียด)', what:'ประเมินการรู้คิดที่ไวต่อภาวะ MCI ระยะแรก เต็ม 30',
+    gear:['แบบ MoCA + ปากกา','นาฬิกาจับเวลา 1 นาที (ข้อบอกชื่อสัตว์)'],
+    steps:['ใช้เมื่อ MMSE ปกติ แต่ยังสงสัยปัญหาความจำ','Visuospatial: ลากเส้นสลับเลข-ตัวอักษร + วาดลูกบาศก์/นาฬิกา','ตั้งชื่อสัตว์ + จำ 5 คำ','สมาธิ + ภาษา (ทวนประโยค / บอกชื่อสัตว์ให้มากที่สุดใน 1 นาที)','นามธรรม + ระลึก 5 คำ + รับรู้เวลา-สถานที่'],
+    score:'น้อยกว่า 25 = ผิดปกติ · เพิ่ม 1 คะแนนถ้าการศึกษา 6 ปีหรือน้อยกว่า (ระบบทำให้)',
+    tips:['ใช้ต่อจาก MMSE เพื่อจับ MCI ระยะแรก','ให้เวลาตามจริง ไม่เร่ง']},
+  falls:{title:'หกล้ม: TUG / SPPB / Morse', what:'ประเมินความเสี่ยงหกล้มและสมรรถภาพการเคลื่อนไหว/ทรงตัว',
+    gear:['เก้าอี้มีพนักพิง (สูง ~46 ซม.)','นาฬิกาจับเวลา','ทางเดินตรง 3-4 เมตร + เทปติดพื้น'],
+    steps:['TUG: นั่งพิงพนัก → บอก เริ่ม จับเวลา → ลุกยืน เดิน 3 เมตร หมุนกลับ เดินกลับมานั่ง → หยุดเวลาเมื่อนั่งพิง','SPPB ทรงตัว: ยืน 3 ท่า (เท้าชิด / กึ่งเหลื่อม / ต่อส้น-ปลายเท้า) ท่าละ 10 วินาที','SPPB เดิน: จับเวลาเดิน 4 เมตร ความเร็วปกติ','SPPB ลุกนั่ง: ลุกจากเก้าอี้ 5 ครั้งเร็วที่สุด กอดอกไว้ จับเวลา','Morse: ถามประวัติ 6 ข้อ (เคยหกล้ม/โรคร่วม/อุปกรณ์ช่วยเดิน/น้ำเกลือ/ลักษณะเดิน/การรับรู้)'],
+    score:'TUG 12 วินาทีขึ้นไป = เสี่ยงหกล้ม · SPPB 8 หรือน้อยกว่า = สมรรถภาพต่ำ · Morse 45 ขึ้นไป = เสี่ยงสูง',
+    tips:['ยืนเคียงข้างพร้อมพยุงกันล้มเสมอ','ใส่รองเท้าปกติ ห้ามเร่ง ห้ามดันหลัง']},
+  mna:{title:'MNA (คัดกรองภาวะโภชนาการ)', what:'คัดกรองภาวะทุพโภชนาการ (ฉบับสั้น MNA-SF) เต็ม 14',
+    gear:['BMI + รอบน่อง — ระบบดึงจากขั้นตอนที่ 1 ให้อัตโนมัติ'],
+    steps:['ถามการกินลดลงใน 3 เดือน (เบื่ออาหาร/เคี้ยวกลืนลำบาก)','ถามน้ำหนักลดใน 3 เดือน','ประเมินการเคลื่อนไหว (ติดเตียง/ลุกได้/ออกนอกบ้านได้)','ถามความเครียด/เจ็บป่วยเฉียบพลันใน 3 เดือน','ถามปัญหาระบบประสาท/จิต (สมองเสื่อม/ซึมเศร้า)','ใช้ BMI หรือรอบน่อง (ถ้าไม่มี BMI) จากขั้นตอนที่ 1'],
+    score:'12-14 ปกติ · 8-11 เสี่ยงทุพโภชนาการ · 0-7 ทุพโภชนาการ',
+    tips:['ต้องกรอกน้ำหนัก/ส่วนสูง/รอบน่อง ในขั้นตอนที่ 1 ก่อน','รอบน่อง < 31 ซม. ถือว่าผิดปกติ']},
+  frail:{title:'ภาวะเปราะบาง (FRAIL / Thai FI / CFS)', what:'ประเมินภาวะเปราะบาง (frailty) ของผู้สูงอายุ',
+    gear:['ถามประวัติ + น้ำหนักปัจจุบันและ 1 ปีก่อน'],
+    steps:['FRAIL 5 ข้อ: เหนื่อยล้า / ขึ้นบันได / การเดิน / โรคร่วมมากกว่า 5 / น้ำหนักลดมากกว่า 5%','ถามความเหนื่อยล้าในสัปดาห์ที่ผ่านมา','ถามการขึ้นบันได 10 ขั้น และเดิน 100-200 เมตร ลำบากไหม','นับโรคเรื้อรัง + เทียบน้ำหนักกับ 1 ปีก่อน','(เสริม) เลือกระดับ Clinical Frailty Scale ตามภาพ'],
+    score:'FRAIL 0 = แข็งแรง · 1-2 = ก่อนเปราะบาง · 3-5 = เปราะบาง',
+    tips:['ถามน้ำหนัก 1 ปีก่อนจากผู้สูงอายุ/ญาติ','ภาวะเปราะบางป้องกัน/ฟื้นได้ด้วยออกกำลัง + โปรตีน']},
+  muscle:{title:'มวลกล้ามเนื้อ (แรงบีบมือ / SARC-CalF)', what:'คัดกรองภาวะมวลกล้ามเนื้อน้อย (sarcopenia)',
+    gear:['เครื่องวัดแรงบีบมือ (handgrip dynamometer)','รอบน่อง จากขั้นตอนที่ 1'],
+    steps:['SARC-F 5 ข้อ: ยกของ / เดิน / ลุกจากเก้าอี้ / ขึ้นบันได / เคยหกล้ม','วัดแรงบีบมือ: นั่ง ข้อศอกงอ 90 องศา บีบเต็มแรง','วัดทั้ง 2 ข้าง ข้างละ 2-3 ครั้ง เอาค่าสูงสุด','ระบบนำรอบน่อง + เพศ มาคิดรวม'],
+    score:'แรงบีบมือต่ำ: ชาย < 28 / หญิง < 18 กก. · SARC-CalF 11 ขึ้นไป = เสี่ยง sarcopenia',
+    tips:['ให้กำลังใจให้บีบเต็มแรง พัก 30 วินาทีระหว่างครั้ง','รอบน่อง ชาย < 34 / หญิง < 33 ซม. = น้อย']},
+  adl:{title:'กิจวัตรประจำวัน (Barthel / IADL / AADL)', what:'ประเมินความสามารถดูแลตนเอง 3 ระดับ',
+    gear:['ถาม + สังเกต (ถามญาติประกอบ)'],
+    steps:['Barthel ADL: กิจวัตรพื้นฐาน (กิน/อาบน้ำ/แต่งตัว/ขับถ่าย/เคลื่อนย้าย/เดิน)','IADL: กิจวัตรซับซ้อน (โทรศัพท์/ซื้อของ/ทำอาหาร/จัดยา/จัดการเงิน)','AADL: กิจกรรมขั้นสูง (สังคม/งานอดิเรก/บทบาทในชุมชน)','เลือกระดับการช่วยเหลือ ตามที่ทำจริง ไม่ใช่ทำได้ถ้าจำเป็น'],
+    score:'Barthel ต่ำ = พึ่งพามาก, สูงสุด 20 = ช่วยตัวเองได้ · ระบบแปลผลแต่ละชุดให้',
+    tips:['ถามจากการทำจริง 1-2 สัปดาห์ที่ผ่านมา','ถ้าผู้สูงอายุบอกไม่ชัด ให้ถามญาติ/ผู้ดูแล']},
+  gpaq:{title:'กิจกรรมทางกาย (GPAQ ของ WHO)', what:'ประเมินระดับกิจกรรมทางกายต่อสัปดาห์ (MET-min)',
+    gear:['ถามกิจวัตรใน 1 สัปดาห์ทั่วไป'],
+    steps:['งาน/อาชีพ: กิจกรรมหนัก และปานกลาง — กี่วัน/สัปดาห์ และนาที/วัน','การเดินทาง: เดิน/ปั่นจักรยานต่อเนื่อง 10 นาทีขึ้นไป','นันทนาการ: ออกกำลังหนัก และปานกลาง','เวลานั่ง/เอนตัวต่อวัน (ไม่รวมเวลานอน)'],
+    score:'ระบบรวม MET — น้อยกว่า 600 MET-min/สัปดาห์ = กิจกรรมทางกายไม่เพียงพอ',
+    tips:['หนัก = หอบ พูดได้เป็นคำ · ปานกลาง = หายใจเร็วขึ้นเล็กน้อย','นับเฉพาะกิจกรรมที่ต่อเนื่อง 10 นาทีขึ้นไป']},
+  whoqol:{title:'คุณภาพชีวิต (WHOQOL-BREF)', what:'ประเมินคุณภาพชีวิต 26 ข้อ ใน 4 ด้าน',
+    gear:['แบบสอบถาม — ตอบตามความรู้สึกใน 2 สัปดาห์ที่ผ่านมา'],
+    steps:['อธิบายให้ตอบตามความรู้สึกใน 2 สัปดาห์ที่ผ่านมา','ตอบครบ 26 ข้อ มาตรา 1-5 (ด้านกาย/จิตใจ/สัมพันธภาพ/สิ่งแวดล้อม)','มีข้อกลับด้าน (ความเจ็บปวด/ความรู้สึกลบ) — ระบบคิดให้'],
+    score:'ระบบรวม: น้อยกว่าหรือเท่ากับ 60 ไม่ดี · 61-95 ปานกลาง · มากกว่า 95 ดี',
+    tips:['ให้ผู้สูงอายุตอบเอง ไม่ชี้นำ','อ่านช้าๆ ชัดๆ ให้เข้าใจทุกข้อ']},
+  oral:{title:'สุขภาพช่องปาก', what:'คัดกรองปัญหาช่องปากที่กระทบการกินและโภชนาการ',
+    gear:['ไฟฉาย','สังเกตในช่องปาก'],
+    steps:['ตรวจฟันแท้/ฟันปลอม และความสามารถในการเคี้ยว','ถามปัญหากลืน/สำลัก ปากแห้ง เจ็บแผลในปาก','ถามการทำความสะอาดช่องปาก/ฟันปลอม'],
+    score:'ระบบรวมคะแนน → บ่งชี้ว่าควรส่งต่อทันตกรรมหรือไม่',
+    tips:['ปัญหาช่องปากเป็นสาเหตุซ่อนของกินได้น้อย/น้ำหนักลด','พบปัญหา = ส่งต่อทันตกรรม']},
+  zarit:{title:'ภาระผู้ดูแล (Zarit ZBI-22)', what:'ประเมินภาระของผู้ดูแลหลัก (ไม่ใช่ตัวผู้สูงอายุ)',
+    gear:['ถามผู้ดูแลหลัก 22 ข้อ'],
+    steps:['ระบุผู้ดูแลหลัก — ถ้าผู้สูงอายุดูแลตัวเองได้/ไม่มีผู้ดูแล ข้ามได้','ถามผู้ดูแล 22 ข้อ ความถี่ 0-4','ครอบคลุมความเครียด เวลา สุขภาพ การเงิน และความสัมพันธ์'],
+    score:'ผลรวม 0-88: น้อยกว่าหรือเท่ากับ 20 น้อย/ไม่มี · 21-40 เล็กน้อย-ปานกลาง · 41-60 ปานกลาง-มาก · 61-88 มาก',
+    tips:['ภาระสูง → ให้คำปรึกษา/จัดบริการพักการดูแล (respite care)','ถามด้วยความเข้าใจ ผู้ดูแลมักไม่กล้าบอก']}
+};
+function guideCardHtml_(key,id){
+  var g=GUIDE[key]; if(!g) return '';
+  var steps=g.steps.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('');
+  var gear=g.gear?('<div class="pg-gear"><b>🧰 อุปกรณ์:</b> '+esc(g.gear.join(' · '))+'</div>'):'';
+  var tips=g.tips?('<div class="pg-tips"><b>💡 เคล็ดลับ / ข้อควรระวัง:</b> '+esc(g.tips.join(' · '))+'</div>'):'';
+  return '<details class="pg"'+(id?(' id="'+id+'"'):'')+' open>'+
+    '<summary><span class="pg-ic">📖</span> วิธีประเมิน: '+esc(g.title)+' <span class="pg-hint">แตะเพื่อย่อ/ขยาย</span></summary>'+
+    '<div class="pg-body">'+
+      '<div class="pg-what"><b>🔎 วัดอะไร:</b> '+esc(g.what)+'</div>'+gear+
+      '<ol class="pg-steps">'+steps+'</ol>'+
+      '<div class="pg-score"><b>🎯 คะแนน / แปลผล:</b> '+esc(g.score)+'</div>'+tips+
+    '</div></details>';
+}
+function injectModuleGuide_(key){ if(!GUIDE[key]) return; var body=document.getElementById('moduleBody'); if(body) body.insertAdjacentHTML('afterbegin', guideCardHtml_(key)); }
+function injectStaticGuide_(sec,key){ var s=document.getElementById(sec); if(!s||document.getElementById('pg_'+sec)||!GUIDE[key]) return; s.insertAdjacentHTML('afterbegin', guideCardHtml_(key,'pg_'+sec)); }
+function removeStaticGuides_(){ ['pg_s1','pg_s2'].forEach(function(id){ var e=document.getElementById(id); if(e&&e.parentNode) e.parentNode.removeChild(e); }); }
 function loadPatient(cid, date){
   cid=((cid&&typeof cid==='string')?cid:currentCid()).trim();
   if(!cid){ alert('กรุณากรอกเลขบัตรประชาชน (CID) ก่อนดึงข้อมูล'); return; }
@@ -2181,7 +2400,7 @@ function loadPatient(cid, date){
     var who={}; Object.keys(rec.modules||{}).forEach(function(k){ if(rec.modules[k].assessor) who[rec.modules[k].assessor]=1; });
     toast('โหลดข้อมูล '+((rec.profile&&rec.profile.pname)||cid)+' — มี '+n+' การประเมินที่บันทึกไว้'+(Object.keys(who).length?' (ผู้ประเมิน: '+Object.keys(who).join(', ')+')':'')+' ✓');
   }
-  if(gasAvailable()){
+  if(gasAvailable() && !TEST_MODE){
     google.script.run.withSuccessHandler(function(rec){ apply(rec||recOf(cid)); }).withFailureHandler(function(){ apply(recOf(cid)); }).getElderlyPatientRecord(cid, window.__pocToken||'', date||'');
   } else { apply(recOf(cid)); }
 }
@@ -2205,7 +2424,7 @@ function peekCase(){ var cid=currentCid(); if(cid.length!==13) return;
     if(formIsFresh()){ loadPatient(cid); toast('พบการประเมินเดิม '+keys.length+' รายการ'+byTxt+' — ดึงผลมาแสดงให้อัตโนมัติแล้ว ✓ (เปิดขั้นตอน 3/สรุป เพื่อดู/ทำต่อ)'); }
     else { toast('⚠️ เคสนี้มี '+keys.length+' การประเมินบันทึกไว้แล้ว'+byTxt+' — กด “ดึงข้อมูลผู้ป่วย” เพื่อดู/แก้ กันประเมินซ้ำ'); }
   }
-  if(gasAvailable()){ google.script.run.withSuccessHandler(function(rec){ handle(rec||recOf(cid)); }).withFailureHandler(function(){ handle(recOf(cid)); }).getElderlyPatientRecord(cid, window.__pocToken||''); }
+  if(gasAvailable() && !TEST_MODE){ google.script.run.withSuccessHandler(function(rec){ handle(rec||recOf(cid)); }).withFailureHandler(function(){ handle(recOf(cid)); }).getElderlyPatientRecord(cid, window.__pocToken||''); }
   else handle(recOf(cid));
 }
 
@@ -2217,6 +2436,12 @@ function outboxShift(){ var o=lsGet(LS_OUT,[]); o.shift(); lsSet(LS_OUT,o); }
 function markSynced(cid,key){ var all=recAll(); if(all[cid]&&all[cid].modules[key]){ all[cid].modules[key].synced=true; lsSet(LS_REC,all); } }
 function pendingCount(){ return outboxAll().length; }
 function flushSync(){
+  if(TEST_MODE){   // โหมดซ้อม: ไม่ส่งขึ้นเซิร์ฟเวอร์ — จำลองบันทึกสำเร็จ (เคลียร์ outbox + mark synced เหมือนจริง)
+    outboxAll().forEach(function(it){ markSynced(it.cid,it.module); refreshSaveMeta(it.module); });
+    lsSet(LS_OUT,[]); updateSyncBadge();
+    if(!document.getElementById('s3').classList.contains('hidden')) renderModules();
+    return;
+  }
   if(!gasAvailable()){ updateSyncBadge(); return; }
   var o=outboxAll(); if(!o.length){ updateSyncBadge(); return; }
   var item=o[0];
@@ -2232,6 +2457,8 @@ function flushSync(){
     .saveElderlyAssessmentModule(item.payload);
 }
 function updateSyncBadge(){ var b=document.getElementById('syncBadge'); if(!b) return; var n=pendingCount();
+  if(TEST_MODE){ b.classList.add('test'); b.innerHTML='🧪 โหมดซ้อม • ไม่บันทึกลงฐานข้อมูล'; return; }
+  b.classList.remove('test');
   if(!gasAvailable()){ b.innerHTML='💾 ออฟไลน์ • เก็บในเครื่อง'+(n?' • รอ sync '+n:''); return; }
   b.innerHTML=(navigator.onLine?'☁️ ออนไลน์':'📴 ออฟไลน์')+(n?' • รอ sync '+n:' • ซิงค์ครบ');
 }
