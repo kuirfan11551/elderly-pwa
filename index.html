@@ -267,8 +267,13 @@ body.light .btn.ghost{background:rgba(20,50,90,.06)}
 .testbar .tb-tools button:hover{transform:translateY(-1px);border-color:rgba(125,211,252,.6)}
 .testbar .tb-tools button:active{transform:scale(.95)}
 .testbar .tb-magic{background:linear-gradient(135deg,#f59e0b,#f472b6)!important;color:#1a1208!important;font-weight:800!important;border:none!important;box-shadow:0 4px 16px rgba(244,114,182,.4)}
-body.test-mode::before{content:"";position:fixed;inset:0;border:3px solid rgba(245,158,11,.6);pointer-events:none;z-index:9998;box-shadow:inset 0 0 30px rgba(245,158,11,.12)}
+/* แถบขอบบน-ล่าง แทนกรอบเต็มจอ (กรอบเต็มจอ position:fixed inset:0 z-index สูง ทำ WebKit เรนเดอร์ทับเป็นจอดำ) */
+body.test-mode::before,body.test-mode::after{content:"";position:fixed;left:0;right:0;height:4px;z-index:60;pointer-events:none;background:linear-gradient(90deg,#f59e0b,#f472b6,#f59e0b);background-size:200% 100%;animation:tmShimmer 3s linear infinite}
+body.test-mode::before{top:0}
+body.test-mode::after{bottom:0}
+@keyframes tmShimmer{0%{background-position:0 0}100%{background-position:200% 0}}
 #testBtn.on{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.6);color:#fbbf24}
+#fsBtn.on{background:rgba(94,234,212,.18);border-color:rgba(94,234,212,.6);color:#5eead4}
 #syncBadge.test{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.5);color:#fbbf24}
 .pg{margin:0 0 15px;border-radius:15px;border:1px solid rgba(94,234,212,.32);background:linear-gradient(160deg,rgba(94,234,212,.09),rgba(56,189,248,.05));overflow:hidden;box-shadow:0 6px 22px rgba(56,189,248,.1)}
 .pg>summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:800;font-size:14px;color:#5eead4;display:flex;align-items:center;gap:9px;background:linear-gradient(90deg,rgba(94,234,212,.14),rgba(56,189,248,.06))}
@@ -291,6 +296,7 @@ body.light .pg .pg-what b,body.light .pg .pg-gear b{color:#0369a1}
 @media print{body.test-mode #s4{position:relative}body.test-mode #s4::before{content:"เอกสารฝึกซ้อม — ไม่ใช่เอกสารจริง";position:fixed;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:46px;font-weight:900;color:rgba(245,158,11,.18);white-space:nowrap;pointer-events:none;z-index:9999}}
 </style>
 <div class="viewctl">
+  <button id="fsBtn" type="button" onclick="toggleFullscreen()" title="เปิดเต็มจอ — ใช้งานเหมือนแอป ไม่มีแถบรบกวน">⛶ เต็มจอ</button>
   <button id="testBtn" type="button" onclick="toggleTestMode()" title="โหมดซ้อม — ฝึกประเมินเหมือนจริง โดยไม่บันทึกลงฐานข้อมูล">🧪 ซ้อม</button>
   <button id="themeBtn" type="button" onclick="toggleTheme()" title="สลับโหมดสว่าง/มืด">🌙 มืด</button>
   <button id="fontBtn" type="button" onclick="cycleFont()" title="ปรับขนาดตัวอักษร">ก+</button>
@@ -529,6 +535,20 @@ function applyViewPrefs(){
 }
 function toggleTheme(){ var on=!document.body.classList.contains('light'); try{ localStorage.setItem('eldTheme', on?'light':'dark'); }catch(e){} applyViewPrefs(); }
 function cycleFont(){ var cur=document.body.classList.contains('fz2')?2:(document.body.classList.contains('fz1')?1:0); var nx=(cur+1)%3; try{ localStorage.setItem('eldFont', String(nx)); }catch(e){} applyViewPrefs(); }
+/* ===== โหมดเต็มจอ (ใช้งานเหมือนแอป ไม่มีแถบเบราว์เซอร์/แท็บ) ===== */
+function fsActive_(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+function toggleFullscreen(){
+  try{
+    if(!fsActive_()){
+      var el=document.documentElement, req=el.requestFullscreen||el.webkitRequestFullscreen;
+      if(!req){ toast('เบราว์เซอร์นี้ไม่รองรับเต็มจอ — บน iPhone แนะนำ “เพิ่มไปยังหน้าจอโฮม” เพื่อใช้แบบแอป'); return; }
+      var p=req.call(el); if(p&&p.catch) p.catch(function(){ toast('ระบบไม่อนุญาตเต็มจอที่นี่ — แนะนำติดตั้งเป็นแอป (เพิ่มไปยังหน้าจอโฮม)'); });
+    } else { var ex=document.exitFullscreen||document.webkitExitFullscreen; if(ex) ex.call(document); }
+  }catch(e){ toast('เปิดเต็มจอไม่สำเร็จ'); }
+}
+function updateFsBtn_(){ var b=document.getElementById('fsBtn'); if(b){ var on=fsActive_(); b.textContent=on?'⛶ ออกเต็มจอ':'⛶ เต็มจอ'; b.classList.toggle('on',on); } }
+document.addEventListener('fullscreenchange',updateFsBtn_);
+document.addEventListener('webkitfullscreenchange',updateFsBtn_);
 
 /* ===== แถบความคืบหน้า + ทำต่อจากที่ค้าง ===== */
 function updateProgress(){
