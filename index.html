@@ -600,6 +600,7 @@ applyViewPrefs(); setTimeout(updateProgress,0); // ธีม/ขนาดอั�
   var role=gp('role'); if(role) window.__pocRole=role;
   var ec=gp('cid'); if(ec) window.__editCid=ec;
   var ed=gp('editDate'); if(ed) window.__editDate=ed;
+  var tr=gp('train'); if(tr==='1'||tr===1||tr===true) window.__train=true;   // เปิดจากหน้า login โหมดฝึกซ้อม → เข้าโหมดซ้อมอัตโนมัติ
 }catch(e){} })();
 Q2.forEach((q,i)=>q2box.insertAdjacentHTML('beforeend','<div class="q"><div class="qt"><b>ข้อ '+(i+1)+'.</b> '+q+'</div><div class="opts"><div class="opt" onclick="setQ2('+i+',0,this)">ไม่มี</div><div class="opt" onclick="setQ2('+i+',1,this)">มี</div></div></div>'));
 suicidebox.insertAdjacentHTML('beforeend','<div class="q"><div class="qt">'+SUICIDE_Q+'</div><div class="opts"><div class="opt" onclick="setSuicide(0,this)">ไม่มี</div><div class="opt" onclick="setSuicide(1,this)">มี</div></div></div>');
@@ -2249,6 +2250,11 @@ function enterTestMode(){
   toast('🧪 เข้าโหมดซ้อมแล้ว — ลองกด “เคสตัวอย่าง” หรือ 🎲 สุ่มกรอกให้ ฝึกได้เลย ข้อมูลไม่ถูกบันทึกจริง');
 }
 function exitTestMode(){
+  if(window.__train){   // โหมดฝึกซ้อมจาก login: ออก = กลับหน้า login (คงโหมดซ้อมไว้ ไม่หลุดเป็นฟอร์มไร้ token)
+    if(typeof window.__pwaExitTrain==='function'){ try{ window.__pwaExitTrain(); }catch(e){} return; }   // PWA: เคลียร์ auth + reload
+    try{ if(window.parent) window.parent.postMessage({eld:'exit-train'},'*'); }catch(e){}   // dashboard iframe: บอก parent logout
+    return;
+  }
   if(!confirm('ออกจากโหมดซ้อม?\nข้อมูลที่กรอกในโหมดซ้อมจะถูกล้างทิ้งทั้งหมด (ไม่ได้บันทึกอยู่แล้ว)')) return;
   TEST_MODE=false; TEST_STORE={};
   window.__pocBy=_savedPocBy;
@@ -2489,6 +2495,11 @@ window.addEventListener('offline',updateSyncBadge);
 updateSyncBadge(); flushSync();
 /* เปิดจากปุ่ม "แก้ไข" ในหน้า dashboard → โหลดเคส+ครั้งที่ประเมินนั้นมาแก้อัตโนมัติ */
 if(window.__editCid){ try{ document.getElementById('cid').value=window.__editCid; loadPatient(window.__editCid, window.__editDate||''); }catch(e){} }
+if(window.__train){ try{   // เปิดจากหน้า login โหมดฝึกซ้อม → เข้าโหมดซ้อมเลย + ซ่อนปุ่มสลับ + เปลี่ยนปุ่มออกเป็น "ออกจากฝึกซ้อม"
+  var _tb=document.getElementById('testBtn'); if(_tb) _tb.style.display='none';
+  enterTestMode();
+  var _ex=document.querySelector('#testBanner .tb-exit'); if(_ex) _ex.textContent='ออกจากฝึกซ้อม ✕';
+}catch(e){} }
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 </script>

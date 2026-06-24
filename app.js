@@ -55,10 +55,12 @@
   function getAuth() { try { return JSON.parse(localStorage.getItem(LS_AUTH) || 'null'); } catch (e) { return null; } }
   function setAuth(a) { localStorage.setItem(LS_AUTH, JSON.stringify(a)); }
   function clearAuth() { localStorage.removeItem(LS_AUTH); }
+  // ออกจากโหมดฝึกซ้อม (เรียกจากปุ่ม "ออกจากฝึกซ้อม" ในแบบประเมิน) → เคลียร์ session + กลับหน้า login
+  window.__pwaExitTrain = function () { clearAuth(); location.reload(); };
 
   // ฉีดข้อมูลล็อกอินเข้า window.__SP "ก่อน" สคริปต์หลักอ่าน (สำคัญ)
   var auth = getAuth();
-  window.__SP = auth ? { token: auth.token, by: auth.by, role: auth.role } : {};
+  window.__SP = auth ? { token: auth.token, by: auth.by, role: auth.role, train: auth.train ? '1' : '' } : {};
   if (auth) { window.__pocToken = auth.token; window.__pocBy = auth.by; window.__pocRole = auth.role; }
 
   /* ---------- UI: login overlay + topbar + QR modal (สร้างเมื่อ DOM พร้อม) ---------- */
@@ -96,6 +98,18 @@
           '<button id="pwaGuestBtn">เริ่มประเมิน</button>' +
         '</div>' +
         '<div id="pwaLoginErr" class="pwa-err"></div>' +
+        '<div id="pwaTrainLauncher" style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,158,11,.18);text-align:center">' +
+          '<button type="button" id="pwaTrainOpen" style="width:100%;background:linear-gradient(120deg,#f59e0b,#f472b6);color:#1a1208">🧪 เข้าโหมดฝึกซ้อม</button>' +
+          '<div class="pwa-sub" style="margin-top:7px;color:#caa55a">ฝึกใช้แบบประเมินเสมือนจริง — คะแนน/แปลผลครบ ไม่บันทึกลงฐานข้อมูล</div>' +
+        '</div>' +
+        '<div id="pwaTrainForm" class="hidden">' +
+          '<input id="pwaTName" placeholder="ชื่อ-สกุลผู้ฝึก">' +
+          '<select id="pwaTPosSel"><option value="อสม.">อสม.</option><option value="เจ้าหน้าที่">เจ้าหน้าที่</option><option value="สหวิชาชีพ">สหวิชาชีพ</option></select>' +
+          '<input id="pwaTPosOther" class="hidden" placeholder="ระบุตำแหน่ง (เช่น พยาบาลวิชาชีพ)">' +
+          '<input id="pwaTAff" placeholder="ต้นสังกัด (เช่น รพ.สต.ระแว้ง)">' +
+          '<button id="pwaTrainBtn" style="background:linear-gradient(120deg,#f59e0b,#f472b6);color:#1a1208">🧪 เริ่มฝึกซ้อม</button>' +
+          '<div style="text-align:center;margin-top:8px"><a href="#" id="pwaTrainBack" style="color:#7dd3fc;font-size:13px;text-decoration:none">← กลับ</a></div>' +
+        '</div>' +
         (ENDPOINT ? '' : '<div class="pwa-err">⚠️ ยังไม่ได้ตั้งค่า apiUrl ใน config.js</div>') +
       '</div>';
     document.body.appendChild(el);
@@ -166,6 +180,32 @@
       var staff = posSel.value === 'เจ้าหน้าที่';
       posOther.classList.toggle('hidden', !staff);
       if (staff) posOther.focus();
+    });
+
+    // โหมดฝึกซ้อม — ฝึกใช้แบบประเมินเสมือนจริง ไม่บันทึกลงฐานข้อมูล (ใช้ได้ตลอด/ออฟไลน์)
+    var tabsWrap = el.querySelector('.pwa-tabs');
+    var trLauncher = document.getElementById('pwaTrainLauncher');
+    var trForm = document.getElementById('pwaTrainForm');
+    document.getElementById('pwaTrainOpen').addEventListener('click', function () {
+      tabsWrap.classList.add('hidden'); formS.classList.add('hidden'); formG.classList.add('hidden'); trLauncher.classList.add('hidden');
+      trForm.classList.remove('hidden'); err.textContent = '';
+    });
+    document.getElementById('pwaTrainBack').addEventListener('click', function (e) {
+      e.preventDefault();
+      trForm.classList.add('hidden'); tabsWrap.classList.remove('hidden'); trLauncher.classList.remove('hidden'); show(false);
+    });
+    var tPosSel = document.getElementById('pwaTPosSel'), tPosOther = document.getElementById('pwaTPosOther');
+    tPosSel.addEventListener('change', function () {
+      var other = tPosSel.value === 'เจ้าหน้าที่';
+      tPosOther.classList.toggle('hidden', !other); if (other) tPosOther.focus();
+    });
+    document.getElementById('pwaTrainBtn').addEventListener('click', function () {
+      var nm = document.getElementById('pwaTName').value.trim();
+      var pos = tPosSel.value === 'เจ้าหน้าที่' ? document.getElementById('pwaTPosOther').value.trim() : tPosSel.value;
+      var aff = document.getElementById('pwaTAff').value.trim();
+      if (!nm || !pos || !aff) { err.textContent = 'กรอกชื่อ ตำแหน่ง และต้นสังกัดให้ครบ'; return; }
+      setAuth({ token: '', by: nm + ' (' + pos + ' · ' + aff + ')', role: 'TRAIN', train: true });
+      location.reload();
     });
   }
 
