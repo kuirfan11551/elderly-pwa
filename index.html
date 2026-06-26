@@ -969,7 +969,7 @@ var MODULES=[
  {key:'zarit',icon:'🧑‍🤝‍🧑',name:'ภาระผู้ดูแล (Zarit)',group:'ผู้ดูแล'}
 ];
 function freshMod(){ return {
-  falls:{tug:null,balance:null,gait:null,chair:null,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null},
+  falls:{tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null},
   adl:{barthel:{},iadl:{},aadl:{}},
   mna:{sel:{},protein:{milk:false,legumeEgg:false,meat:false}},
   frail:{fatigue:null,resistance:null,ambulation:null,diseases:{},prevWeight:null,mtfi:{},cfs:null},
@@ -1087,10 +1087,16 @@ function fallsForm(){
     '<div class="grid c3">'+
       '<div class="fld"><label>TUG (วินาที)</label><input id="tugIn" type="number" inputmode="decimal" oninput="setTug(this.value)" value="'+(f.tug==null?'':f.tug)+'" placeholder="เช่น 12.5"></div>'+
       '<div class="fld"><label>SPPB — การทรงตัว</label><select onchange="setSppb(\'balance\',this.value)">'+spOpt(SPPB_BAL,f.balance)+'</select></div>'+
-      '<div class="fld"><label>SPPB — ความเร็วเดิน 4 เมตร</label><select onchange="setSppb(\'gait\',this.value)">'+spOpt(SPPB_GAIT,f.gait)+'</select></div>'+
-      '<div class="fld"><label>SPPB — ลุกนั่งเก้าอี้ 5 ครั้ง</label><select onchange="setSppb(\'chair\',this.value)">'+spOpt(SPPB_CHAIR,f.chair)+'</select></div>'+
+      '<div class="fld"><label>SPPB — เดิน 4 เมตร · จับเวลา (วินาที)</label>'+
+        '<input id="gaitSecIn" type="number" inputmode="decimal" step="0.1" min="0"'+(f.gaitNA?' disabled':'')+' value="'+(f.gaitSec==null?'':f.gaitSec)+'" oninput="setSppbTime(\'gait\',this.value)" placeholder="เช่น 5.4">'+
+        '<label class="litbox" style="margin-top:7px;font-weight:400;font-size:13px"><input type="checkbox" id="gaitNAcb"'+(f.gaitNA?' checked':'')+' onchange="setSppbNA(\'gait\',this.checked)"><span>เดินไม่ได้ (= 0 คะแนน)</span></label>'+
+        '<div class="hint" id="gaitScoreHint" style="margin-top:5px;color:var(--neon)"></div></div>'+
+      '<div class="fld"><label>SPPB — ลุก-นั่งเก้าอี้ 5 ครั้ง · จับเวลา (วินาที)</label>'+
+        '<input id="chairSecIn" type="number" inputmode="decimal" step="0.1" min="0"'+(f.chairNA?' disabled':'')+' value="'+(f.chairSec==null?'':f.chairSec)+'" oninput="setSppbTime(\'chair\',this.value)" placeholder="เช่น 12.5">'+
+        '<label class="litbox" style="margin-top:7px;font-weight:400;font-size:13px"><input type="checkbox" id="chairNAcb"'+(f.chairNA?' checked':'')+' onchange="setSppbNA(\'chair\',this.checked)"><span>ทำไม่ได้ / เกิน 60 วินาที (= 0 คะแนน)</span></label>'+
+        '<div class="hint" id="chairScoreHint" style="margin-top:5px;color:var(--neon)"></div></div>'+
     '</div>'+
-    '<div class="hint" style="margin-top:6px;color:var(--ink-faint)">SPPB: เดินจับเวลา 4 เมตร · ลุกนั่งเก้าอี้ 5 ครั้งจับเวลา · ทรงตัว 3 ท่า (เท้าชิด / กึ่งเรียงส้น–ปลายเท้า / เรียงส้น–ปลายเท้า) ท่าละ 10 วินาที</div>'+
+    '<div class="hint" style="margin-top:6px;color:var(--ink-faint)">SPPB: กรอก<b>เวลาดิบเป็นวินาที</b> ระบบจะแปลงเป็นคะแนน 0–4 ให้อัตโนมัติ (เดิน 4 ม. · ลุก-นั่ง 5 ครั้ง) · ทรงตัวเลือก 3 ท่า (เท้าชิด / กึ่งเรียงส้น–ปลายเท้า / เรียงส้น–ปลายเท้า) ท่าละ 10 วินาที</div>'+
     '<div class="scorebox" id="tugBox" style="margin-top:13px"><div><div class="big" id="tugV">—</div><div class="lbl">TUG (วินาที)</div></div><div class="res" id="tugR">—</div></div>'+
     '<div class="scorebox" id="sppbBox"><div><div class="big" id="sppbV">0</div><div class="lbl">SPPB (เต็ม 12)</div></div><div class="res" id="sppbR">—</div></div>'+
     '<div class="sectitle" style="margin-top:16px">Morse Fall Scale</div>'+
@@ -1107,6 +1113,19 @@ function fallsForm(){
 }
 function setTug(v){ MOD.falls.tug=v===''?null:+v; scoreFalls(); renderModules(); }
 function setSppb(k,v){ MOD.falls[k]=v===''?null:+v; scoreFalls(); renderModules(); }
+/* SPPB ลุก-นั่ง/เดิน 4 ม.: กรอกเวลาดิบ (วินาที) → ระบบแปลงเป็นคะแนน 0–4 อัตโนมัติ (เก็บทั้งเวลาดิบ *Sec และคะแนน) */
+function sppbGaitScore_(s){ if(s<4.82) return 4; if(s<=6.20) return 3; if(s<=8.70) return 2; return 1; }
+function sppbChairScore_(s){ if(s<=11.19) return 4; if(s<=13.69) return 3; if(s<=16.69) return 2; if(s<60) return 1; return 0; }
+function setSppbTime(k,v){ var f=MOD.falls;
+  if(v===''||isNaN(+v)){ f[k+'Sec']=null; if(!f[k+'NA']) f[k]=null; }
+  else { var s=+v; f[k+'Sec']=s; f[k+'NA']=false; f[k]=(k==='gait')?sppbGaitScore_(s):sppbChairScore_(s); var cb=document.getElementById(k+'NAcb'); if(cb) cb.checked=false; }
+  scoreFalls(); renderModules();
+}
+function setSppbNA(k,na){ var f=MOD.falls;
+  if(na){ f[k+'NA']=true; f[k]=0; f[k+'Sec']=null; var inp=document.getElementById(k+'SecIn'); if(inp){ inp.value=''; inp.disabled=true; } }
+  else { f[k+'NA']=false; f[k]=null; var inp2=document.getElementById(k+'SecIn'); if(inp2) inp2.disabled=false; }
+  scoreFalls(); renderModules();
+}
 function setMorse(k,v){ MOD.falls[k]=v===''?null:+v; scoreFalls(); }
 function tugResult(v){ return v>=20?'TUG เสี่ยงล้มสูง':v>=12?'TUG เข้าเกณฑ์เสี่ยงล้ม':'TUG ยังไม่เข้าเกณฑ์'; }
 function sppbResult(t){ return t<=3?'SPPB เสี่ยงล้มสูงมาก':t<=6?'SPPB เสี่ยงล้มสูง':t<=9?'SPPB เสี่ยงล้มปานกลาง':'SPPB เสี่ยงล้มต่ำ'; }
@@ -1117,6 +1136,8 @@ function scoreFalls(){ var f=MOD.falls;
   var sppb=(f.balance||0)+(f.gait||0)+(f.chair||0); var sppbDone=f.balance!=null&&f.gait!=null&&f.chair!=null;
   document.getElementById('sppbV').textContent=sppb; document.getElementById('sppbR').textContent=sppbDone?sppbResult(sppb):'—';
   document.getElementById('sppbBox').className='scorebox '+(!sppbDone?'':sppb<=6?'risk':sppb<=9?'warn':'ok');
+  var gh=document.getElementById('gaitScoreHint'); if(gh) gh.textContent=(f.gaitNA?'→ เดินไม่ได้ = 0 คะแนน':(f.gait==null?'':'→ คะแนน '+f.gait+' / 4'));
+  var ch=document.getElementById('chairScoreHint'); if(ch) ch.textContent=(f.chairNA?'→ ทำไม่ได้ = 0 คะแนน':(f.chair==null?'':'→ คะแนน '+f.chair+' / 4'));
   var ms=(f.mHistory||0)+(f.mDiag||0)+(f.mAmb||0)+(f.mIv||0)+(f.mGait||0)+(f.mMental||0);
   var msAny=['mHistory','mDiag','mAmb','mIv','mGait','mMental'].some(function(k){return f[k]!=null;});
   document.getElementById('morseV').textContent=ms; document.getElementById('morseR').textContent=msAny?morseResult(ms):'—';
@@ -2206,7 +2227,7 @@ function clearFormState(){
   ST.dx={}; document.querySelectorAll('#diseases .chip').forEach(function(c){ c.classList.remove('on'); });
   sumDx(); bmiHint.textContent=''; bpHint.textContent='';
   ST.q2=[null,null]; ST.suicide=null; ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null);
-  MOD.falls={tug:null,balance:null,gait:null,chair:null,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null};
+  MOD.falls={tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null};
   MOD.adl={barthel:{},iadl:{},aadl:{}}; MOD.mna={sel:{},protein:{milk:false,legumeEgg:false,meat:false}};
   MOD.frail={fatigue:null,resistance:null,ambulation:null,diseases:{},prevWeight:null,mtfi:{}};
   MOD.muscle={gripR:null,gripL:null,sarc:{}}; MOD.gpaq={seg:{},sedHours:null,sedMins:null}; MOD.whoqol={};
