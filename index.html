@@ -731,11 +731,11 @@ function domainResults(){
   // การเคลื่อนไหว/หกล้ม
   (function(){ var f=MOD.falls;
     var sppb=(f.balance||0)+(f.gait||0)+(f.chair||0), sppbDone=f.balance!=null&&f.gait!=null&&f.chair!=null;
-    var ms=(f.mHistory||0)+(f.mDiag||0)+(f.mAmb||0)+(f.mIv||0)+(f.mGait||0)+(f.mMental||0);
-    var msAny=['mHistory','mDiag','mAmb','mIv','mGait','mMental'].some(function(k){return f[k]!=null;});
-    if(!(f.tug!=null||sppbDone||msAny)) return;
-    var risk=(f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(msAny&&ms>=25);
-    add('การเคลื่อนไหว','หกล้ม (TUG/SPPB/Morse)','TUG '+(f.tug==null?'—':f.tug)+' · SPPB '+(sppbDone?sppb:'—')+' · Morse '+(msAny?ms:'—'), risk?'เข้าเกณฑ์เสี่ยงหกล้ม':'ยังไม่พบเกณฑ์เสี่ยงเด่นชัด', risk?'risk':'ok', risk?['ภาวะพลัดตกหกล้ม']:[]);
+    var frat=thaiFratScore();
+    var fAny=['fratFall','fratBalance','fratMed','fratVision','fratHome'].some(function(k){return f[k]!=null;})||fratSexScore()>0;
+    if(!(f.tug!=null||sppbDone||fAny)) return;
+    var risk=(f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(fratDone()&&frat>=4);
+    add('การเคลื่อนไหว','หกล้ม (TUG/SPPB/Thai-FRAT)','TUG '+(f.tug==null?'—':f.tug)+' · SPPB '+(sppbDone?sppb:'—')+' · Thai-FRAT '+(fAny?frat:'—'), risk?'เข้าเกณฑ์เสี่ยงหกล้ม':'ยังไม่พบเกณฑ์เสี่ยงเด่นชัด', risk?'risk':'ok', risk?['ภาวะพลัดตกหกล้ม']:[]);
   })();
   // กิจวัตร — Basic/IADL/Advance
   (function(){ var b=adlSum('barthel',BARTHEL), i=adlSum('iadl',IADL), a=adlSum('aadl',AADL);
@@ -958,7 +958,7 @@ function saveDemo(){ var t0=performance.now();
 var MODULES=[
  {key:'mmse',icon:'💭',name:'MMSE-Thai',group:'การรู้คิด',cognition:true},
  {key:'moca',icon:'💭',name:'MoCA',group:'การรู้คิด',cognition:true},
- {key:'falls',icon:'🦵',name:'หกล้ม (TUG/SPPB/Morse)',group:'การเคลื่อนไหว'},
+ {key:'falls',icon:'🦵',name:'หกล้ม (TUG/SPPB/Thai-FRAT)',group:'การเคลื่อนไหว'},
  {key:'mna',icon:'🍚',name:'MNA โภชนาการ',group:'โภชนาการ'},
  {key:'frail',icon:'🍂',name:'FRAIL / Thai Frailty Index',group:'ภาวะเปราะบาง'},
  {key:'muscle',icon:'💪',name:'แรงบีบมือ / SARC-CalF',group:'มวลกล้ามเนื้อ'},
@@ -969,7 +969,7 @@ var MODULES=[
  {key:'zarit',icon:'🧑‍🤝‍🧑',name:'ภาระผู้ดูแล (Zarit)',group:'ผู้ดูแล'}
 ];
 function freshMod(){ return {
-  falls:{tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null},
+  falls:{tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,fratFall:null,fratBalance:null,fratMed:null,fratVision:null,fratHome:null},
   adl:{barthel:{},iadl:{},aadl:{}},
   mna:{sel:{},protein:{milk:false,legumeEgg:false,meat:false}},
   frail:{fatigue:null,resistance:null,ambulation:null,diseases:{},prevWeight:null,mtfi:{},cfs:null},
@@ -1074,7 +1074,7 @@ function openModule(key){
     '<div style="color:var(--ink-dim);font-size:13px;line-height:1.7">แม่แบบเดียวกับโมดูลหกล้ม — กำลังทยอยทำในเฟสถัดไป โดย<b style="color:var(--neon)"> ยกสูตรคิดคะแนนเดิมมาทุกตัว</b> (เช่น MNA, FRAIL, WHOQOL ฯลฯ) คิดในเครื่องทันทีเหมือนกัน</div></div>'; }
   body.scrollIntoView({block:'nearest'});
 }
-/* ---- Falls module (TUG/SPPB/Morse) ---- */
+/* ---- Falls module (TUG/SPPB/Thai-FRAT) ---- */
 var SEL=function(id,opts){ return '<select onchange="'+id+'" class="msel">'+'<option value="">เลือก</option>'+opts+'</select>'; };
 function fallsForm(){
   var f=MOD.falls;
@@ -1099,16 +1099,16 @@ function fallsForm(){
     '<div class="hint" style="margin-top:6px;color:var(--ink-faint)">SPPB: กรอก<b>เวลาดิบเป็นวินาที</b> ระบบจะแปลงเป็นคะแนน 0–4 ให้อัตโนมัติ (เดิน 4 ม. · ลุก-นั่ง 5 ครั้ง) · ทรงตัวเลือก 3 ท่า (เท้าชิด / กึ่งเรียงส้น–ปลายเท้า / เรียงส้น–ปลายเท้า) ท่าละ 10 วินาที</div>'+
     '<div class="scorebox" id="tugBox" style="margin-top:13px"><div><div class="big" id="tugV">—</div><div class="lbl">TUG (วินาที)</div></div><div class="res" id="tugR">—</div></div>'+
     '<div class="scorebox" id="sppbBox"><div><div class="big" id="sppbV">0</div><div class="lbl">SPPB (เต็ม 12)</div></div><div class="res" id="sppbR">—</div></div>'+
-    '<div class="sectitle" style="margin-top:16px">Morse Fall Scale</div>'+
+    '<div class="sectitle" style="margin-top:16px">Thai-FRAT · แบบประเมินความเสี่ยงหกล้ม</div>'+
+    '<div class="note" style="margin-top:0;margin-bottom:6px">เพศหญิงนับ +1 คะแนนให้อัตโนมัติจากข้อมูลพื้นฐาน · รวมคะแนน ≥ 4 = เสี่ยงหกล้มสูง</div>'+
     '<div class="grid c2">'+
-      '<div class="fld"><label>1. ประวัติเคยหกล้ม (3 เดือน)</label><select onchange="setMorse(\'mHistory\',this.value)">'+msel('mHistory',[['ไม่เคย = 0',0],['เคย = 25',25]])+'</select></div>'+
-      '<div class="fld"><label>2. มีโรคร่วมมากกว่า 1 โรค</label><select onchange="setMorse(\'mDiag\',this.value)">'+msel('mDiag',[['ไม่มี = 0',0],['มี = 15',15]])+'</select></div>'+
-      '<div class="fld"><label>3. อุปกรณ์ช่วยเดิน</label><select onchange="setMorse(\'mAmb\',this.value)">'+msel('mAmb',[['ไม่ใช้/นอนติดเตียง = 0',0],['ไม้เท้า/walker = 15',15],['เกาะเฟอร์นิเจอร์ = 30',30]])+'</select></div>'+
-      '<div class="fld"><label>4. ให้สารน้ำ/คาสายน้ำเกลือ</label><select onchange="setMorse(\'mIv\',this.value)">'+msel('mIv',[['ไม่มี = 0',0],['มี = 20',20]])+'</select></div>'+
-      '<div class="fld"><label>5. ลักษณะการเดิน</label><select onchange="setMorse(\'mGait\',this.value)">'+msel('mGait',[['ปกติ/นั่งรถเข็น = 0',0],['อ่อนแรง = 10',10],['บกพร่อง/ช่วยพยุง = 20',20]])+'</select></div>'+
-      '<div class="fld"><label>6. การรับรู้ความสามารถตนเอง</label><select onchange="setMorse(\'mMental\',this.value)">'+msel('mMental',[['รู้ข้อจำกัดตนเอง = 0',0],['ประเมินเกินจริง/ลืม = 15',15]])+'</select></div>'+
+      '<div class="fld"><label>1. ประวัติการหกล้มใน 1 ปีที่ผ่านมา</label><select onchange="setFrat(\'fratFall\',this.value)">'+msel('fratFall',[['ไม่เคย = 0',0],['เกือบหกล้ม = 2',2],['เคยหกล้ม = 5',5]])+'</select></div>'+
+      '<div class="fld"><label>2. การทรงตัว/เดินไม่มั่นคง (เดินเซ ต้องเกาะยึด ลุก-นั่งไม่มั่นคง)</label><select onchange="setFrat(\'fratBalance\',this.value)">'+msel('fratBalance',[['ไม่มี = 0',0],['มี = 2',2]])+'</select></div>'+
+      '<div class="fld"><label>3. ใช้ยาเสี่ยงหกล้ม (ยานอนหลับ/กล่อมประสาท/ลดความดัน/ขับปัสสาวะ ฯลฯ)</label><select onchange="setFrat(\'fratMed\',this.value)">'+msel('fratMed',[['ไม่ใช้ = 0',0],['ใช้/ไม่แน่ใจ = 1',1]])+'</select></div>'+
+      '<div class="fld"><label>4. สายตาผิดปกติ/มองเห็นไม่ชัด</label><select onchange="setFrat(\'fratVision\',this.value)">'+msel('fratVision',[['ไม่มี = 0',0],['มี = 1',1]])+'</select></div>'+
+      '<div class="fld"><label>5. สภาพแวดล้อมในบ้านเสี่ยง (พื้นลื่น/แสงน้อย/ไม่มีราวจับ/มีสิ่งกีดขวาง)</label><select onchange="setFrat(\'fratHome\',this.value)">'+msel('fratHome',[['ไม่มี = 0',0],['มี = 1',1]])+'</select></div>'+
     '</div>'+
-    '<div class="scorebox" id="morseBox"><div><div class="big" id="morseV">0</div><div class="lbl">Morse</div></div><div class="res" id="morseR">—</div></div>'+
+    '<div class="scorebox" id="fratBox"><div><div class="big" id="fratV">0</div><div class="lbl">Thai-FRAT</div></div><div class="res" id="fratR">—</div></div>'+
     '<div class="note" id="fallConcl" style="margin-top:14px"></div></div>';
 }
 function setTug(v){ MOD.falls.tug=v===''?null:+v; scoreFalls(); renderModules(); }
@@ -1126,10 +1126,13 @@ function setSppbNA(k,na){ var f=MOD.falls;
   else { f[k+'NA']=false; f[k]=null; var inp2=document.getElementById(k+'SecIn'); if(inp2) inp2.disabled=false; }
   scoreFalls(); renderModules();
 }
-function setMorse(k,v){ MOD.falls[k]=v===''?null:+v; scoreFalls(); }
+function setFrat(k,v){ MOD.falls[k]=v===''?null:+v; scoreFalls(); }
+function fratSexScore(){ return (typeof gender!=='undefined' && gender && gender.value==='หญิง')?1:0; }   // เพศหญิง +1 (Thai-FRAT)
+function thaiFratScore(){ var f=MOD.falls; return (f.fratFall||0)+(f.fratBalance||0)+(f.fratMed||0)+(f.fratVision||0)+(f.fratHome||0)+fratSexScore(); }
+function fratDone(){ var f=MOD.falls; return ['fratFall','fratBalance','fratMed','fratVision','fratHome'].every(function(k){return f[k]!=null;}); }
 function tugResult(v){ return v>=20?'TUG เสี่ยงล้มสูง':v>=12?'TUG เข้าเกณฑ์เสี่ยงล้ม':'TUG ยังไม่เข้าเกณฑ์'; }
 function sppbResult(t){ return t<=3?'SPPB เสี่ยงล้มสูงมาก':t<=6?'SPPB เสี่ยงล้มสูง':t<=9?'SPPB เสี่ยงล้มปานกลาง':'SPPB เสี่ยงล้มต่ำ'; }
-function morseResult(s){ return s>=45?'Morse เสี่ยงสูง':s>=25?'Morse เสี่ยงปานกลาง':'Morse เสี่ยงต่ำ'; }
+function fratResult(s){ return s>=4?'Thai-FRAT เสี่ยงหกล้มสูง':s>=2?'Thai-FRAT เสี่ยงปานกลาง':s>=1?'Thai-FRAT เสี่ยงต่ำ':'Thai-FRAT ไม่พบความเสี่ยง'; }
 function scoreFalls(){ var f=MOD.falls;
   if(f.tug!=null){ document.getElementById('tugV').textContent=f.tug; document.getElementById('tugR').textContent=tugResult(f.tug);
     document.getElementById('tugBox').className='scorebox '+(f.tug>=20?'risk':f.tug>=12?'warn':'ok'); }
@@ -1138,12 +1141,13 @@ function scoreFalls(){ var f=MOD.falls;
   document.getElementById('sppbBox').className='scorebox '+(!sppbDone?'':sppb<=6?'risk':sppb<=9?'warn':'ok');
   var gh=document.getElementById('gaitScoreHint'); if(gh) gh.textContent=(f.gaitNA?'→ เดินไม่ได้ = 0 คะแนน':(f.gait==null?'':'→ คะแนน '+f.gait+' / 4'));
   var ch=document.getElementById('chairScoreHint'); if(ch) ch.textContent=(f.chairNA?'→ ทำไม่ได้ = 0 คะแนน':(f.chair==null?'':'→ คะแนน '+f.chair+' / 4'));
-  var ms=(f.mHistory||0)+(f.mDiag||0)+(f.mAmb||0)+(f.mIv||0)+(f.mGait||0)+(f.mMental||0);
-  var msAny=['mHistory','mDiag','mAmb','mIv','mGait','mMental'].some(function(k){return f[k]!=null;});
-  document.getElementById('morseV').textContent=ms; document.getElementById('morseR').textContent=msAny?morseResult(ms):'—';
-  document.getElementById('morseBox').className='scorebox '+(!msAny?'':ms>=45?'risk':ms>=25?'warn':'ok');
-  // สรุปหกล้ม: เสี่ยง ถ้า TUG>=12 หรือ SPPB<=9 หรือ Morse>=25
-  var risk=(f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(msAny&&ms>=25);
+  var frat=thaiFratScore();
+  var fAny=['fratFall','fratBalance','fratMed','fratVision','fratHome'].some(function(k){return f[k]!=null;})||fratSexScore()>0;
+  var fv=document.getElementById('fratV'); if(fv) fv.textContent=frat;
+  var fr=document.getElementById('fratR'); if(fr) fr.textContent=fAny?fratResult(frat):'—';
+  var fb=document.getElementById('fratBox'); if(fb) fb.className='scorebox '+(!fAny?'':frat>=4?'risk':frat>=2?'warn':'ok');
+  // สรุปหกล้ม: เสี่ยง ถ้า TUG>=12 หรือ SPPB<=9 หรือ Thai-FRAT>=4
+  var risk=(f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(fratDone()&&frat>=4);
   var el=document.getElementById('fallConcl'); if(el){ el.className='note'+(risk?' alert':'');
     el.innerHTML=risk?'⚠️ <b>เข้าเกณฑ์เสี่ยงหกล้ม</b> — ควรให้คำแนะนำป้องกันหกล้ม / ประเมินสิ่งแวดล้อม / พิจารณาส่งต่อกายภาพ':'✅ ยังไม่พบเกณฑ์เสี่ยงหกล้มเด่นชัด'; }
 }
@@ -1948,7 +1952,7 @@ var LS_REC='eldRecords', LS_OUT='eldOutbox';
 var TEST_MODE=false, TEST_STORE={}, _savedPocBy=null, _practiceCelebrated=false;   // โหมดซ้อม: ข้อมูลอยู่ใน TEST_STORE (in-memory) ไม่แตะ localStorage จริง/ฐานข้อมูล
 var SAVEABLE=[
  {key:'basic',name:'ข้อมูลพื้นฐาน'},{key:'mood',name:'คัดกรองอารมณ์/ซึมเศร้า'},
- {key:'falls',name:'หกล้ม (TUG/SPPB/Morse)'},{key:'adl',name:'Basic/IADL/Advance ADL'},
+ {key:'falls',name:'หกล้ม (TUG/SPPB/Thai-FRAT)'},{key:'adl',name:'Basic/IADL/Advance ADL'},
  {key:'mna',name:'MNA โภชนาการ'},{key:'frail',name:'FRAIL/MTFI'},{key:'muscle',name:'แรงบีบมือ/SARC-CalF'},
  {key:'gpaq',name:'GPAQ'},{key:'whoqol',name:'WHOQOL-BREF'},{key:'oral',name:'สุขภาพช่องปาก'},
  {key:'mmse',name:'MMSE-Thai'},{key:'moca',name:'MoCA'},{key:'note',name:'ความเห็นแพทย์/ผู้ประเมิน'}
@@ -2051,7 +2055,7 @@ function moduleSnapshot(key){
   if(key==='mood'){ var conf=depressionConfirmed(),suicide=ST.suicide===1||(ST.q9[8]||0)>=1||q8Sum()>=1;
     return {scoreText:'2Q='+q2Score()+' · 9Q='+(q2Positive()?q9Sum():'—'), result:(conf?'เข้าเกณฑ์ซึมเศร้า':q2Positive()?'2Q+ ผิดปกติ':'ไม่พบซึมเศร้า')+(suicide?' · เสี่ยงฆ่าตัวตาย':''), sev:(conf||suicide?'risk':q2Positive()?'warn':'ok')}; }
   if(key==='note'){ var dn=document.getElementById('doctorNote'),t=dn?(dn.value||'').trim():''; return {scoreText:(t?(t.length>40?t.slice(0,40)+'…':t):''),result:(t?'บันทึกความเห็นแล้ว':'(ยังไม่มีความเห็น)'),sev:''}; }
-  var KEY2NAME={falls:'หกล้ม (TUG/SPPB/Morse)',adl:'Basic / IADL / Advance ADL',mna:'MNA',frail:'FRAIL / MTFI',muscle:'Hand Grip / SARC-CalF',gpaq:'GPAQ',whoqol:'WHOQOL-BREF',oral:'สุขภาพช่องปาก',mmse:'MMSE-Thai',moca:'MoCA'};
+  var KEY2NAME={falls:'หกล้ม (TUG/SPPB/Thai-FRAT)',adl:'Basic / IADL / Advance ADL',mna:'MNA',frail:'FRAIL / MTFI',muscle:'Hand Grip / SARC-CalF',gpaq:'GPAQ',whoqol:'WHOQOL-BREF',oral:'สุขภาพช่องปาก',mmse:'MMSE-Thai',moca:'MoCA'};
   var want=KEY2NAME[key], arr=domainResults();
   for(var i=0;i<arr.length;i++) if(arr[i].name===want) return {scoreText:arr[i].scoreText,result:arr[i].result,sev:arr[i].sev};
   return {scoreText:'',result:'บันทึกแล้ว',sev:''};
@@ -2087,8 +2091,8 @@ function moduleConditions(key){
     return C;
   }
   if(key==='falls'){ var f=MOD.falls,sppb=(f.balance||0)+(f.gait||0)+(f.chair||0),sppbDone=f.balance!=null&&f.gait!=null&&f.chair!=null;
-    var ms=(f.mHistory||0)+(f.mDiag||0)+(f.mAmb||0)+(f.mIv||0)+(f.mGait||0)+(f.mMental||0),msAny=['mHistory','mDiag','mAmb','mIv','mGait','mMental'].some(function(k){return f[k]!=null;});
-    if((f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(msAny&&ms>=25)) add('fall_risk',((f.tug!=null&&f.tug>=20)||(msAny&&ms>=45)||(sppbDone&&sppb<=6))?'high':'medium','');
+    var frat=thaiFratScore(),fOk=fratDone();
+    if((f.tug!=null&&f.tug>=12)||(sppbDone&&sppb<=9)||(fOk&&frat>=4)) add('fall_risk',((f.tug!=null&&f.tug>=20)||(fOk&&frat>=6)||(sppbDone&&sppb<=6))?'high':'medium','');
     return C;
   }
   if(key==='mna'){ if(!mnaAny()) return C; var au=mnaAuto(),p=mnaProteinScore(),scr=mnaSumGroup(MNA_SCREEN),ass=mnaSumGroup(MNA_ASSESS),total=scr.s+au.bmiScore+p+ass.s+au.macScore+au.ccScore,ok=scr.done&&ass.done;
@@ -2137,7 +2141,7 @@ function moduleDetail(key){
   if(key==='mood'){ var on=q2Positive(); return {Q2_Result:on?'2Q plus ผิดปกติ':'ปกติ',Q9_Score:on?q9Sum():'',Q9_Result:on?q9Result(q9Sum()):'',Q8_Score:q8Any()?q8Sum():'',Q8_Result:q8Any()?q8Result(q8Sum()):'',TGDS_Score:tgdsDone()?tgdsSum():'',TGDS_Result:tgdsDone()?tgdsResult(tgdsSum()):''}; }
   if(key==='mmse'){ var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL; var t=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO); var cut=mmseCutoff(mmseEduGroup()); return {MMSE_Score:t,MMSE_Result:t<cut?'MMSE ผิดปกติ R/O Dementia':'MMSE ปกติ'}; }
   if(key==='moca'){ var dir=mocaSumArr(MOCA_ATT_DIRECT),sc=mocaSumArr(MOCA_SERIAL),ss=sc>=4?3:sc>=2?2:sc===1?1:0,fc=MOD.moca.fluencyCount,fp=(fc!=null&&fc>=11)?1:0,rc=0; MOCA_WORDS.forEach(function(w){if(MOD.moca.v['dr_'+w[0]]==='free')rc++;}); var adj=mocaSumArr(MOCA_VISUO)+mocaSumArr(MOCA_NAMING)+dir+ss+mocaVal('repeat1')+mocaVal('repeat2')+fp+mocaSumArr(MOCA_ABS)+rc+mocaSumArr(MOCA_ORI)+(mocaLowEdu()?1:0); return {MoCA_Score:adj,MoCA_Result:adj<26?'MoCA ผิดปกติ สงสัย MCI':'MoCA ปกติ'}; }
-  if(key==='falls'){ var f=MOD.falls,sppb=(f.balance||0)+(f.gait||0)+(f.chair||0),ms=(f.mHistory||0)+(f.mDiag||0)+(f.mAmb||0)+(f.mIv||0)+(f.mGait||0)+(f.mMental||0); return {TUG_Seconds:f.tug==null?'':f.tug,TUG_Result:f.tug==null?'':tugResult(f.tug),SPPB_Total:sppb,SPPB_Result:sppbResult(sppb),Morse_Score:ms,Morse_Result:morseResult(ms)}; }
+  if(key==='falls'){ var f=MOD.falls,sppb=(f.balance||0)+(f.gait||0)+(f.chair||0),frat=thaiFratScore(); return {TUG_Seconds:f.tug==null?'':f.tug,TUG_Result:f.tug==null?'':tugResult(f.tug),SPPB_Total:sppb,SPPB_Result:sppbResult(sppb),ThaiFRAT_Score:frat,ThaiFRAT_Result:fratResult(frat)}; }
   if(key==='mna'){ var au=mnaAuto(),tot=mnaSumGroup(MNA_SCREEN).s+au.bmiScore+mnaProteinScore()+mnaSumGroup(MNA_ASSESS).s+au.macScore+au.ccScore; return {MNA_Score:toFixed1(tot),MNA_Result:mnaResult(tot)}; }
   if(key==='frail'){ var s=frailScore(),mt=0; MTFI_SECTIONS.forEach(function(sec){sec.items.forEach(function(it){if(!it[3])return; var v=MOD.frail.mtfi[it[0]]; if(v!=null)mt+=mtfiItemScore(v);});}); var cfs=MOD.frail.cfs; return {FRAIL_Score:s.total,FRAIL_Result:frailResultText(s.total),MTFI_Total_Score:mt,MTFI_Result:mtfiResultText(mt),CFS_Level:cfs==null?'':cfs,CFS_Result:cfs==null?'':cfsResultText(cfs)}; }
   if(key==='muscle'){ var best=gripBest(),fs=sarcFSum(),calfS=calfScoreCompute(),tot=fs.s+(calfS||0); return {Handgrip_Best:best==null?'':best,Handgrip_Result:gripResultText(best),SARC_Calf_Total:tot,SARC_Calf_Result:(fs.done&&calfS!=null)?(tot>=11?'SARC-CalF เป็นบวก':'SARC-CalF ไม่เข้าเกณฑ์'):''}; }
@@ -2181,7 +2185,7 @@ function moduleComplete(key){
       if(q2Positive()){ if(ST.q9.some(function(v){return v==null;})) return false; if(ST.q8.some(function(v){return v==null;})) return false; if(ST.tgds.some(function(v){return v!=='yes'&&v!=='no';})) return false; }
       return true;
     case 'note': { var dn=document.getElementById('doctorNote'); return !!(dn&&String(dn.value||'').trim()); }
-    case 'falls': { var f=MOD.falls; return f.tug!=null&&f.balance!=null&&f.gait!=null&&f.chair!=null&&['mHistory','mDiag','mAmb','mIv','mGait','mMental'].every(function(k){return f[k]!=null;}); }
+    case 'falls': { var f=MOD.falls; return f.tug!=null&&f.balance!=null&&f.gait!=null&&f.chair!=null&&['fratFall','fratBalance','fratMed','fratVision','fratHome'].every(function(k){return f[k]!=null;}); }
     case 'adl': return adlSum('barthel',BARTHEL).done&&adlSum('iadl',IADL).done&&adlSum('aadl',AADL).done;
     case 'mna': return mnaSumGroup(MNA_SCREEN).done&&mnaSumGroup(MNA_ASSESS).done;
     case 'frail': { var f=MOD.frail; return f.fatigue!=null&&f.resistance!=null&&f.ambulation!=null&&f.prevWeight!=null; }
@@ -2227,7 +2231,7 @@ function clearFormState(){
   ST.dx={}; document.querySelectorAll('#diseases .chip').forEach(function(c){ c.classList.remove('on'); });
   sumDx(); bmiHint.textContent=''; bpHint.textContent='';
   ST.q2=[null,null]; ST.suicide=null; ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null);
-  MOD.falls={tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,mHistory:null,mDiag:null,mAmb:null,mIv:null,mGait:null,mMental:null};
+  MOD.falls={tug:null,balance:null,gait:null,chair:null,gaitSec:null,chairSec:null,gaitNA:false,chairNA:false,fratFall:null,fratBalance:null,fratMed:null,fratVision:null,fratHome:null};
   MOD.adl={barthel:{},iadl:{},aadl:{}}; MOD.mna={sel:{},protein:{milk:false,legumeEgg:false,meat:false}};
   MOD.frail={fatigue:null,resistance:null,ambulation:null,diseases:{},prevWeight:null,mtfi:{}};
   MOD.muscle={gripR:null,gripL:null,sarc:{}}; MOD.gpaq={seg:{},sedHours:null,sedMins:null}; MOD.whoqol={};
@@ -2363,10 +2367,10 @@ var GUIDE={
     steps:['ใช้เมื่อ MMSE ปกติ แต่ยังสงสัยปัญหาความจำ','Visuospatial: ลากเส้นสลับเลข-ตัวอักษร + วาดลูกบาศก์/นาฬิกา','ตั้งชื่อสัตว์ + จำ 5 คำ','สมาธิ + ภาษา (ทวนประโยค / บอกชื่อสัตว์ให้มากที่สุดใน 1 นาที)','นามธรรม + ระลึก 5 คำ + รับรู้เวลา-สถานที่'],
     score:'น้อยกว่า 25 = ผิดปกติ · เพิ่ม 1 คะแนนถ้าการศึกษา 6 ปีหรือน้อยกว่า (ระบบทำให้)',
     tips:['ใช้ต่อจาก MMSE เพื่อจับ MCI ระยะแรก','ให้เวลาตามจริง ไม่เร่ง']},
-  falls:{title:'หกล้ม: TUG / SPPB / Morse', what:'ประเมินความเสี่ยงหกล้มและสมรรถภาพการเคลื่อนไหว/ทรงตัว',
+  falls:{title:'หกล้ม: TUG / SPPB / Thai-FRAT', what:'ประเมินความเสี่ยงหกล้ม: สมรรถภาพการเคลื่อนไหว/ทรงตัว (TUG/SPPB) + ปัจจัยเสี่ยง (Thai-FRAT)',
     gear:['เก้าอี้มีพนักพิง (สูง ~46 ซม.)','นาฬิกาจับเวลา','ทางเดินตรง 3-4 เมตร + เทปติดพื้น'],
-    steps:['TUG: นั่งพิงพนัก → บอก เริ่ม จับเวลา → ลุกยืน เดิน 3 เมตร หมุนกลับ เดินกลับมานั่ง → หยุดเวลาเมื่อนั่งพิง','SPPB ทรงตัว: ยืน 3 ท่า (เท้าชิด / กึ่งเหลื่อม / ต่อส้น-ปลายเท้า) ท่าละ 10 วินาที','SPPB เดิน: จับเวลาเดิน 4 เมตร ความเร็วปกติ','SPPB ลุกนั่ง: ลุกจากเก้าอี้ 5 ครั้งเร็วที่สุด กอดอกไว้ จับเวลา','Morse: ถามประวัติ 6 ข้อ (เคยหกล้ม/โรคร่วม/อุปกรณ์ช่วยเดิน/น้ำเกลือ/ลักษณะเดิน/การรับรู้)'],
-    score:'TUG 12 วินาทีขึ้นไป = เสี่ยงหกล้ม · SPPB 8 หรือน้อยกว่า = สมรรถภาพต่ำ · Morse 45 ขึ้นไป = เสี่ยงสูง',
+    steps:['TUG: นั่งพิงพนัก → บอก เริ่ม จับเวลา → ลุกยืน เดิน 3 เมตร หมุนกลับ เดินกลับมานั่ง → หยุดเวลาเมื่อนั่งพิง','SPPB ทรงตัว: ยืน 3 ท่า (เท้าชิด / กึ่งเหลื่อม / ต่อส้น-ปลายเท้า) ท่าละ 10 วินาที','SPPB เดิน 4 เมตร · ลุก-นั่ง 5 ครั้ง: กรอกเวลาดิบ (วินาที) ระบบคิดคะแนนให้','Thai-FRAT: ถาม 5 ข้อ (ประวัติหกล้ม/การทรงตัว/ยาเสี่ยง/สายตา/บ้านเสี่ยง) + เพศหญิง +1 อัตโนมัติ'],
+    score:'TUG ≥ 12 วินาที = เสี่ยงหกล้ม · SPPB ≤ 8 = สมรรถภาพต่ำ · Thai-FRAT ≥ 4 = เสี่ยงหกล้มสูง',
     tips:['ยืนเคียงข้างพร้อมพยุงกันล้มเสมอ','ใส่รองเท้าปกติ ห้ามเร่ง ห้ามดันหลัง']},
   mna:{title:'MNA (คัดกรองภาวะโภชนาการ)', what:'คัดกรองภาวะทุพโภชนาการ (ฉบับสั้น MNA-SF) เต็ม 14',
     gear:['BMI + รอบน่อง — ระบบดึงจากขั้นตอนที่ 1 ให้อัตโนมัติ'],
