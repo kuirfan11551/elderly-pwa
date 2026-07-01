@@ -2479,65 +2479,129 @@ function peekCase(){ var cid=currentCid(); if(cid.length!==13) return;
   else handle(recOf(cid));
 }
 
-/* ---- sync bridge (offline-first → GAS เมื่อออนไลน์) ---- */
-var LS_TODAY='eldTodaySynced';
-var _syncing=false, _inflightId=null, _nextRetryAt=0, _syncFails=0;
+/* ---- sync bridge: batch ต่อเคส + ยืนยันด้วยใบเสร็จ + คิวไม่ค้างทั้งแถว + กันข้อมูลหาย ---- */
+var LS_TODAY='eldTodaySynced', LS_DEAD='eldDeadletter', LS_VERIFY='eldVerified';
+var _syncing=false, _inflightId=null, _nextRetryAt=0, _syncFails=0, _noBatch=false;
+var MAX_TRIES=8;   // ลองซ้ำสูงสุดต่อรายการ ก่อนพักไว้ "ตรวจ" (deadletter — ไม่ทิ้ง)
 function gasAvailable(){ return typeof google!=='undefined' && google.script && google.script.run; }
 function todayKey_(){ return new Date().toISOString().slice(0,10); }
 function outboxKey_(it){ var ad=(it&&it.payload&&it.payload.profile&&it.payload.profile.adate)||''; return it.cid+'|'+ad+'|'+it.module; }
-/* คิวงานซิงค์: มี id เฉพาะตัว + กันรายการซ้ำของ (คน|วันที่|โมดูล) เดียวกัน (เก็บอันใหม่สุด) ไม่ลบอันที่กำลังส่งอยู่ */
+/* คิวงานซิงค์: id เฉพาะตัว + กันรายการซ้ำของ (คน|วันที่|โมดูล) เดียวกัน (เก็บอันใหม่สุด) */
 function outboxPush(it){
-  it.id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7); it.ts=todayKey_();
+  it.id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7); it.ts=todayKey_(); it.tries=0;
   var k=outboxKey_(it), o=lsGet(LS_OUT,[]).filter(function(x){ return x.id===_inflightId || outboxKey_(x)!==k; });
   o.push(it); lsSet(LS_OUT,o);
 }
 function outboxAll(){ return lsGet(LS_OUT,[]); }
 function outboxRemove_(id){ lsSet(LS_OUT, lsGet(LS_OUT,[]).filter(function(x){ return x.id!==id; })); }
+function outboxRotate_(it){ var o=lsGet(LS_OUT,[]).filter(function(x){ return x.id!==it.id; }); o.push(it); lsSet(LS_OUT,o); }
 function markSynced(cid,key){ var all=recAll(); if(all[cid]&&all[cid].modules[key]){ all[cid].modules[key].synced=true; lsSet(LS_REC,all); } }
 function pendingCount(){ return outboxAll().length; }
-/* ----- ตัวนับ "วันนี้ประเมินกี่เคส" (รายคน distinct) — สำเร็จ vs รอซิงค์ ----- */
+/* deadletter = ลองซ้ำหลายครั้งแล้วยังไม่สำเร็จ → "พักไว้ตรวจ" ไม่ทิ้ง (สำรอง/ลองใหม่ได้) */
+function deadAll_(){ return lsGet(LS_DEAD,[]); }
+function deadCount(){ return deadAll_().length; }
+function deadPush_(it){ var d=lsGet(LS_DEAD,[]); it.deadAt=nowISO(); d.push(it); lsSet(LS_DEAD,d); }
+function retireOrRotate_(it){ it.tries=(it.tries||0)+1; if(it.tries>=MAX_TRIES){ deadPush_(it); outboxRemove_(it.id); } else { outboxRotate_(it); } }
+function retryDeadletter(){ var d=deadAll_(); if(!d.length){ toast('ไม่มีรายการค้างให้ลองใหม่'); return; } var o=lsGet(LS_OUT,[]); d.forEach(function(it){ it.tries=0; o.push(it); }); lsSet(LS_OUT,o); lsSet(LS_DEAD,[]); _nextRetryAt=0; toast('นำ '+d.length+' รายการกลับเข้าคิว ลองซิงค์ใหม่...'); flushSync(); }
+/* ----- ตัวนับ "วันนี้ประเมินกี่เคส" (รายคน distinct) ----- */
 function todaySyncedSet_(){ var o=lsGet(LS_TODAY,{date:'',cids:[]}); var k=todayKey_(); if(o.date!==k){ o={date:k,cids:[]}; lsSet(LS_TODAY,o); } return o; }
 function markTodaySynced_(cid){ if(!cid) return; var o=todaySyncedSet_(); if(o.cids.indexOf(cid)<0){ o.cids.push(cid); lsSet(LS_TODAY,o); } }
 function todayCounts_(){
   var s=todaySyncedSet_(), k=s.date, pend={};
   outboxAll().forEach(function(it){ if((it.ts||'')===k && it.cid) pend[it.cid]=true; });
+  deadAll_().forEach(function(it){ if((it.ts||'')===k && it.cid) pend[it.cid]=true; });   // ค้างตรวจ = ยังไม่ครบ (นับเป็น pending)
   var all={}; s.cids.forEach(function(c){ all[c]=true; }); Object.keys(pend).forEach(function(c){ all[c]=true; });
   var pending=Object.keys(pend).length, total=Object.keys(all).length;
   return { total:total, pending:pending, done:Math.max(0,total-pending) };
 }
-function syncBackoff_(){ return Math.min(60000, 3000*Math.pow(2, Math.min(_syncFails,4))); }   // 3s→48s, สูงสุด 60s
+/* ----- ใบยืนยันจากเซิร์ฟเวอร์ (receipt) — เก็บว่าเคสไหน "ยืนยันบนระบบแล้ว" ----- */
+function markVerified_(cid,adate,rec){ var v=lsGet(LS_VERIFY,{}); v[cid+'|'+adate]={at:nowISO(),moduleCount:rec.moduleCount,conditionsText:rec.conditionsText||'',conditionsCount:rec.conditionsCount}; lsSet(LS_VERIFY,v); }
+function verifiedOf(cid,adate){ return (lsGet(LS_VERIFY,{})||{})[cid+'|'+(adate||'')]||null; }
+function syncBackoff_(){ return Math.min(60000, 3000*Math.pow(2, Math.min(_syncFails,4))); }
+/* จัดกลุ่มรายการค้างเป็น "รายเคส" (คน|วันที่) → ส่งทีเดียว (batch) */
+function outboxGroups_(){
+  var o=outboxAll(), g={}, order=[];
+  o.forEach(function(it){ var ad=(it.payload&&it.payload.profile&&it.payload.profile.adate)||''; var key=it.cid+'|'+ad;
+    if(!g[key]){ g[key]={key:key,cid:it.cid,adate:ad,items:[]}; order.push(key); } g[key].items.push(it); });
+  return order.map(function(k){ return g[k]; });
+}
+function buildBatch_(grp){
+  var b={cid:grp.cid,adate:grp.adate,token:(window.__pocToken||''),assessor:(window.__pocBy||''),profile:null,hn:'',modules:{}};
+  grp.items.forEach(function(it){ var p=it.payload||{}; if(!b.profile) b.profile=p.profile; if(p.hn) b.hn=p.hn; if(p.token) b.token=p.token;
+    b.modules[it.module]={result:p.result,scoreText:p.scoreText,sev:p.sev,data:p.data,conditions:p.conditions,moduleName:p.moduleName,detail:p.detail,savedAt:p.savedAt,assessor:p.assessor}; });
+  return b;
+}
 function flushSync(){
-  if(TEST_MODE){   // โหมดซ้อม: ไม่ส่งขึ้นเซิร์ฟเวอร์ — จำลองบันทึกสำเร็จ (เคลียร์ outbox + mark synced เหมือนจริง)
+  if(TEST_MODE){   // โหมดซ้อม: จำลองบันทึกสำเร็จ ไม่แตะเซิร์ฟเวอร์
     outboxAll().forEach(function(it){ markSynced(it.cid,it.module); markTodaySynced_(it.cid); refreshSaveMeta(it.module); });
     lsSet(LS_OUT,[]); updateSyncBadge();
     if(!document.getElementById('s3').classList.contains('hidden')) renderModules();
     return;
   }
   if(!gasAvailable()){ updateSyncBadge(); return; }
-  if(_syncing){ return; }                                   // ส่งทีละรายการ — กันยิงซ้ำตอน timer/online/save ชนกัน
-  var o=outboxAll(); if(!o.length){ _syncFails=0; updateSyncBadge(); return; }
-  if(Date.now()<_nextRetryAt){ updateSyncBadge(); return; } // หน่วงก่อนลองใหม่ (backoff) เมื่อเพิ่งล้มเหลว
-  var item=o[0]; _syncing=true; _inflightId=item.id;
+  if(_syncing){ return; }
+  var groups=outboxGroups_(); if(!groups.length){ _syncFails=0; updateSyncBadge(); return; }
+  if(Date.now()<_nextRetryAt){ updateSyncBadge(); return; }   // backoff เมื่อเน็ตล่ม (ทั้งระบบ)
+  var grp=groups[0]; _syncing=true;
+  if(_noBatch){ sendPerModule_(grp); return; }                // เซิร์ฟเวอร์เก่าไม่มี batch → ส่งรายโมดูล
   google.script.run
-    .withSuccessHandler(function(r){
-      _syncing=false; _inflightId=null;
-      if(r&&r.success===false){ _syncFails++; _nextRetryAt=Date.now()+syncBackoff_(); console.warn('save rejected',r.message); toast('⚠️ บันทึกขึ้นระบบไม่สำเร็จ: '+(r.message||'')+' — จะลองใหม่อัตโนมัติ'); updateSyncBadge(); return; }
-      _syncFails=0; _nextRetryAt=0;
-      outboxRemove_(item.id); markSynced(item.cid,item.module); markTodaySynced_(item.cid); updateSyncBadge();
-      if(!document.getElementById('s3').classList.contains('hidden')) renderModules();
-      refreshSaveMeta(item.module);
-      flushSync();   // ต่อรายการถัดไป
-    })
-    .withFailureHandler(function(e){ _syncing=false; _inflightId=null; _syncFails++; _nextRetryAt=Date.now()+syncBackoff_(); console.warn('sync failed',e); updateSyncBadge(); refreshSaveMeta(item.module); toast('⚠️ ยังซิงค์ขึ้นระบบไม่สำเร็จ จะลองใหม่อัตโนมัติ'); })
-    .saveElderlyAssessmentModule(item.payload);
+    .withSuccessHandler(function(r){ _syncing=false; onBatchResult_(grp,r); })
+    .withFailureHandler(function(e){ _syncing=false; onNetFail_(e); })
+    .saveElderlyAssessmentBatch(buildBatch_(grp));
 }
-function updateSyncBadge(){ var b=document.getElementById('syncBadge'); if(!b) return; var n=pendingCount();
-  if(TEST_MODE){ b.classList.add('test'); b.innerHTML='🧪 โหมดซ้อม • ไม่บันทึกลงฐานข้อมูล'; return; }
+function onBatchResult_(grp,r){
+  if(r && (r.error==='UNKNOWN_METHOD' || /is not a function/i.test(String(r.error||'')))){ _noBatch=true; _syncing=true; sendPerModule_(grp); return; }
+  if(r && r.authRequired){ _nextRetryAt=Date.now()+30000; toast('⚠️ ต้องเข้าสู่ระบบใหม่ก่อนซิงค์ (ข้อมูลยังอยู่ในเครื่อง ไม่หาย)'); updateSyncBadge(); return; }
+  if(!r || r.success===false){ groupRejected_(grp,(r&&r.message)||'ระบบปฏิเสธการบันทึก'); return; }
+  var rec=r.receipt||{modules:[]}, ok={}; (rec.modules||[]).forEach(function(m){ ok[m]=true; });
+  grp.items.forEach(function(it){ if(ok[it.module]){ outboxRemove_(it.id); markSynced(it.cid,it.module); refreshSaveMeta(it.module); } else { retireOrRotate_(it); } });   // เอาออกเฉพาะที่ "ยืนยันแล้ว"
+  markTodaySynced_(grp.cid);
+  if(rec && rec.conditionsCount!=null) markVerified_(grp.cid,grp.adate,rec);
+  _syncFails=0; _nextRetryAt=0;
+  if(r.drilldownOk===false) toast('บันทึกแล้ว ✓ (คะแนนละเอียดบางส่วนจะลองซิงค์ซ้ำให้อัตโนมัติ)');
+  updateSyncBadge(); if(!document.getElementById('s3').classList.contains('hidden')) renderModules();
+  flushSync();   // เคสถัดไป (network-paced)
+}
+function groupRejected_(grp,msg){
+  console.warn('batch rejected',msg);
+  var retired=0; grp.items.forEach(function(it){ var willRetire=((it.tries||0)+1)>=MAX_TRIES; retireOrRotate_(it); if(willRetire) retired++; });
+  toast('⚠️ บันทึกขึ้นระบบไม่สำเร็จ: '+msg+' — จะลองใหม่อัตโนมัติ'+(retired?(' ('+retired+' รายการพักไว้ตรวจ — แตะแถบสถานะเพื่อสำรอง)'):''));
+  updateSyncBadge();
+  flushSync();   // ไปเคสถัดไป ไม่ค้างทั้งแถว (จำกัดรอบด้วย MAX_TRIES → deadletter)
+}
+function onNetFail_(e){ _syncFails++; _nextRetryAt=Date.now()+syncBackoff_(); console.warn('sync net fail',e); toast('⚠️ ยังซิงค์ขึ้นระบบไม่สำเร็จ (เน็ต) จะลองใหม่อัตโนมัติ'); updateSyncBadge(); }
+/* fallback: เซิร์ฟเวอร์เก่า (ไม่มี batch) → ส่งทีละโมดูลแบบเดิม (ยังกันคิวค้างทั้งแถว) */
+function sendPerModule_(grp){
+  var it=grp.items[0];
+  google.script.run
+    .withSuccessHandler(function(r){ _syncing=false;
+      if(r && r.authRequired){ _nextRetryAt=Date.now()+30000; toast('⚠️ ต้องเข้าสู่ระบบใหม่ก่อนซิงค์'); updateSyncBadge(); return; }
+      if(!r || r.success===false){ groupRejected_({items:[it],cid:grp.cid,adate:grp.adate}, (r&&r.message)||'ปฏิเสธ'); return; }
+      outboxRemove_(it.id); markSynced(it.cid,it.module); markTodaySynced_(it.cid);
+      if(r.receipt&&r.receipt.conditionsCount!=null) markVerified_(grp.cid,grp.adate,r.receipt);
+      _syncFails=0; _nextRetryAt=0; refreshSaveMeta(it.module); updateSyncBadge();
+      if(!document.getElementById('s3').classList.contains('hidden')) renderModules(); flushSync(); })
+    .withFailureHandler(function(e){ _syncing=false; onNetFail_(e); })
+    .saveElderlyAssessmentModule(it.payload);
+}
+/* สำรองคิว+ข้อมูลในเครื่องเป็นไฟล์ (กันหายแม้ซิงค์ไม่ผ่าน) — กดจากแถบสถานะ */
+function exportSyncQueue(){
+  try{ var data={exportedAt:nowISO(),device:(navigator.userAgent||''),pending:outboxAll(),deadletter:deadAll_(),records:recAll(),verified:lsGet(LS_VERIFY,{})};
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='eld-sync-backup-'+todayKey_()+'.json'; document.body.appendChild(a); a.click();
+    setTimeout(function(){ try{URL.revokeObjectURL(a.href);}catch(e){} if(a.parentNode) a.remove(); },1200);
+    toast('สำรองคิว+ข้อมูลในเครื่องเป็นไฟล์แล้ว ✓ (กันข้อมูลหายแม้ซิงค์ไม่ผ่าน)');
+  }catch(e){ toast('สำรองไม่สำเร็จ: '+e); }
+}
+function updateSyncBadge(){ var b=document.getElementById('syncBadge'); if(!b) return;
+  if(TEST_MODE){ b.classList.add('test'); b.style.cursor=''; b.onclick=null; b.innerHTML='🧪 โหมดซ้อม • ไม่บันทึกลงฐานข้อมูล'; return; }
   b.classList.remove('test');
-  var t=todayCounts_();
-  var today=' · 📅 วันนี้ '+t.total+' ราย'+(t.total? (t.pending? ' (✓ '+t.done+' · ⏳ รอซิงค์ '+t.pending+')' : ' ✓ ครบ') : '');
-  if(!gasAvailable()){ b.innerHTML='💾 ออฟไลน์ • เก็บในเครื่อง'+(n?' • รอ sync '+n:'')+today; return; }
-  b.innerHTML=(navigator.onLine?'☁️ ออนไลน์':'📴 ออฟไลน์')+(n?' • รอ sync '+n:' • ซิงค์ครบ')+today;
+  var n=pendingCount(), d=deadCount(), t=todayCounts_();
+  var today=' · 📅 วันนี้ '+t.total+' ราย'+(t.total? (t.pending? ' (✓ '+t.done+' · ⏳ รอ '+t.pending+')' : ' ✓ ยืนยันครบ') : '');
+  var dead=d?(' · ⚠️ พักตรวจ '+d):'';
+  var head = !gasAvailable() ? ('💾 ออฟไลน์ • เก็บในเครื่อง'+(n?' • รอ sync '+n:'')) : ((navigator.onLine?'☁️ ออนไลน์':'📴 ออฟไลน์')+(n?' • รอ sync '+n:' • ยืนยันครบ'));
+  b.innerHTML=head+today+dead+((n+d)?' 💾':'');
+  var clickable=(n+d)>0; b.style.cursor=clickable?'pointer':''; b.title=clickable?'แตะเพื่อสำรองคิว/ข้อมูลในเครื่องเป็นไฟล์':''; b.onclick=clickable?exportSyncQueue:null;
 }
 function toast(msg){ var t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
   t.textContent=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(function(){ t.classList.remove('show'); },2800); }
@@ -2545,8 +2609,8 @@ window.addEventListener('online',function(){ _nextRetryAt=0; updateSyncBadge(); 
 window.addEventListener('offline',updateSyncBadge);
 /* ลองซิงค์ใหม่อัตโนมัติทุก 15 วิ ถ้ายังมีของค้าง — กันรายการค้างเงียบจนข้อมูลตกหล่น */
 if(!window.__eldSyncTimer){ window.__eldSyncTimer=setInterval(function(){ if(!TEST_MODE && pendingCount()>0) flushSync(); }, 15000); }
-/* เตือนก่อนปิด/รีเฟรช ถ้ายังมีการประเมินที่ยังไม่ได้ซิงค์ขึ้นระบบ */
-window.addEventListener('beforeunload',function(e){ if(!TEST_MODE && pendingCount()>0){ e.preventDefault(); e.returnValue='ยังมีการประเมินที่ยังไม่ได้ซิงค์ขึ้นระบบ ออกตอนนี้อาจทำให้ต้องซิงค์ใหม่ภายหลัง'; return e.returnValue; } });
+/* เตือนก่อนปิด/รีเฟรช ถ้ายังมีการประเมินที่ยังไม่ได้ยืนยันบนระบบ */
+window.addEventListener('beforeunload',function(e){ if(!TEST_MODE && (pendingCount()+deadCount())>0){ e.preventDefault(); e.returnValue='ยังมีการประเมินที่ยังไม่ได้ยืนยันบนระบบ ออกตอนนี้อาจต้องซิงค์ใหม่ภายหลัง'; return e.returnValue; } });
 updateSyncBadge(); flushSync();
 /* เปิดจากปุ่ม "แก้ไข" ในหน้า dashboard → โหลดเคส+ครั้งที่ประเมินนั้นมาแก้อัตโนมัติ */
 if(window.__editCid){ try{ document.getElementById('cid').value=window.__editCid; loadPatient(window.__editCid, window.__editDate||''); }catch(e){} }

@@ -11,8 +11,8 @@
   var CFG = window.PWA_CONFIG || {};
   var ENDPOINT = (CFG.proxyUrl && CFG.proxyUrl.trim()) || (CFG.apiUrl && CFG.apiUrl.trim()) || '';
   var LS_AUTH = 'eldpwa_auth_v1';
-  var API_METHODS = ['authenticate', 'saveElderlyAssessmentModule', 'getElderlyPatientRecord',
-                     'createReferral', 'nextClinicDates', 'ping'];
+  var API_METHODS = ['authenticate', 'saveElderlyAssessmentModule', 'saveElderlyAssessmentBatch',
+                     'getElderlyPatientRecord', 'integrityReport', 'createReferral', 'nextClinicDates', 'ping'];
 
   /* ---------- เรียก GAS JSON API (POST text/plain = simple request เลี่ยง preflight) ---------- */
   function apiCall(method, args) {
