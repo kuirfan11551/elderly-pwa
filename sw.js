@@ -7,7 +7,7 @@
  *    (ออฟไลน์ = fetch ล้มเหลว → outbox ในหน้าเว็บจะ retry เอง)
  *  *** เปลี่ยน CACHE เวอร์ชันทุกครั้งที่แก้ไฟล์ static เพื่อล้างแคชเก่า ***
  * ===================================================================== */
-const CACHE = 'eld-pwa-v13';
+const CACHE = 'eld-pwa-v14';
 // CDN ที่ให้แคชไว้ใช้ออฟไลน์ (ฟอนต์ + ไลบรารีสแกน QR) — โหลดครั้งแรกครั้งเดียว
 const CDN = /fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net/;
 const SHELL = [

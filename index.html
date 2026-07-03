@@ -807,10 +807,26 @@ var CARE_PLAN={
   'ช่องปาก':['ส่งทันตกรรม','สอนการดูแลช่องปาก/ฟันปลอม'],
   'คุณภาพชีวิต':['ประเมินด้านที่เป็นปัญหา (กาย/จิตใจ/สังคม/สิ่งแวดล้อม)','เชื่อมโยงบริการชุมชน/สวัสดิการที่เกี่ยวข้อง']
 };
+/* อ้างอิงแนวทางสากล/งานวิจัย ต่อกลุ่มภาวะ — แสดงเป็นชิปให้ผู้ประเมินอ้างอิงเหมือนแพทย์เฉพาะทาง */
+var CARE_REF={
+  'สุขภาพจิต':['WHO mhGAP 2.0 (2016)','Thai 2Q/9Q/8Q','WHO LIVE LIFE (2021)'],
+  'การรู้คิด':['WHO ICOPE (2019)','NICE NG97','MMSE-Thai (กรมการแพทย์)'],
+  'ภาวะพลัดตกหกล้ม':['World Falls Guidelines 2022 (AGS/BGS)','CDC STEADI','Cochrane 2019: Otago ลดหกล้ม 23–55%'],
+  'โภชนาการ':['ESPEN Geriatrics (2022)','MNA®','PROT-AGE: โปรตีน 1.0–1.2 g/kg/วัน'],
+  'ความเปราะบาง':['WHO ICOPE (2019)','Fried Phenotype (2001)','APAC Frailty Consensus (2017)'],
+  'มวลกล้ามเนื้อ':['AWGS 2019','EWGSOP2 (2019)'],
+  'กิจกรรมทางกาย':['WHO PA Guidelines 2020: 150–300 นาที/สัปดาห์','ACSM'],
+  'กิจวัตรประจำวัน':['Barthel Index','Lawton–Brody IADL','WHO ICOPE Care Pathway'],
+  'การเคลื่อนไหว':['World Falls Guidelines 2022','Otago Exercise Programme'],
+  'ช่องปาก':['WHO Oral Health (2022)','FDI Oral Health for Ageing'],
+  'คุณภาพชีวิต':['WHOQOL-BREF','WHO Active Ageing Framework']
+};
 function carePlanHtml(doms, conf, suicide){
   var seen={}, blocks=[];
+  function refChips(dom){ var r=CARE_REF[dom]; if(!r||!r.length) return '';
+    return '<div style="margin-top:4px"><span style="font-size:10px;color:var(--ink-dim)">📚 อ้างอิง:</span> '+r.map(function(x){return '<span style="display:inline-block;font-size:9.5px;background:rgba(56,189,248,.14);color:#7dd3fc;padding:1px 7px;border-radius:20px;margin:2px 3px 0 0">'+esc(x)+'</span>';}).join('')+'</div>'; }
   function push(dom){ if(seen[dom]||!CARE_PLAN[dom]) return; seen[dom]=1;
-    blocks.push('<div style="margin-top:8px"><div style="font-weight:700;font-size:12.5px;color:var(--neon-2)">'+domainIcon(dom)+' '+dom+'</div><ul style="margin:4px 0 0 18px;font-size:12.5px;line-height:1.7">'+CARE_PLAN[dom].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'); }
+    blocks.push('<div style="margin-top:8px"><div style="font-weight:700;font-size:12.5px;color:var(--neon-2)">'+domainIcon(dom)+' '+dom+'</div><ul style="margin:4px 0 0 18px;font-size:12.5px;line-height:1.7">'+CARE_PLAN[dom].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+refChips(dom)+'</div>'); }
   if(conf||suicide) push('สุขภาพจิต');
   (doms||[]).forEach(function(d){ if(d.sev==='risk'||d.sev==='warn') push(d.domain); });
   if(!blocks.length) return '';
