@@ -294,6 +294,47 @@ body.light .pg .pg-what b,body.light .pg .pg-gear b{color:#0369a1}
 .confetti-wrap i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:confFall 2.2s linear forwards}
 @keyframes confFall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(106vh) rotate(680deg)}}
 @media print{body.test-mode #s4{position:relative}body.test-mode #s4::before{content:"เอกสารฝึกซ้อม — ไม่ใช่เอกสารจริง";position:fixed;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:46px;font-weight:900;color:rgba(245,158,11,.18);white-space:nowrap;pointer-events:none;z-index:9999}}
+
+/* ===================== ✨ AURORA AI (care plan) ===================== */
+.ai-card{position:relative;margin:16px 0 4px;padding:1.5px;border-radius:var(--r-md);
+  background:linear-gradient(120deg,var(--neon),var(--neon-2) 45%,var(--neon-3) 85%);background-size:220% 220%;animation:aiflow 6s ease infinite;box-shadow:0 12px 42px rgba(94,234,212,.12)}
+@keyframes aiflow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.ai-inner{border-radius:calc(var(--r-md) - 1px);background:linear-gradient(180deg,rgba(14,21,44,.95),rgba(8,12,26,.97));padding:16px 18px 18px;backdrop-filter:blur(14px)}
+.ai-head{display:flex;align-items:center;gap:11px}
+.ai-badge{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:radial-gradient(circle at 30% 25%,var(--neon),var(--neon-3));box-shadow:0 0 18px rgba(167,139,250,.5);animation:aipulse 2.4s ease-in-out infinite}
+@keyframes aipulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.15)}}
+.ai-title{font-size:14.5px;font-weight:800;background:linear-gradient(90deg,var(--neon),var(--neon-2),var(--neon-3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ai-sub{font-size:11.5px;color:var(--ink-faint);margin-top:1px}
+.ai-btn{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:10px 16px;border:none;border-radius:11px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#04121a;background:linear-gradient(120deg,var(--neon),var(--neon-2));box-shadow:0 6px 20px rgba(56,189,248,.28);transition:transform .15s,box-shadow .15s}
+.ai-btn:hover{transform:translateY(-1px);box-shadow:0 9px 26px rgba(56,189,248,.4)}
+.ai-btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.ai-body{margin-top:12px}
+.ai-shimmer div{height:12px;border-radius:6px;margin:9px 0;background:linear-gradient(90deg,rgba(125,211,252,.06),rgba(125,211,252,.20),rgba(125,211,252,.06));background-size:200% 100%;animation:aishine 1.3s linear infinite}
+.ai-shimmer div:nth-child(2){width:92%}.ai-shimmer div:nth-child(3){width:78%}.ai-shimmer div:nth-child(4){width:86%}.ai-shimmer div:nth-child(5){width:64%}
+@keyframes aishine{to{background-position:-200% 0}}
+.ai-thinking{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--neon);margin-bottom:8px}
+.ai-thinking .d{width:6px;height:6px;border-radius:50%;background:var(--neon);animation:aiblink 1s infinite}
+.ai-thinking .d:nth-child(2){animation-delay:.2s}.ai-thinking .d:nth-child(3){animation-delay:.4s}
+@keyframes aiblink{0%,100%{opacity:.25}50%{opacity:1}}
+.ai-md{font-size:13.5px;line-height:1.72;color:var(--ink)}
+.ai-md h2{font-size:13.5px;font-weight:800;margin:14px 0 6px;color:var(--neon)}
+.ai-md h2:first-child{margin-top:2px}
+.ai-md h3{font-size:13px;font-weight:700;margin:11px 0 4px;color:var(--neon-2)}
+.ai-md ul{list-style:none;margin:4px 0 8px;padding:0}
+.ai-md li{position:relative;padding-left:18px;margin:4px 0}
+.ai-md li::before{content:'▹';position:absolute;left:2px;color:var(--neon-2)}
+.ai-md p{margin:5px 0}.ai-md strong{color:#fff;font-weight:700}
+.ai-md code{background:rgba(125,211,252,.12);padding:1px 6px;border-radius:5px;font-size:12.5px}
+.ai-cursor{display:inline-block;width:7px;height:15px;margin-left:2px;vertical-align:text-bottom;background:var(--neon);animation:aicaret .8s step-end infinite}
+@keyframes aicaret{50%{opacity:0}}
+.ai-notice{margin-top:10px;padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.6;background:rgba(245,196,81,.10);border:1px solid rgba(245,196,81,.28);color:var(--gold)}
+.ai-notice b{color:#fbbf24}.ai-err{background:rgba(251,113,133,.10);border-color:rgba(251,113,133,.3);color:var(--risk)}
+.ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ai-mini{padding:6px 12px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink-dim);background:rgba(125,211,252,.07);border:1px solid var(--glass-brd);transition:.15s}
+.ai-mini:hover{background:rgba(94,234,212,.16);color:var(--ink)}
+.ai-disc{margin-top:10px;font-size:10.5px;color:var(--ink-faint);line-height:1.5;border-top:1px dashed var(--glass-brd);padding-top:8px}
+body.light .ai-inner{background:linear-gradient(180deg,#ffffff,#f2f7fd)}
+body.light .ai-md,body.light .ai-md strong{color:#0b1220}body.light .ai-sub,body.light .ai-disc{color:#5a6a86}
 </style>
 <div class="viewctl">
   <button id="fsBtn" type="button" onclick="toggleFullscreen()" title="เปิดเต็มจอ — ใช้งานเหมือนแอป ไม่มีแถบรบกวน">⛶ เต็มจอ</button>
@@ -333,7 +374,7 @@ body.light .pg .pg-what b,body.light .pg .pg-gear b{color:#0369a1}
     <div class="grid c3">
       <div class="fld"><label>HN</label><input id="hn" placeholder="ไม่บังคับ (กรอกเพื่อ link เคสหกล้ม)"></div>
       <div class="fld"><label>เลขบัตรประชาชน</label><input id="cid" inputmode="numeric" maxlength="13" placeholder="13 หลัก" onblur="peekCase()"><button type="button" class="pwa-scanbtn" onclick="pwaScanCID()">📷 สแกน QR บัตรผู้ป่วย</button></div>
-      <div class="fld"><label>วันที่ประเมิน</label><input id="adate" type="date"></div>
+      <div class="fld"><label>วันที่ประเมิน</label><input id="adate" type="date" onchange="dateThHint_('adate')"><div class="muted" id="adateTh" style="font-size:11px;margin-top:2px"></div></div>
     </div>
     <div style="margin-top:9px"><button class="btn ghost" style="padding:9px 15px;font-size:13px" onclick="loadPatient()">🔍 ดึงข้อมูลผู้ป่วยที่เคยประเมิน (จาก CID)</button></div>
     <div class="grid c3" style="margin-top:13px">
@@ -590,7 +631,7 @@ EDU.forEach(e=>edu.insertAdjacentHTML('beforeend','<option>'+e+'</option>'));
 PCUS.forEach(p=>pcu.insertAdjacentHTML('beforeend','<option>'+p+'</option>'));
 initAddress();
 DISEASES.forEach((d,i)=>diseases.insertAdjacentHTML('beforeend','<span class="chip" data-d="'+i+'" onclick="toggleDx('+i+')">'+d+'</span>'));
-adate.value=new Date().toISOString().slice(0,10);
+adate.value=new Date().toISOString().slice(0,10); if(typeof dateThHint_==='function')dateThHint_('adate');
 applyViewPrefs(); setTimeout(updateProgress,0); // ธีม/ขนาดอักษรที่จำไว้ + แถบความคืบหน้า (defer ให้ STEP1_REQUIRED ถูกนิยามก่อน)
 /* รับค่าจากหน้า dashboard (เปิดในแท็บเดียวกันผ่าน iframe): token + ชื่อผู้ประเมิน */
 (function(){ try{
@@ -604,6 +645,27 @@ applyViewPrefs(); setTimeout(updateProgress,0); // ธีม/ขนาดอั�
   var ed=gp('editDate'); if(ed) window.__editDate=ed;
   var tr=gp('train'); if(tr==='1'||tr===1||tr===true) window.__train=true;   // เปิดจากหน้า login โหมดฝึกซ้อม → เข้าโหมดซ้อมอัตโนมัติ
 }catch(e){} })();
+/* 🔐 v27 กันโทเค็นหายทั้งก้อน (สาเหตุ "ยังไม่ได้เข้าสู่ระบบ" ทั้งที่ล็อกอินแล้ว — iframe reload บนมือถือทิ้ง URL params):
+   ① ถ้าโหลดมาไม่มีโทเค็น → ใช้แคช auth ที่หน้า dashboard ฝากไว้ใน localStorage (origin เดียวกัน)
+   ② พร้อมกัน postMessage ขึ้นไปตามสายหน้าแม่ทุกชั้น ขอโทเค็นสด — หน้า dashboard ตอบกลับตรงมาที่หน้าต่างนี้ */
+(function(){
+  var K='eldAuthCache';
+  function stash(){ try{ if(window.__pocToken) localStorage.setItem(K, JSON.stringify({t:window.__pocToken,b:window.__pocBy||'',r:window.__pocRole||'',at:Date.now()})); }catch(e){} }
+  window.__eldAuthStash=stash;
+  window.__eldAskAuth=function(){ try{ var w=window,n=0; while(w&&w!==w.top&&n<6){ w=w.parent; n++; try{ w.postMessage({t:'eldReqAuth'},'*'); }catch(e){} } }catch(e){} };
+  window.addEventListener('message',function(ev){
+    var d=ev&&ev.data; if(!d||d.t!=='eldAuth'||!d.token) return;
+    window.__pocToken=d.token; if(d.by&&!window.__pocBy)window.__pocBy=d.by; if(d.role&&!window.__pocRole)window.__pocRole=d.role;
+    stash(); try{ if(typeof ensureAssessor_==='function') ensureAssessor_(); }catch(e){}
+  });
+  if(window.__pocToken){ stash(); }
+  else{
+    try{ var c=JSON.parse(localStorage.getItem(K)||'null');
+      if(c&&c.t&&(Date.now()-(c.at||0))<12*3600*1000){ window.__pocToken=c.t; if(!window.__pocBy)window.__pocBy=c.b||''; if(!window.__pocRole)window.__pocRole=c.r||''; } }catch(e){}
+    window.__eldAskAuth();
+  }
+})();
+try{ if(typeof ensureAssessor_==='function') ensureAssessor_(); }catch(e){}   // ⭐ ชื่อผู้บันทึกว่าง (by param หลุด) → ดึงจากโทเค็นทันทีตอนโหลด
 Q2.forEach((q,i)=>q2box.insertAdjacentHTML('beforeend','<div class="q"><div class="qt"><b>ข้อ '+(i+1)+'.</b> '+q+'</div><div class="opts"><div class="opt" onclick="setQ2('+i+',0,this)">ไม่มี</div><div class="opt" onclick="setQ2('+i+',1,this)">มี</div></div></div>'));
 suicidebox.insertAdjacentHTML('beforeend','<div class="q"><div class="qt">'+SUICIDE_Q+'</div><div class="opts"><div class="opt" onclick="setSuicide(0,this)">ไม่มี</div><div class="opt" onclick="setSuicide(1,this)">มี</div></div></div>');
 Q9.forEach(function(q,i){ var o=Q9OPTS.map(function(t,v){return '<div class="opt" onclick="setScale(\'q9\','+i+','+v+',this)">'+v+' · '+t+'</div>';}).join('');
@@ -708,7 +770,7 @@ function go(n){
   document.querySelectorAll('.stepper .st').forEach(function(st){var k=+st.dataset.st; st.classList.toggle('active',k===n); st.classList.toggle('done',k<n);});
   if(n===2) flow(); if(n===3) renderModules(); if(n===4){ window.__s4seen=true; buildSummary(); if(TEST_MODE) celebratePractice_(); } updateProgress(); window.scrollTo({top:0,behavior:'smooth'}); }
 function depressionConfirmed(){ return (q2Score()>0 && q9Done() && q9Sum()>=7) || (tgdsDone() && tgdsSum()>=13); }
-function domainIcon(d){ var m={'การรู้คิด':'💭','การเคลื่อนไหว':'🦵','กิจวัตรประจำวัน':'🧍','โภชนาการ':'🍚','ภาวะเปราะบาง':'🍂','มวลกล้ามเนื้อ':'💪','กิจกรรมทางกาย':'🏃','คุณภาพชีวิต':'🌿','ช่องปาก':'🦷'}; return m[d]||'•'; }
+function domainIcon(d){ var m={'การรู้คิด':'💭','การเคลื่อนไหว':'🦵','กิจวัตรประจำวัน':'🧍','โภชนาการ':'🍚','ภาวะเปราะบาง':'🍂','มวลกล้ามเนื้อ':'💪','กิจกรรมทางกาย':'🏃','คุณภาพชีวิต':'🌿','ช่องปาก':'🦷','การมองเห็น':'👁️','การได้ยิน':'👂','การกลั้นปัสสาวะ':'💦'}; return m[d]||'•'; }
 /* แปลผลรายด้านแบบ pure (เกณฑ์เดียวกับโมดูล) สำหรับหน้าสรุป */
 function domainResults(){
   var L=[]; function add(domain,name,scoreText,result,sev,conds){ L.push({domain:domain,name:name,scoreText:scoreText,result:result,sev:sev,conds:conds||[]}); }
@@ -791,6 +853,22 @@ function domainResults(){
     if(t>=41) conds.push('ภาระผู้ดูแลสูง'); else if(t>=21) conds.push('ภาระผู้ดูแลปานกลาง');
     add('ผู้ดูแล','Zarit ภาระผู้ดูแล','Zarit '+t+'/88', done?zaritResult(t):'กรอกยังไม่ครบ', t>=41?'risk':t>=21?'warn':'ok', conds);
   })();
+  // การมองเห็น — ICOPE + VA (Snellen/E-chart)
+  (function(){ if(!visionAny()) return;
+    var m=visionBest(), complete=moduleComplete('vision'), abn=complete&&m!=null&&m>0.3;
+    add('การมองเห็น','การมองเห็น (ICOPE + VA)','VA ตาข้างดี '+(m==null?'—':vaLabel(m)), complete?(abn?visionResult(m):'ไม่เข้าเกณฑ์การมองเห็นบกพร่อง'):'กรอกยังไม่ครบ', complete?(abn?(m>0.6?'risk':'warn'):'ok'):'warn', abn?['การมองเห็นบกพร่อง']:[]);
+  })();
+  // การได้ยิน — เสียงกระซิบ + HHIE-S
+  (function(){ if(!hearingAny()) return;
+    var s=hhieSum(), done=moduleComplete('hearing'), wf=MOD.hearing.whisperR===1||MOD.hearing.whisperL===1;
+    var abn=done&&(s>=10||wf);
+    add('การได้ยิน','การได้ยิน (กระซิบ + HHIE-S)','กระซิบ '+(MOD.hearing.whisperR==null&&MOD.hearing.whisperL==null?'—':(wf?'ไม่ผ่าน':'ผ่าน'))+' · HHIE-S '+(hhieAnswered()?s:'—')+'/40', done?(s>=10?hhieResult(s):wf?'เสียงกระซิบไม่ผ่าน ควรตรวจยืนยัน':'ไม่พบปัญหาการได้ยินเด่นชัด'):'กรอกยังไม่ครบ', done?(s>=26?'risk':abn?'warn':'ok'):'warn', abn?['การได้ยินบกพร่อง']:[]);
+  })();
+  // การกลั้นปัสสาวะ — ICIQ-UI SF
+  (function(){ if(!contAny()) return;
+    var t=iciqSum(), done=moduleComplete('cont');
+    add('การกลั้นปัสสาวะ','ICIQ-UI SF','ICIQ '+t+'/21', done?iciqResult(t):'กรอกยังไม่ครบ', done?(t>=13?'risk':t>=6?'warn':t>=1?'warn':'ok'):'warn', done&&t>=1?['กลั้นปัสสาวะไม่อยู่']:[]);
+  })();
   return L;
 }
 /* ข้อเสนอแผนการดูแลตามภาวะที่พบ (อ้างแนวทางเวชศาสตร์ผู้สูงอายุ — ปรับตามบริบทผู้ป่วย) */
@@ -805,7 +883,10 @@ var CARE_PLAN={
   'กิจวัตรประจำวัน':['ส่งกายภาพบำบัด/กิจกรรมบำบัดฟื้นฟูสมรรถภาพ','จัดอุปกรณ์ช่วย + ฝึกผู้ดูแล','ประเมินภาระและความต้องการของผู้ดูแล'],
   'การเคลื่อนไหว':['ฝึกการเดิน/การทรงตัว ป้องกันหกล้ม','ส่งกายภาพบำบัดถ้าจำเป็น'],
   'ช่องปาก':['ส่งทันตกรรม','สอนการดูแลช่องปาก/ฟันปลอม'],
-  'คุณภาพชีวิต':['ประเมินด้านที่เป็นปัญหา (กาย/จิตใจ/สังคม/สิ่งแวดล้อม)','เชื่อมโยงบริการชุมชน/สวัสดิการที่เกี่ยวข้อง']
+  'คุณภาพชีวิต':['ประเมินด้านที่เป็นปัญหา (กาย/จิตใจ/สังคม/สิ่งแวดล้อม)','เชื่อมโยงบริการชุมชน/สวัสดิการที่เกี่ยวข้อง'],
+  'การมองเห็น':['ส่งตรวจตากับจักษุแพทย์ (ต้อกระจก/จอตา/วัดแว่น)','จัดแสงสว่างในบ้านให้เพียงพอ ลดความเสี่ยงหกล้ม','ทบทวนแว่นตา/เลนส์ให้เหมาะสม ตรวจสายตาซ้ำอย่างน้อยปีละครั้ง'],
+  'การได้ยิน':['ส่งตรวจการได้ยิน (audiometry) เพื่อยืนยันและพิจารณาเครื่องช่วยฟัง','ตรวจ/เอาขี้หูอุดตันออกก่อน (แก้ไขได้ทันที)','สื่อสารช้า ชัด เห็นหน้า ลดเสียงรบกวน — การได้ยินบกพร่องเพิ่มความเสี่ยงสมองเสื่อม/โดดเดี่ยว'],
+  'การกลั้นปัสสาวะ':['ฝึกกล้ามเนื้ออุ้งเชิงกราน (Kegel) สม่ำเสมอ + ฝึกเข้าห้องน้ำเป็นเวลา (bladder training)','ปรับพฤติกรรม: ลดคาเฟอีน/แอลกอฮอล์ จัดการท้องผูก คุมน้ำหนัก','หาสาเหตุที่แก้ไขได้ (ติดเชื้อทางเดินปัสสาวะ ยาขับปัสสาวะ ต่อมลูกหมาก) ส่งต่อเมื่อปานกลาง-รุนแรง']
 };
 /* อ้างอิงแนวทางสากล/งานวิจัย ต่อกลุ่มภาวะ — แสดงเป็นชิปให้ผู้ประเมินอ้างอิงเหมือนแพทย์เฉพาะทาง */
 var CARE_REF={
@@ -819,7 +900,10 @@ var CARE_REF={
   'กิจวัตรประจำวัน':['Barthel Index','Lawton–Brody IADL','WHO ICOPE Care Pathway'],
   'การเคลื่อนไหว':['World Falls Guidelines 2022','Otago Exercise Programme'],
   'ช่องปาก':['WHO Oral Health (2022)','FDI Oral Health for Ageing'],
-  'คุณภาพชีวิต':['WHOQOL-BREF','WHO Active Ageing Framework']
+  'คุณภาพชีวิต':['WHOQOL-BREF','WHO Active Ageing Framework'],
+  'การมองเห็น':['WHO ICOPE (2019)','WHO World Report on Vision (2019)'],
+  'การได้ยิน':['WHO ICOPE (2019)','HHIE-S (Ventry & Weinstein 1982)','WHO World Report on Hearing (2021)'],
+  'การกลั้นปัสสาวะ':['ICIQ-UI SF (Avery 2004)','WHO ICOPE (2019)','ICS Guideline on UI in Frail Older Persons']
 };
 function carePlanHtml(doms, conf, suicide){
   var seen={}, blocks=[];
@@ -906,8 +990,11 @@ function buildSummary(){
   var conds=[]; if(conf) conds.push('ภาวะซึมเศร้า'); if(suicide) conds.push('เสี่ยงฆ่าตัวตาย');
   doms.forEach(function(d){ d.conds.forEach(function(c){ conds.push(c); }); });
   var cb=document.getElementById('condsBox');
+  window.__aiCarePayload={ ageBand:aiBand_(age.value), gender:(gender.value||'ไม่ระบุ'),
+    conditions:conds.map(function(c){ return {label:String(c)}; }),
+    scores:doms.map(function(d){ return {name:(d.name||d.domain), result:(d.result||''), score:(d.scoreText||'')}; }) };
   cb.innerHTML = conds.length
-    ? '<div class="sectitle" style="margin:0 0 8px">⚠️ ภาวะที่ตรวจพบ ('+conds.length+')</div>'+conds.map(function(c){return '<span class="pill risk" style="margin:3px 5px 0 0">'+c+'</span>';}).join('')+carePlanHtml(doms,conf,suicide)
+    ? '<div class="sectitle" style="margin:0 0 8px">⚠️ ภาวะที่ตรวจพบ ('+conds.length+')</div>'+conds.map(function(c){return '<span class="pill risk" style="margin:3px 5px 0 0">'+c+'</span>';}).join('')+carePlanHtml(doms,conf,suicide)+aiCarePlanCard_()
     : '<div class="note">✅ ยังไม่พบภาวะเสี่ยงเด่นชัดจากแบบประเมินที่ทำไปแล้ว</div>';
   var g3=document.getElementById('gate3'); g3.className='gate '+g.state;
   g3.innerHTML='<div class="gt">การประเมินการรู้คิด (MMSE / MoCA)</div><div class="gv">'+g.icon+' '+g.text+'</div><div class="gr">'+g.reason+'</div>';
@@ -944,6 +1031,9 @@ function referralLabPlan(doms, mood){
     else if(d.domain==='มวลกล้ามเนื้อ'){ add('มวลกล้ามเนื้อน้อย',['ความสมบูรณ์ของเม็ดเลือด (CBC)','การทำงานของไต (creatinine, eGFR)','แคลเซียมในเลือด (calcium)','อัลบูมินในเลือด (albumin)','วิตามินดี (vitamin D, 25-OH)','วัดมวลกระดูก/องค์ประกอบร่างกาย (DXA)']); }
     else if(d.domain==='กิจวัตรประจำวัน'){ add('กิจวัตรลดลง (ADL)',['ตรวจตามโรคร่วม','ส่งกายภาพบำบัด/กิจกรรมบำบัด']); }
     else if(d.domain==='ช่องปาก'){ add('สุขภาพช่องปาก',['ส่งทันตกรรม']); }
+    else if(d.domain==='การมองเห็น'){ add('การมองเห็นบกพร่อง',['ทบทวนยา/ตรวจสายตา-การได้ยิน','ส่งตรวจตากับจักษุแพทย์ (วัด VA/ต้อกระจก/จอตา)']); }
+    else if(d.domain==='การได้ยิน'){ add('การได้ยินบกพร่อง',['ทบทวนยา/ตรวจสายตา-การได้ยิน','ส่งตรวจการได้ยิน (audiometry)']); }
+    else if(d.domain==='การกลั้นปัสสาวะ'){ add('กลั้นปัสสาวะไม่อยู่',['ตรวจปัสสาวะแถบจุ่ม (urine dipstick)','ตรวจปัสสาวะ (urinalysis)']); }
   });
   if(mood&&mood.depression) add('ซึมเศร้า'+(mood.suicide?' / เสี่ยงฆ่าตัวตาย (ด่วน)':''),['ฮอร์โมนไทรอยด์ (TSH)','ความสมบูรณ์ของเม็ดเลือด (CBC)','เกลือแร่ในเลือด (electrolytes)','วิตามินบี 12 (vitamin B12)'].concat(mood.suicide?['ประเมินความเสี่ยงทำร้ายตนเอง (safety)']:[]));
   var s=+sbp.value,d2=+dbp.value; if(s>=140||d2>=90) add('ความดันสูง',['ไขมันในเลือด (lipid profile)','ระดับน้ำตาลในเลือด (FBS/HbA1c)','การทำงานของไต (creatinine, eGFR)','เกลือแร่ในเลือด (electrolytes)','อัลบูมินในปัสสาวะ (urine albumin)','คลื่นไฟฟ้าหัวใจ (ECG)']);
@@ -979,7 +1069,7 @@ function renderReferral(){
     '<div id="refLabs">'+labHtml+'</div>'+
     '<div class="grid c2" style="margin-top:12px">'+
       '<div class="fld"><label>วันนัดคลินิก (ศุกร์ที่ 4 ของเดือน)</label><select id="refDate"><option>กำลังโหลดวันนัด...</option></select></div>'+
-      '<div class="fld"><label>หรือระบุวันนัดเอง (ถ้ามี)</label><input id="refDateCustom" type="date"></div>'+
+      '<div class="fld"><label>หรือระบุวันนัดเอง (ถ้ามี)</label><input id="refDateCustom" type="date" onchange="dateThHint_(\'refDateCustom\')"><div class="muted" id="refDateCustomTh" style="font-size:11px;margin-top:2px"></div></div>'+
     '</div>'+
     '<div class="savebar"><button class="btn primary" id="refBtn" style="flex:0 0 auto;padding:11px 20px" onclick="sendReferral(this)">📨 ส่งต่อ รพ.ยะรัง</button><span id="refMeta" class="savemeta"></span></div>';
   loadClinicDates();
@@ -993,7 +1083,7 @@ function loadClinicDates(){
 function sendReferral(btn){
   var cid=currentCid(); if(cid.length!==13){ alert('ต้องมีเลขบัตรประชาชน 13 หลักก่อนส่งต่อ'); return; }
   if(!document.getElementById('refConsent').checked){ alert('กรุณาติ๊กยืนยันว่าผู้สูงอายุยินยอม/สะดวกมา รพ. ก่อนส่งต่อ'); return; }
-  var by=currentAssessor(); if(!by){ alert('ไม่พบชื่อผู้ส่ง — กรุณาเข้าสู่ระบบใหม่'); return; }
+  if(!assessorGuard_()) return; var by=currentAssessor();
   var labs=[]; document.querySelectorAll('#refLabs input[type=checkbox]:checked').forEach(function(c){ labs.push({title:c.dataset.title,name:c.dataset.name,tier:c.dataset.tier||''}); });
   var doms=domainResults(), conf=depressionConfirmed();
   var risks=doms.filter(function(d){return d.sev==='risk'||d.sev==='warn';}).map(function(d){return d.domain;}); if(conf) risks.push('ซึมเศร้า');
@@ -1009,6 +1099,14 @@ function sendReferral(btn){
     riskDomains:risks.join(', '),conditionsText:condsText.join(' | '),summary:summary,labChecklist:labs};
   if(btn){ btn.disabled=true; btn.textContent='⏳ กำลังส่ง...'; }
   function done(r){ if(r&&r.success){ var mt=document.getElementById('refMeta'); if(mt) mt.innerHTML='✓ ส่งต่อแล้ว · นัด '+(fmtThaiDate(r.appointDate||date)||'-')+(gasAvailable()?' · ☁️':''); toast('ส่งต่อโรงพยาบาลยะรังเรียบร้อย ✓'); if(btn){ btn.textContent='✓ ส่งต่อแล้ว'; } }
+    else if(r&&r.duplicate){ // 🛡 ระบบกันส่งซ้ำ: มีใบ active อยู่แล้ว — ยืนยันเฉพาะเหตุใหม่จริง
+      if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; }
+      if(confirm(r.message+'\n\nยืนยันส่งซ้ำเป็นใบใหม่หรือไม่? (เฉพาะกรณีเป็นเหตุ/อาการใหม่คนละเรื่องกับใบเดิม)')){
+        payload.force=true;
+        if(btn){ btn.disabled=true; btn.textContent='⏳ กำลังส่ง...'; }
+        google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ alert('ส่งต่อไม่สำเร็จ: '+e); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } }).createReferral(payload);
+      }
+    }
     else { alert((r&&r.message)||'ส่งต่อไม่สำเร็จ'); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } } }
   if(TEST_MODE){ done({success:true,appointDate:date,message:'(ซ้อม) ส่งต่อจำลอง — ไม่บันทึกจริง'}); }
   else if(gasAvailable()){ google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ alert('ส่งต่อไม่สำเร็จ: '+e); if(btn){ btn.disabled=false; btn.textContent='📨 ส่งต่อ รพ.ยะรัง'; } }).createReferral(payload); }
@@ -1030,6 +1128,9 @@ var MODULES=[
  {key:'gpaq',icon:'🏃',name:'GPAQ กิจกรรมทางกาย',group:'กิจกรรมทางกาย'},
  {key:'whoqol',icon:'🌿',name:'WHOQOL-BREF',group:'คุณภาพชีวิต'},
  {key:'oral',icon:'🦷',name:'สุขภาพช่องปาก',group:'ช่องปาก'},
+ {key:'vision',icon:'👁️',name:'การมองเห็น (ICOPE + VA)',group:'ประสาทสัมผัส'},
+ {key:'hearing',icon:'👂',name:'การได้ยิน (กระซิบ + HHIE-S)',group:'ประสาทสัมผัส'},
+ {key:'cont',icon:'💦',name:'กลั้นปัสสาวะ (ICIQ-UI SF)',group:'การขับถ่าย'},
  {key:'zarit',icon:'🧑‍🤝‍🧑',name:'ภาระผู้ดูแล (Zarit)',group:'ผู้ดูแล'}
 ];
 function freshMod(){ return {
@@ -1041,6 +1142,9 @@ function freshMod(){ return {
   gpaq:{seg:{},sedHours:null,sedMins:null},
   whoqol:{},
   oral:{},
+  vision:{screenFar:null,screenRead:null,glasses:null,vaR:null,vaL:null},
+  hearing:{whisperR:null,whisperL:null,hhie:{}},
+  cont:{freq:null,amount:null,impact:null,sit:{}},
   zarit:{v:{}},
   mmse:{ctx:'hospital',method:'serial7',v:{}},
   moca:{v:{},fluencyCount:null}
@@ -1056,6 +1160,9 @@ function isModDone(k){
   if(k==='gpaq') return gpaqAny();
   if(k==='whoqol') return whoqolAny();
   if(k==='oral') return oralAny();
+  if(k==='vision') return visionAny();
+  if(k==='hearing') return hearingAny();
+  if(k==='cont') return contAny();
   if(k==='zarit') return zaritAny();
   if(k==='mmse') return mmseAny();
   if(k==='moca') return mocaAny();
@@ -1120,8 +1227,126 @@ function scoreZarit(){
   if(done){ el.className='note'+(t>=41?' alert':''); el.innerHTML='ผลรวม '+t+'/88 → <b>'+zaritResult(t)+'</b>'+(t>=41?' — ผู้ดูแลมีภาระสูง ควรให้คำปรึกษา/สนับสนุน/จัดบริการพักการดูแล (respite care)':''); }
   else { el.className='note'; el.innerHTML='กรอกให้ครบ 22 ข้อ ระบบจะรวมและแปลผลให้อัตโนมัติ'; }
 }
-var FORMS={ falls:fallsForm, adl:adlForm, mna:mnaForm, frail:frailForm, muscle:muscleForm, gpaq:gpaqForm, whoqol:whoqolForm, oral:oralForm, zarit:zaritForm, mmse:mmseForm, moca:mocaForm };   // โมดูลที่ทำเสร็จ → render ฟอร์มจริง
-var MOUNT={ falls:scoreFalls, adl:scoreAdl, mna:scoreMna, frail:scoreFrail, muscle:scoreMuscle, gpaq:scoreGpaq, whoqol:scoreWhoqol, oral:scoreOral, zarit:scoreZarit, mmse:scoreMmse, moca:scoreMoca };             // ฟังก์ชันคิดคะแนนซ้ำหลัง mount (คืนค่าที่กรอกไว้)
+/* ---- ICOPE ประสาทสัมผัส & การกลั้นปัสสาวะ (v16): การมองเห็น (ICOPE+VA) / การได้ยิน (กระซิบ+HHIE-S ไทย) / ICIQ-UI SF ---- */
+var VA_ROWS=[[0,'6/6 (ปกติ)'],[0.18,'6/9'],[0.3,'6/12'],[0.48,'6/18'],[0.6,'6/24'],[0.78,'6/36'],[1,'6/60'],[1.3,'แย่กว่า 6/60 (นับนิ้ว/โบกมือ)']];
+function vaLabel(v){ for(var i=0;i<VA_ROWS.length;i++) if(VA_ROWS[i][0]===v) return VA_ROWS[i][1].replace(/ \(.*\)$/,''); return '—'; }
+function visionAny(){ var v=MOD.vision; return v.screenFar!=null||v.screenRead!=null||v.glasses!=null||v.vaR!=null||v.vaL!=null; }
+function visionBest(){ var v=MOD.vision; if(v.vaR==null&&v.vaL==null) return null; if(v.vaR==null) return v.vaL; if(v.vaL==null) return v.vaR; return Math.min(v.vaR,v.vaL); }
+function visionResult(m){ return m==null?'':(m<=0.3?'การมองเห็นปกติ/ใกล้เคียงปกติ':m<=0.6?'การมองเห็นบกพร่องเล็กน้อย-ปานกลาง':'การมองเห็นบกพร่องรุนแรง')+' (ตาข้างดี '+vaLabel(m)+')'; }
+function setVision(k,v){ MOD.vision[k]=v===''?null:+v; scoreVision(); renderModules(); }
+function visionForm(){
+  var v=MOD.vision, yn=[['0','ไม่มี = 0'],['1','มี = 1']];
+  var vaOpts=VA_ROWS.map(function(r){ return [String(r[0]),r[1]]; });
+  return '<div class="modpanel"><h3>👁️ การมองเห็น (คัดกรอง ICOPE + วัด VA)</h3>'+
+    '<div class="note" style="margin-bottom:8px">วัด VA ด้วยแผ่น Snellen/E-chart ระยะ 3 เมตร ทีละข้าง (ปิดตาอีกข้าง) <b>ขณะใส่แว่น/เลนส์ที่ใช้ประจำ</b> (presenting VA) · เกณฑ์บกพร่อง = ตาข้างดีแย่กว่า 6/12 · ติดตามผล: ดีขึ้น = logMAR ลดลง ≥0.2 (2 แถว)</div>'+
+    '<div class="sectitle">คัดกรอง ICOPE</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">'+
+    '<div class="fld"><label>1. มองไกลไม่ชัด / ตามัว / เห็นภาพเลือนราง</label>'+frailSel('setVision(\'screenFar\',this.value)', v.screenFar==null?'':String(v.screenFar), yn)+'</div>'+
+    '<div class="fld"><label>2. อ่านหนังสือ / ป้าย / ฉลากยาลำบาก (ระยะใกล้)</label>'+frailSel('setVision(\'screenRead\',this.value)', v.screenRead==null?'':String(v.screenRead), yn)+'</div>'+
+    '<div class="fld"><label>3. ใช้แว่นตา / เลนส์ช่วยอยู่</label>'+frailSel('setVision(\'glasses\',this.value)', v.glasses==null?'':String(v.glasses), [['0','ไม่ใช้ = 0'],['1','ใช้ = 1']])+'</div>'+
+    '</div>'+
+    '<div class="sectitle" style="margin-top:10px">วัด VA (Snellen/E-chart 3 เมตร) — แถวเล็กสุดที่อ่านถูกเกินครึ่งแถว</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">'+
+    '<div class="fld"><label>ตาขวา (Rt)</label>'+frailSel('setVision(\'vaR\',this.value)', v.vaR==null?'':String(v.vaR), vaOpts,'เลือกแถวที่อ่านได้')+'</div>'+
+    '<div class="fld"><label>ตาซ้าย (Lt)</label>'+frailSel('setVision(\'vaL\',this.value)', v.vaL==null?'':String(v.vaL), vaOpts,'เลือกแถวที่อ่านได้')+'</div>'+
+    '</div>'+
+    '<div class="scorebox" id="visBox"><div><div class="big" id="visV">—</div><div class="lbl">VA ตาข้างดี</div></div><div class="res" id="visR">—</div></div>'+
+    '<div class="note" id="visConcl" style="margin-top:11px"></div>'+
+  '</div>';
+}
+function scoreVision(){
+  var m=visionBest(), complete=moduleComplete('vision'), abn=m!=null&&m>0.3;
+  adlSet_('visV', m==null?'—':vaLabel(m));
+  adlSet_('visR', visionAny()?(complete?(abn?'พบการมองเห็นบกพร่อง':'ไม่เข้าเกณฑ์บกพร่อง'):'กรอกยังไม่ครบ'):'—');
+  adlCls_('visBox', !visionAny()?'':(complete?(m>0.6?'risk':abn?'warn':'ok'):'warn'));
+  var el=document.getElementById('visConcl'); if(!el) return;
+  if(complete){ el.className='note'+(abn?' alert':''); el.innerHTML=abn?('<b>'+visionResult(m)+'</b> — แนะนำส่งตรวจตากับจักษุแพทย์ (ต้อกระจก/จอตา/วัดแว่น) + จัดแสงสว่างในบ้าน ระวังหกล้ม'):'ตาข้างดี '+vaLabel(m)+' — ไม่เข้าเกณฑ์การมองเห็นบกพร่อง (ตรวจซ้ำอย่างน้อยปีละครั้ง)'; }
+  else { el.className='note'; el.innerHTML='ตอบคัดกรอง 3 ข้อ + วัด VA ครบ 2 ตา ระบบจะแปลผลให้อัตโนมัติ'; }
+}
+var HHIE_Q=[
+ 'ปัญหาการได้ยินทำให้ท่านรู้สึกอาย/เขิน เมื่อพบปะผู้คนใหม่ๆ หรือไม่',
+ 'ปัญหาการได้ยินทำให้ท่านรู้สึกหงุดหงิด/คับข้องใจ เมื่อพูดคุยกับคนในครอบครัวหรือไม่',
+ 'ท่านมีความลำบากในการได้ยิน เมื่อมีคนพูดเสียงกระซิบหรือไม่',
+ 'ท่านรู้สึกว่าตนเองมีความบกพร่อง/เสียเปรียบ จากปัญหาการได้ยินหรือไม่',
+ 'ปัญหาการได้ยินทำให้ลำบาก เมื่อไปเยี่ยมญาติ เพื่อน หรือเพื่อนบ้านหรือไม่',
+ 'ปัญหาการได้ยินทำให้ท่านไปร่วมพิธีทางศาสนา/กิจกรรมชุมชน น้อยกว่าที่ต้องการหรือไม่',
+ 'ปัญหาการได้ยินทำให้มีปากเสียง/โต้เถียงกับคนในครอบครัวหรือไม่',
+ 'ปัญหาการได้ยินทำให้ลำบากในการฟังวิทยุ/โทรทัศน์หรือไม่',
+ 'ท่านรู้สึกว่าปัญหาการได้ยินจำกัด/เป็นอุปสรรคต่อชีวิตส่วนตัวหรือชีวิตทางสังคมหรือไม่',
+ 'ปัญหาการได้ยินทำให้ลำบาก เมื่ออยู่ในร้านอาหาร/สถานที่เสียงดังกับญาติหรือเพื่อนหรือไม่'
+];
+var HHIE_OPTS=[['4','ใช่ = 4'],['2','บางครั้ง = 2'],['0','ไม่ใช่ = 0']];
+function hearingAny(){ var h=MOD.hearing; return h.whisperR!=null||h.whisperL!=null||HHIE_Q.some(function(_,i){return h.hhie[i]!=null;}); }
+function hhieSum(){ var s=0; HHIE_Q.forEach(function(_,i){ var v=MOD.hearing.hhie[i]; if(v!=null) s+=v; }); return s; }
+function hhieAnswered(){ var n=0; HHIE_Q.forEach(function(_,i){ if(MOD.hearing.hhie[i]!=null) n++; }); return n; }
+function hhieResult(s){ return s<=8?'ไม่พบปัญหาการได้ยินที่กระทบชีวิต':s<=24?'สงสัยการได้ยินบกพร่องเล็กน้อย-ปานกลาง':'การได้ยินบกพร่องมาก'; }
+function setHearing(k,v){ MOD.hearing[k]=v===''?null:+v; scoreHearing(); renderModules(); }
+function setHhie(i,v){ MOD.hearing.hhie[i]=v===''?null:+v; scoreHearing(); renderModules(); }
+function hearingForm(){
+  var h=MOD.hearing, wOpts=[['0','ผ่าน (ทวนถูก) = ปกติ'],['1','ไม่ผ่าน']];
+  var items=HHIE_Q.map(function(q,i){ var cur=h.hhie[i];
+    return '<div class="fld"><label>'+(i+1)+'. '+q+'</label>'+frailSel('setHhie('+i+',this.value)', cur==null?'':String(cur), HHIE_OPTS)+'</div>'; }).join('');
+  return '<div class="modpanel"><h3>👂 การได้ยิน (เสียงกระซิบ + HHIE-S ฉบับไทย)</h3>'+
+    '<div class="note" style="margin-bottom:8px">ขั้น 1 คัดกรองด้วย <b>เสียงกระซิบ (whisper test)</b>: ยืนด้านหลังห่าง 1 ก้าว กระซิบตัวเลข/คำ 3 พยางค์ ให้ทวน (อุดหูอีกข้าง) · ขั้น 2 <b>HHIE-S</b> 10 ข้อ (0-40) ใช้ติดตามผล: ดีขึ้น = ลดลง ≥8 คะแนน · ≥10 = สงสัยบกพร่อง ≥26 = บกพร่องมาก</div>'+
+    '<div class="sectitle">เสียงกระซิบ (คัดกรอง)</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">'+
+    '<div class="fld"><label>หูขวา (Rt)</label>'+frailSel('setHearing(\'whisperR\',this.value)', h.whisperR==null?'':String(h.whisperR), wOpts)+'</div>'+
+    '<div class="fld"><label>หูซ้าย (Lt)</label>'+frailSel('setHearing(\'whisperL\',this.value)', h.whisperL==null?'':String(h.whisperL), wOpts)+'</div>'+
+    '</div>'+
+    '<div class="sectitle" style="margin-top:10px">HHIE-S (10 ข้อ • ใช่=4 บางครั้ง=2 ไม่ใช่=0)</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">'+items+'</div>'+
+    '<div class="scorebox" id="hearBox"><div><div class="big" id="hearV">0</div><div class="lbl">HHIE-S (เต็ม 40)</div></div><div class="res" id="hearR">—</div></div>'+
+    '<div class="note" id="hearConcl" style="margin-top:11px"></div>'+
+  '</div>';
+}
+function scoreHearing(){
+  var s=hhieSum(), ans=hhieAnswered(), complete=moduleComplete('hearing');
+  var wf=MOD.hearing.whisperR===1||MOD.hearing.whisperL===1;
+  adlSet_('hearV', s);
+  adlSet_('hearR', hearingAny()?(complete?(s>=10?hhieResult(s):wf?'กระซิบไม่ผ่าน ควรตรวจยืนยัน':'ไม่พบปัญหาเด่นชัด'):'กรอก '+ans+'/'+HHIE_Q.length):'—');
+  adlCls_('hearBox', !hearingAny()?'':(complete?(s>=26?'risk':(s>=10||wf)?'warn':'ok'):'warn'));
+  var el=document.getElementById('hearConcl'); if(!el) return;
+  if(complete){ var abn=s>=10||wf; el.className='note'+(abn?' alert':'');
+    el.innerHTML=abn?('<b>'+(s>=10?hhieResult(s)+' (HHIE-S '+s+'/40)':'เสียงกระซิบไม่ผ่าน')+'</b> — ตรวจ/เอาขี้หูอุดตันออกก่อน แล้วส่งตรวจการได้ยิน (audiometry) พิจารณาเครื่องช่วยฟัง'):'HHIE-S '+s+'/40 + กระซิบผ่าน — ไม่พบปัญหาการได้ยินเด่นชัด'; }
+  else { el.className='note'; el.innerHTML='ทำ whisper test 2 หู + ตอบ HHIE-S ครบ 10 ข้อ ระบบจะรวมและแปลผลให้อัตโนมัติ'; }
+}
+var ICIQ_FREQ=[['0','ไม่เคยเลย = 0'],['1','ประมาณสัปดาห์ละครั้ง หรือน้อยกว่า = 1'],['2','สัปดาห์ละ 2-3 ครั้ง = 2'],['3','วันละครั้ง = 3'],['4','วันละหลายครั้ง = 4'],['5','ตลอดเวลา = 5']];
+var ICIQ_AMT=[['0','ไม่เล็ดเลย = 0'],['2','เล็ดเล็กน้อย = 2'],['4','เล็ดปานกลาง = 4'],['6','เล็ดมาก = 6']];
+var ICIQ_SIT=['เล็ดก่อนไปถึงห้องน้ำ','เล็ดเมื่อไอหรือจาม','เล็ดขณะนอนหลับ','เล็ดขณะออกแรง/ออกกำลังกาย','เล็ดหลังปัสสาวะเสร็จและแต่งตัวแล้ว','เล็ดโดยไม่มีเหตุชัดเจน','เล็ดตลอดเวลา'];
+function contAny(){ var c=MOD.cont; return c.freq!=null||c.amount!=null||c.impact!=null||ICIQ_SIT.some(function(_,i){return !!c.sit[i];}); }
+function iciqSum(){ var c=MOD.cont; return (c.freq||0)+(c.amount||0)+(c.impact||0); }
+function iciqResult(s){ return s<=0?'ไม่พบปัญหากลั้นปัสสาวะ':s<=5?'กลั้นปัสสาวะไม่อยู่เล็กน้อย':s<=12?'กลั้นปัสสาวะไม่อยู่ปานกลาง':s<=18?'กลั้นปัสสาวะไม่อยู่รุนแรง':'กลั้นปัสสาวะไม่อยู่รุนแรงมาก'; }
+function setCont(k,v){ MOD.cont[k]=v===''?null:+v; scoreCont(); renderModules(); }
+function toggleContSit(i,el){ MOD.cont.sit[i]=!MOD.cont.sit[i]; if(el) el.classList.toggle('on',!!MOD.cont.sit[i]); scoreCont(); renderModules(); }
+function contForm(){
+  var c=MOD.cont;
+  var impOpts=[]; for(var i=0;i<=10;i++) impOpts.push([String(i), i+(i===0?' = ไม่กระทบเลย':i===10?' = กระทบมากที่สุด':'')]);
+  var chips=ICIQ_SIT.map(function(s,i){ return '<span class="chip'+(c.sit[i]?' on':'')+'" onclick="toggleContSit('+i+',this)">'+s+'</span>'; }).join('');
+  return '<div class="modpanel"><h3>💦 การกลั้นปัสสาวะ (ICIQ-UI SF ฉบับไทย)</h3>'+
+    '<div class="note" style="margin-bottom:8px">ถามอาการ "ใน 4 สัปดาห์ที่ผ่านมา" · คะแนนรวม 0-21 (ข้อ 1+2+3) · ติดตามผล: ดีขึ้น = ลดลง ≥2.5 คะแนน (MCID) · ข้อ 4 (สถานการณ์ที่เล็ด) ไม่คิดคะแนน ใช้บอกชนิดของภาวะ</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">'+
+    '<div class="fld"><label>1. ปัสสาวะเล็ดบ่อยแค่ไหน</label>'+frailSel('setCont(\'freq\',this.value)', c.freq==null?'':String(c.freq), ICIQ_FREQ)+'</div>'+
+    '<div class="fld"><label>2. ปริมาณที่เล็ดโดยทั่วไป (ทั้งที่ใส่/ไม่ใส่แผ่นรอง)</label>'+frailSel('setCont(\'amount\',this.value)', c.amount==null?'':String(c.amount), ICIQ_AMT)+'</div>'+
+    '<div class="fld"><label>3. กระทบชีวิตประจำวันมากแค่ไหน (0-10)</label>'+frailSel('setCont(\'impact\',this.value)', c.impact==null?'':String(c.impact), impOpts)+'</div>'+
+    '</div>'+
+    '<div class="sectitle" style="margin-top:10px">4. ปัสสาวะเล็ดเมื่อใด (เลือกได้หลายข้อ • ไม่คิดคะแนน)</div>'+
+    '<div id="contSits" style="display:flex;flex-wrap:wrap;gap:7px">'+chips+'</div>'+
+    '<div class="scorebox" id="contBox"><div><div class="big" id="contV">0</div><div class="lbl">ICIQ-UI SF (เต็ม 21)</div></div><div class="res" id="contR">—</div></div>'+
+    '<div class="note" id="contConcl" style="margin-top:11px"></div>'+
+  '</div>';
+}
+function scoreCont(){
+  var t=iciqSum(), complete=moduleComplete('cont');
+  adlSet_('contV', t);
+  adlSet_('contR', contAny()?(complete?iciqResult(t):'กรอกยังไม่ครบ'):'—');
+  adlCls_('contBox', !contAny()?'':(complete?(t>=13?'risk':t>=6?'warn':t>=1?'warn':'ok'):'warn'));
+  var el=document.getElementById('contConcl'); if(!el) return;
+  if(complete){ el.className='note'+(t>=6?' alert':'');
+    el.innerHTML=t>=1?('<b>'+iciqResult(t)+' (ICIQ '+t+'/21)</b> — ฝึกกล้ามเนื้ออุ้งเชิงกราน (Kegel) + ฝึกเข้าห้องน้ำเป็นเวลา ลดคาเฟอีน'+(t>=6?' · หาสาเหตุที่แก้ไขได้ (ติดเชื้อ/ยา/ต่อมลูกหมาก) และพิจารณาส่งต่อ':'')):'ไม่พบปัญหากลั้นปัสสาวะ'; }
+  else { el.className='note'; el.innerHTML='ตอบข้อ 1-3 ให้ครบ ระบบจะรวมและแปลผลให้อัตโนมัติ (ข้อ 4 เลือกตามจริง)'; }
+}
+var FORMS={ falls:fallsForm, adl:adlForm, mna:mnaForm, frail:frailForm, muscle:muscleForm, gpaq:gpaqForm, whoqol:whoqolForm, oral:oralForm, vision:visionForm, hearing:hearingForm, cont:contForm, zarit:zaritForm, mmse:mmseForm, moca:mocaForm };   // โมดูลที่ทำเสร็จ → render ฟอร์มจริง
+var MOUNT={ falls:scoreFalls, adl:scoreAdl, mna:scoreMna, frail:scoreFrail, muscle:scoreMuscle, gpaq:scoreGpaq, whoqol:scoreWhoqol, oral:scoreOral, vision:scoreVision, hearing:scoreHearing, cont:scoreCont, zarit:scoreZarit, mmse:scoreMmse, moca:scoreMoca };             // ฟังก์ชันคิดคะแนนซ้ำหลัง mount (คืนค่าที่กรอกไว้)
 function openModule(key){
   var m=MODULES.filter(function(x){return x.key===key;})[0];
   if(activeMod && activeMod!==key && isDirty(activeMod)){ if(!confirm('“'+saveableName(activeMod)+'” ยังกรอกค้างไว้และยังไม่ได้กดบันทึก\nออกไปโดยไม่บันทึกหรือไม่?')) return; }
@@ -2019,6 +2244,7 @@ var SAVEABLE=[
  {key:'falls',name:'หกล้ม (TUG/SPPB/Thai-FRAT)'},{key:'adl',name:'Basic/IADL/Advance ADL'},
  {key:'mna',name:'MNA โภชนาการ'},{key:'frail',name:'FRAIL/MTFI'},{key:'muscle',name:'แรงบีบมือ/SARC-CalF'},
  {key:'gpaq',name:'GPAQ'},{key:'whoqol',name:'WHOQOL-BREF'},{key:'oral',name:'สุขภาพช่องปาก'},
+ {key:'vision',name:'การมองเห็น (ICOPE + VA)'},{key:'hearing',name:'การได้ยิน (กระซิบ + HHIE-S)'},{key:'cont',name:'กลั้นปัสสาวะ (ICIQ-UI SF)'},{key:'zarit',name:'ภาระผู้ดูแล (Zarit)'},
  {key:'mmse',name:'MMSE-Thai'},{key:'moca',name:'MoCA'},{key:'note',name:'ความเห็นแพทย์/ผู้ประเมิน'}
 ];
 function saveableName(key){ for(var i=0;i<SAVEABLE.length;i++) if(SAVEABLE[i].key===key) return SAVEABLE[i].name; return key; }
@@ -2035,6 +2261,16 @@ function toDateObj_(v){ if(!v) return null; if(v instanceof Date) return isNaN(v
   if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))){ var y=+m[3]; if(y>2400) y-=543; return new Date(y,+m[2]-1,+m[1]); }
   var d=new Date(s); return isNaN(d)?null:d; }
 function fmtThaiDate(v){ var d=toDateObj_(v); if(!d) return v?String(v):''; return d.getDate()+' '+THAI_MO[d.getMonth()]+' '+(d.getFullYear()+543); }
+/* บรรทัด พ.ศ. ใต้ช่องกรอกวันที่ (แสดงผลเท่านั้น — ค่าในช่อง/ที่บันทึกยังเป็น ค.ศ. ISO)
+   ⛑ ต้องพึ่งตัวเองล้วน (ห้ามเรียก fmtThaiDate/THAI_MO ที่ประกาศทีหลัง!) — เวอร์ชันเก่าเรียกตอน init ก่อน THAI_MO เกิด
+   → TypeError ฆ่าสคริปต์ทั้งหน้า: โทเค็นไม่ถูกอ่าน/ปุ่มตาย/แก้ไขไม่โหลด/ป้ายออฟไลน์ค้าง */
+function dateThHint_(id){ try{
+  var el=document.getElementById(id), o=document.getElementById(id+'Th'); if(!el||!o) return;
+  var m=String(el.value||'').match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(!m){ o.textContent=''; return; }
+  var MO=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  o.textContent='= '+(+m[3])+' '+MO[+m[2]-1]+' '+((+m[1])+543);
+}catch(e){} }
 function fmtDate(iso){ var d=toDateObj_(iso); if(!d) return iso?String(iso):''; return fmtThaiDate(d)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' น.'; }
 
 var PROFILE_FIELDS=['hn','cid','adate','pname','gender','age','phone','edu','unit','pcu','addr','prov','amphoe','tambon','zip','dxOther','dxSummary','wt','ht','arm','calf','sbp','dbp','pulse','lat','lng','geoSource'];
@@ -2072,10 +2308,66 @@ function captureGeo(btn){
 }
 /* ผู้บันทึก = คนที่เข้าสู่ระบบ (ส่งผ่าน ?by= จาก dashboard/guest) ใช้เป็น "ผู้ประเมิน" ของทุกส่วนที่คนนั้นกดบันทึก */
 function currentAssessor(){ return String(window.__pocBy||'').trim(); }
+function loggedIn_(){ return !!String(window.__pocToken||'').trim(); }
+/* ⭐ เติมชื่อผู้บันทึกจากโทเค็นเอง เมื่อพารามิเตอร์ by หลุด (iframe/มือถือ) — กัน "ไม่พบชื่อผู้บันทึก" */
+var _assessorTried=false;
+function ensureAssessor_(cb){
+  if(currentAssessor()){ if(cb)cb(); return; }
+  var tk=String(window.__pocToken||'').trim();
+  if(!tk||!(typeof google!=='undefined'&&google.script&&google.script.run)){ if(cb)cb(); return; }
+  google.script.run.withSuccessHandler(function(r){ if(r&&r.ok&&r.name){ window.__pocBy=r.name; try{ var el=document.getElementById('assessorHint'); if(el) el.textContent='ผู้บันทึก: '+r.name; }catch(e){} } if(cb)cb(); })
+    .withFailureHandler(function(){ if(cb)cb(); }).getMyName(tk);
+  _assessorTried=true;
+}
+/* 🔑 v27.1 ล็อกอินในหน้าประเมินเอง — ที่พึ่งสุดท้ายเมื่อโทเค็นหายและไม่มีหน้าแม่ให้ขอ (เปิดเต็มจอ/แท็บตรง/มือถือรีโหลด)
+   สำเร็จ = ได้โทเค็นใหม่ทันที + จำลงแคช + สั่งซิงก์รายการที่ค้างด้วยโทเค็นใหม่ · ข้อมูลที่กรอกไว้ไม่หาย */
+function showInlineLogin_(){
+  if(document.getElementById('inlineLogin')) return;
+  var bk=document.createElement('div'); bk.id='inlineLogin';
+  bk.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(4,8,18,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px';
+  bk.innerHTML='<div style="width:min(400px,94vw);background:linear-gradient(180deg,rgba(20,32,58,.98),rgba(12,20,38,.98));border:1px solid rgba(125,211,252,.3);border-radius:18px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.6)">'
+    +'<div style="font-size:16.5px;font-weight:800;margin-bottom:4px;color:#e8eefc">🔐 เข้าสู่ระบบเพื่อบันทึกต่อ</div>'
+    +'<div style="font-size:12px;color:#9fb0d0;line-height:1.6;margin-bottom:14px">การเชื่อมต่อผู้ใช้หลุด (เปิดหน้านี้ตรงๆ/เครื่องรีโหลด) — ข้อมูลที่กรอกไว้<b style="color:#5eead4">ยังอยู่ครบ</b> เข้าสู่ระบบแล้วกดบันทึกซ้ำได้เลย</div>'
+    +'<input id="ilUser" placeholder="ชื่อผู้ใช้ / เลขบัตร" autocomplete="username" style="width:100%;margin-bottom:9px;padding:11px 13px;border-radius:11px;border:1px solid rgba(125,211,252,.25);background:rgba(7,11,22,.7);color:#e8eefc;font-family:inherit;font-size:14px">'
+    +'<input id="ilPass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password" style="width:100%;margin-bottom:12px;padding:11px 13px;border-radius:11px;border:1px solid rgba(125,211,252,.25);background:rgba(7,11,22,.7);color:#e8eefc;font-family:inherit;font-size:14px">'
+    +'<div id="ilErr" style="min-height:16px;font-size:12px;color:#fb7185;margin-bottom:8px"></div>'
+    +'<div style="display:flex;gap:9px"><button id="ilGo" style="flex:1;padding:12px;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:800;color:#04121a;background:linear-gradient(120deg,#5eead4,#38bdf8);cursor:pointer">เข้าสู่ระบบ</button>'
+    +'<button id="ilX" style="padding:12px 16px;border-radius:12px;font-family:inherit;font-size:13px;color:#9fb0d0;background:rgba(125,211,252,.08);border:1px solid rgba(125,211,252,.2);cursor:pointer">ปิด</button></div></div>';
+  document.body.appendChild(bk);
+  var go=document.getElementById('ilGo');
+  function doIt(){
+    var u=(document.getElementById('ilUser').value||'').trim(), pw=document.getElementById('ilPass').value||'';
+    var er=document.getElementById('ilErr');
+    if(!u||!pw){ er.textContent='กรอกชื่อผู้ใช้และรหัสผ่าน'; return; }
+    go.disabled=true; go.textContent='กำลังตรวจสอบ...';
+    if(!(typeof google!=='undefined'&&google.script&&google.script.run)){ er.textContent='ออฟไลน์อยู่ — ต่ออินเทอร์เน็ตแล้วลองใหม่'; go.disabled=false; go.textContent='เข้าสู่ระบบ'; return; }
+    google.script.run.withSuccessHandler(function(r){
+      go.disabled=false; go.textContent='เข้าสู่ระบบ';
+      if(!r||!r.ok||!r.token){ er.textContent=(r&&r.message)||'เข้าสู่ระบบไม่สำเร็จ'; return; }
+      window.__pocToken=r.token; window.__pocBy=r.displayName||u; window.__pocRole=r.role||'';
+      if(typeof window.__eldAuthStash==='function') window.__eldAuthStash();
+      try{ if(typeof ensureAssessor_==='function') ensureAssessor_(); }catch(e){}
+      bk.remove();
+      try{ toast('✓ เข้าสู่ระบบแล้ว ('+(r.displayName||u)+') — กดบันทึกซ้ำได้เลย'); }catch(e){ alert('เข้าสู่ระบบแล้ว — กดบันทึกซ้ำได้เลย'); }
+      try{ if(typeof flushSync==='function') flushSync(); }catch(e){}
+    }).withFailureHandler(function(e){ go.disabled=false; go.textContent='เข้าสู่ระบบ'; er.textContent='ผิดพลาด: '+(e&&e.message||e); }).authenticate(u,pw);
+  }
+  go.addEventListener('click',doIt);
+  document.getElementById('ilPass').addEventListener('keydown',function(ev){ if(ev.key==='Enter') doIt(); });
+  document.getElementById('ilX').addEventListener('click',function(){ bk.remove(); });
+  setTimeout(function(){ try{ document.getElementById('ilUser').focus(); }catch(e){} },80);
+}
+/* guard บันทึก: บล็อกเฉพาะเมื่อ "ยังไม่ได้เข้าสู่ระบบจริง" (ไม่มีโทเค็น) — ถ้ามีโทเค็นแต่ชื่อว่าง ปล่อยผ่าน (server เติมชื่อจากโทเค็นให้) */
+function assessorGuard_(){
+  if(!loggedIn_() && typeof window.__eldAskAuth==='function') window.__eldAskAuth();   // เผื่อเพิ่งหลุด — ขอโทเค็นสดจากหน้าแม่ก่อนตัดสิน
+  if(currentAssessor()) return true;
+  if(loggedIn_()){ ensureAssessor_(); return true; }   // มีโทเค็น = เข้าระบบแล้ว → บันทึกได้ (server ประทับชื่อ)
+  showInlineLogin_(); return false;
+}
 function collectProfile(){ var sm=document.getElementById('smoke'); var o={illit:!!illit.checked, smoke:!!(sm&&sm.checked), dx:ST.dx}; PROFILE_FIELDS.forEach(function(id){ var el=document.getElementById(id); o[id]=el?el.value:''; }); return o; }
 function toDateInput_(v){ if(!v) return ''; v=String(v); if(/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0,10); var d=new Date(v); return isNaN(d)?'':(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)); }
 function restoreProfile(o){ if(!o) return; PROFILE_FIELDS.forEach(function(id){ if(o[id]!=null){ var el=document.getElementById(id); if(el) el.value=o[id]; } });
-  var ad=document.getElementById('adate'); if(ad && o.adate) ad.value=toDateInput_(o.adate); // Sheets อาจคืนวันที่เป็น Date object → แปลงเป็น YYYY-MM-DD ไม่งั้น input date ว่าง
+  var ad=document.getElementById('adate'); if(ad && o.adate) ad.value=toDateInput_(o.adate); if(typeof dateThHint_==='function')dateThHint_('adate'); // Sheets อาจคืนวันที่เป็น Date object → แปลงเป็น YYYY-MM-DD ไม่งั้น input date ว่าง
   applyAddress(o.prov, o.amphoe, o.tambon, o.zip); // re-populate cascade selects ให้ค่าที่บันทึกไว้ติด
   illit.checked=!!o.illit;
   var sm=document.getElementById('smoke'); if(sm) sm.checked=!!o.smoke;
@@ -2119,7 +2411,7 @@ function moduleSnapshot(key){
   if(key==='mood'){ var conf=depressionConfirmed(),suicide=ST.suicide===1||(ST.q9[8]||0)>=1||q8Sum()>=1;
     return {scoreText:'2Q='+q2Score()+' · 9Q='+(q2Positive()?q9Sum():'—'), result:(conf?'เข้าเกณฑ์ซึมเศร้า':q2Positive()?'2Q+ ผิดปกติ':'ไม่พบซึมเศร้า')+(suicide?' · เสี่ยงฆ่าตัวตาย':''), sev:(conf||suicide?'risk':q2Positive()?'warn':'ok')}; }
   if(key==='note'){ var dn=document.getElementById('doctorNote'),t=dn?(dn.value||'').trim():''; return {scoreText:(t?(t.length>40?t.slice(0,40)+'…':t):''),result:(t?'บันทึกความเห็นแล้ว':'(ยังไม่มีความเห็น)'),sev:''}; }
-  var KEY2NAME={falls:'หกล้ม (TUG/SPPB/Thai-FRAT)',adl:'Basic / IADL / Advance ADL',mna:'MNA',frail:'FRAIL / MTFI',muscle:'Hand Grip / SARC-CalF',gpaq:'GPAQ',whoqol:'WHOQOL-BREF',oral:'สุขภาพช่องปาก',mmse:'MMSE-Thai',moca:'MoCA'};
+  var KEY2NAME={falls:'หกล้ม (TUG/SPPB/Thai-FRAT)',adl:'Basic / IADL / Advance ADL',mna:'MNA',frail:'FRAIL / MTFI',muscle:'Hand Grip / SARC-CalF',gpaq:'GPAQ',whoqol:'WHOQOL-BREF',oral:'สุขภาพช่องปาก',vision:'การมองเห็น (ICOPE + VA)',hearing:'การได้ยิน (กระซิบ + HHIE-S)',cont:'ICIQ-UI SF',zarit:'Zarit ภาระผู้ดูแล',mmse:'MMSE-Thai',moca:'MoCA'};
   var want=KEY2NAME[key], arr=domainResults();
   for(var i=0;i<arr.length;i++) if(arr[i].name===want) return {scoreText:arr[i].scoreText,result:arr[i].result,sev:arr[i].sev};
   return {scoreText:'',result:'บันทึกแล้ว',sev:''};
@@ -2127,7 +2419,7 @@ function moduleSnapshot(key){
 function savedMeta(key){ var rec=recOf(currentCid()); return (rec&&rec.modules&&rec.modules[key])?rec.modules[key]:null; }
 
 /* ภาวะ (engine key/severity ตรงเครื่องยนต์เดิม) ต่อโมดูล → ส่งให้ adapter union ลง Dashboard */
-var ENG_COND_LABEL={depression:'ภาวะซึมเศร้า',suicide_risk:'เสี่ยงฆ่าตัวตาย',dementia:'ภาวะสมองเสื่อม',mci:'การรู้คิดบกพร่องเล็กน้อย (MCI)',fall_risk:'เสี่ยงพลัดตกหกล้ม',malnutrition:'ทุพโภชนาการ',nutrition_risk:'เสี่ยงทุพโภชนาการ',frailty:'ภาวะเปราะบาง',prefrailty:'ภาวะก่อนเปราะบาง',low_muscle_strength:'แรงกล้ามเนื้อต่ำ',sarcopenia_risk:'เสี่ยงมวลกล้ามเนื้อน้อย',low_physical_activity:'กิจกรรมทางกายไม่เพียงพอ',poor_quality_of_life:'คุณภาพชีวิตไม่ดี',poor_physical_qol:'คุณภาพชีวิตด้านกายไม่ดี',poor_psychological_qol:'คุณภาพชีวิตด้านจิตใจไม่ดี',poor_social_qol:'คุณภาพชีวิตด้านสังคมไม่ดี',poor_environment_qol:'คุณภาพชีวิตด้านสิ่งแวดล้อมไม่ดี',oral_issue:'ปัญหาสุขภาพช่องปาก',adl_dependency:'กิจวัตรพื้นฐานบกพร่อง (ADL)',iadl_limitation:'กิจวัตรที่ซับซ้อนบกพร่อง (IADL)',aadl_limitation:'กิจกรรมขั้นสูงลดลง (Advanced ADL)',caregiver_burden:'ภาระผู้ดูแลสูง',caregiver_burden_mod:'ภาระผู้ดูแลปานกลาง'};
+var ENG_COND_LABEL={depression:'ภาวะซึมเศร้า',suicide_risk:'เสี่ยงฆ่าตัวตาย',dementia:'ภาวะสมองเสื่อม',mci:'การรู้คิดบกพร่องเล็กน้อย (MCI)',fall_risk:'เสี่ยงพลัดตกหกล้ม',malnutrition:'ทุพโภชนาการ',nutrition_risk:'เสี่ยงทุพโภชนาการ',frailty:'ภาวะเปราะบาง',prefrailty:'ภาวะก่อนเปราะบาง',low_muscle_strength:'แรงกล้ามเนื้อต่ำ',sarcopenia_risk:'เสี่ยงมวลกล้ามเนื้อน้อย',low_physical_activity:'กิจกรรมทางกายไม่เพียงพอ',poor_quality_of_life:'คุณภาพชีวิตไม่ดี',poor_physical_qol:'คุณภาพชีวิตด้านกายไม่ดี',poor_psychological_qol:'คุณภาพชีวิตด้านจิตใจไม่ดี',poor_social_qol:'คุณภาพชีวิตด้านสังคมไม่ดี',poor_environment_qol:'คุณภาพชีวิตด้านสิ่งแวดล้อมไม่ดี',oral_issue:'ปัญหาสุขภาพช่องปาก',adl_dependency:'กิจวัตรพื้นฐานบกพร่อง (ADL)',iadl_limitation:'กิจวัตรที่ซับซ้อนบกพร่อง (IADL)',aadl_limitation:'กิจกรรมขั้นสูงลดลง (Advanced ADL)',caregiver_burden:'ภาระผู้ดูแลสูง',caregiver_burden_mod:'ภาระผู้ดูแลปานกลาง',vision_impair:'การมองเห็นบกพร่อง',hearing_impair:'การได้ยินบกพร่อง',incontinence:'กลั้นปัสสาวะไม่อยู่'};
 function moduleConditions(key){
   var C=[]; function add(k,sev,note){ C.push({key:k,label:ENG_COND_LABEL[k]||k,severity:sev,note:note||''}); }
   if(key==='mood'){
@@ -2195,6 +2487,22 @@ function moduleConditions(key){
     if(a.done&&a.s<5) add('aadl_limitation',a.s<=1?'high':a.s<=2?'medium':'low','');
     return C;
   }
+  if(key==='vision'){ if(!moduleComplete('vision')) return C; var vm=visionBest();
+    if(vm!=null&&vm>0.3) add('vision_impair', vm>0.6?'high':'medium', 'ตาข้างดี '+vaLabel(vm)+(vm>0.6?' — บกพร่องรุนแรง':' — บกพร่องเล็กน้อย-ปานกลาง'));
+    return C;
+  }
+  if(key==='hearing'){ if(!moduleComplete('hearing')) return C; var hs=hhieSum(), wf=MOD.hearing.whisperR===1||MOD.hearing.whisperL===1;
+    if(hs>=26) add('hearing_impair','high','HHIE-S '+hs+'/40 บกพร่องมาก');
+    else if(hs>=10) add('hearing_impair','medium','HHIE-S '+hs+'/40 สงสัยบกพร่องเล็กน้อย-ปานกลาง');
+    else if(wf) add('hearing_impair','medium','เสียงกระซิบไม่ผ่าน — ควรตรวจยืนยันการได้ยิน');
+    return C;
+  }
+  if(key==='cont'){ if(!moduleComplete('cont')) return C; var ct=iciqSum();
+    if(ct>=13) add('incontinence','high','ICIQ-UI SF '+ct+'/21 รุนแรง');
+    else if(ct>=6) add('incontinence','medium','ICIQ-UI SF '+ct+'/21 ปานกลาง');
+    else if(ct>=1) add('incontinence','low','ICIQ-UI SF '+ct+'/21 เล็กน้อย');
+    return C;
+  }
   return C;
 }
 
@@ -2214,6 +2522,9 @@ function moduleDetail(key){
   if(key==='oral'){ var osc=0,oan=0; ORAL_KEYS.forEach(function(k){if(MOD.oral[k]!=null){oan++;osc+=MOD.oral[k];}}); return {Oral_Score:osc,Oral_Result:oan===ORAL_KEYS.length?oralResult(osc):''}; }
   if(key==='adl'){ var b=adlSum('barthel',BARTHEL),i=adlSum('iadl',IADL),a=adlSum('aadl',AADL); return {Barthel_Score:b.done?b.s:'',Barthel_Result:b.done?barthelResult(b.s):'',IADL_Score:i.done?i.s:'',IADL_Result:i.done?iadlResult(i.s):'',AADL_Score:a.done?a.s:'',AADL_Result:a.done?aadlResult(a.s):''}; }
   if(key==='zarit'){ if(!zaritAny()) return {}; var zt=zaritSum(); return {Zarit_Score:zt,Zarit_Result:zaritResult(zt)}; }
+  if(key==='vision'){ var vm=visionBest(); return {VA_Score:vm==null?'':vm, VA_Result:moduleComplete('vision')?visionResult(vm):''}; }
+  if(key==='hearing'){ var hh=hhieSum(); return {HHIE_Score:hhieAnswered()?hh:'', HHIE_Result:moduleComplete('hearing')?hhieResult(hh):''}; }
+  if(key==='cont'){ var cc=MOD.cont, ci=iciqSum(); return {ICIQ_Score:(cc.freq!=null||cc.amount!=null||cc.impact!=null)?ci:'', ICIQ_Result:moduleComplete('cont')?iciqResult(ci):''}; }
  }catch(e){}
  return {};
 }
@@ -2257,6 +2568,9 @@ function moduleComplete(key){
     case 'gpaq': { var r=calcGpaqPoc(); return !!(r.hasValue&&!r.incomplete); }
     case 'whoqol': { for(var k=1;k<=26;k++){ if(whoqolAdj(k)==null) return false; } return true; }
     case 'oral': return ORAL_KEYS.every(function(k){return MOD.oral[k]!=null;});
+    case 'vision': { var vv=MOD.vision; return vv.screenFar!=null&&vv.screenRead!=null&&vv.glasses!=null&&vv.vaR!=null&&vv.vaL!=null; }
+    case 'hearing': { var hh=MOD.hearing; return hh.whisperR!=null&&hh.whisperL!=null&&hhieAnswered()===HHIE_Q.length; }
+    case 'cont': { var cc=MOD.cont; return cc.freq!=null&&cc.amount!=null&&cc.impact!=null; }
     case 'zarit': return zaritAnswered()===ZARIT_Q.length;
     case 'mmse': return mmseEval().complete;
     case 'moca': return mocaComplete();
@@ -2266,8 +2580,8 @@ function moduleComplete(key){
 function saveModule(key, btn){
   var cid=currentCid();
   if(!cid){ alert('กรุณากรอกเลขบัตรประชาชน (CID) ในขั้นตอนที่ 1 ก่อนบันทึก'); return false; }
+  if(!assessorGuard_()) return false;
   var assessor=currentAssessor();
-  if(!assessor){ alert('ไม่พบชื่อผู้บันทึก — กรุณาเข้าสู่ระบบใหม่อีกครั้งก่อนบันทึก'); return false; }
   var miss=step1Missing();
   if(miss.length){ alert('กรุณากรอก “ขั้นตอนที่ 1 ข้อมูลพื้นฐาน” ให้ครบก่อนบันทึก\nที่ยังขาด: '+miss.slice(0,8).join(', ')+(miss.length>8?' …และอื่นๆ':'')); go(1); return false; }
   if(!moduleComplete(key)){ alert('กรุณากรอก “'+saveableName(key)+'” ให้ครบทุกข้อก่อนบันทึก'); return false; }
@@ -2291,7 +2605,7 @@ function clearFormState(){
   ['hn','cid','pname','phone','age','addr','wt','ht','arm','calf','sbp','dbp','pulse','dxOther','dxSummary','lat','lng','geoSource'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   gender.value=''; edu.value=''; illit.checked=false; pcu.value=''; var smk=document.getElementById('smoke'); if(smk) smk.checked=false; updateGeoUI();
   applyAddress(ADDR_DEFAULT_PROV, ADDR_DEFAULT_AMPHOE, '', ''); zip.value='';
-  adate.value=new Date().toISOString().slice(0,10);
+  adate.value=new Date().toISOString().slice(0,10); if(typeof dateThHint_==='function')dateThHint_('adate');
   ST.dx={}; document.querySelectorAll('#diseases .chip').forEach(function(c){ c.classList.remove('on'); });
   sumDx(); bmiHint.textContent=''; bpHint.textContent='';
   ST.q2=[null,null]; ST.suicide=null; ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null);
@@ -2316,7 +2630,7 @@ function newPatient(){
 }
 function saveAll(){
   if(!currentCid()){ alert('กรุณากรอก CID ในขั้นตอนที่ 1 ก่อนบันทึก'); return; }
-  if(!currentAssessor()){ alert('ไม่พบชื่อผู้บันทึก — กรุณาเข้าสู่ระบบใหม่'); return; }
+  if(!assessorGuard_()) return;
   var n=0;
   if(saveModule('basic')) n++;
   if(q2Score()||ST.suicide!=null){ if(saveModule('mood')) n++; }
@@ -2493,6 +2807,20 @@ function guideCardHtml_(key,id){
 function injectModuleGuide_(key){ if(!GUIDE[key]) return; var body=document.getElementById('moduleBody'); if(body) body.insertAdjacentHTML('afterbegin', guideCardHtml_(key)); }
 function injectStaticGuide_(sec,key){ var s=document.getElementById(sec); if(!s||document.getElementById('pg_'+sec)||!GUIDE[key]) return; s.insertAdjacentHTML('afterbegin', guideCardHtml_(key,'pg_'+sec)); }
 function removeStaticGuides_(){ ['pg_s1','pg_s2'].forEach(function(id){ var e=document.getElementById(id); if(e&&e.parentNode) e.parentNode.removeChild(e); }); }
+/* v24.1: ครั้งนำเข้าจากระบบเก่า — โชว์คะแนนรวมที่นำเข้าไว้เทียบกระดาษ ระหว่างกรอกรายข้อ */
+function showLegacyBanner_(rec){
+  var old=document.getElementById('legacyBanner'); if(old) old.remove();
+  var sc=(rec.legacyScores||[]).map(function(x){ return '<span style="display:inline-block;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.3);border-radius:14px;padding:2px 10px;margin:2px 3px;font-size:12px">'+esc(x.label)+' <b>'+esc(x.value)+'</b></span>'; }).join('');
+  var el=document.createElement('div');
+  el.id='legacyBanner';
+  el.style.cssText='margin:10px 0;padding:12px 14px;border-radius:12px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.08);font-size:13px;line-height:1.7';
+  el.innerHTML='<b>📦 ครั้งประเมินนำเข้าจากระบบเก่า — วันที่ '+esc(rec.legacyDateLabel||rec.visitDate||'')+'</b><br>'+
+    'ระบบเติมโปรไฟล์ + สัญญาณชีพให้แล้ว · คะแนนรวมที่นำเข้า (ไว้เทียบกับกระดาษ):<br>'+(sc||'<span style="opacity:.6">ไม่มีคะแนนนำเข้า</span>')+
+    '<br><span style="opacity:.75">กรอกแบบประเมินรายข้อจากกระดาษจริงแล้วบันทึก — ครั้งนี้จะกลายเป็นครั้งสมบูรณ์ที่แก้ไข/ลบได้ตามปกติ (ถ้าวันที่ไม่ตรงกระดาษ ปิดหน้านี้แล้วใช้ปุ่ม 🗓 แก้วันที่ ในหน้าประวัติผู้ป่วยก่อน)</span>';
+  var s1=document.getElementById('s1');
+  if(s1&&s1.parentNode) s1.parentNode.insertBefore(el,s1); else document.body.insertBefore(el,document.body.firstChild);
+  try{ el.scrollIntoView({block:'start',behavior:'smooth'}); }catch(e){}
+}
 function loadPatient(cid, date){
   cid=((cid&&typeof cid==='string')?cid:currentCid()).trim();
   if(!cid){ alert('กรุณากรอกเลขบัตรประชาชน (CID) ก่อนดึงข้อมูล'); return; }
@@ -2505,6 +2833,7 @@ function loadPatient(cid, date){
     if(basicData) prof=Object.assign({}, prof||{}, basicData); // basic.data = snapshot เต็ม (มี smoke/dx/วันที่) ทับ profile จาก server
     if(prof) restoreProfile(prof);
     document.getElementById('cid').value=cid;
+    if(rec.legacy){ showLegacyBanner_(rec); } else { var oldLb=document.getElementById('legacyBanner'); if(oldLb) oldLb.remove(); }
     var n=0; Object.keys(rec.modules||{}).forEach(function(k){ if(k==='basic')return; restoreModuleData(k,rec.modules[k].data); n++; });
     applyMoodUI();
     // ⭐ ปรับ "baseline ที่บันทึก" ให้ตรงรูปแบบที่ client สร้างเอง — กันขึ้น "ยังไม่บันทึก/แก้ไขหลังบันทึก" ทั้งที่เพิ่งดึงมา (โครงสร้าง data จาก server ต่างจาก collectModuleData เล็กน้อย)
@@ -2591,7 +2920,7 @@ function outboxGroups_(){
 }
 function buildBatch_(grp){
   var b={cid:grp.cid,adate:grp.adate,token:(window.__pocToken||''),assessor:(window.__pocBy||''),profile:null,hn:'',modules:{}};
-  grp.items.forEach(function(it){ var p=it.payload||{}; if(!b.profile) b.profile=p.profile; if(p.hn) b.hn=p.hn; if(p.token) b.token=p.token;
+  grp.items.forEach(function(it){ var p=it.payload||{}; if(!b.profile) b.profile=p.profile; if(p.hn) b.hn=p.hn; if(!b.token&&p.token) b.token=p.token;
     b.modules[it.module]={result:p.result,scoreText:p.scoreText,sev:p.sev,data:p.data,conditions:p.conditions,moduleName:p.moduleName,detail:p.detail,savedAt:p.savedAt,assessor:p.assessor}; });
   return b;
 }
@@ -2646,7 +2975,7 @@ function sendPerModule_(grp){
       _syncFails=0; _nextRetryAt=0; refreshSaveMeta(it.module); updateSyncBadge();
       if(!document.getElementById('s3').classList.contains('hidden')) renderModules(); flushSync(); })
     .withFailureHandler(function(e){ _syncing=false; onNetFail_(e); })
-    .saveElderlyAssessmentModule(it.payload);
+    .saveElderlyAssessmentModule((function(pp){ if(window.__pocToken) pp.token=window.__pocToken; return pp; })(it.payload));
 }
 /* สำรองคิว+ข้อมูลในเครื่องเป็นไฟล์ (กันหายแม้ซิงค์ไม่ผ่าน) — กดจากแถบสถานะ */
 function exportSyncQueue(){
@@ -2685,6 +3014,62 @@ if(window.__train){ try{   // เปิดจากหน้า login โหม�
 }catch(e){} }
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+/* ============ ✨ Aurora AI — แผนดูแลเฉพาะบุคคล (Assess, standalone) ============
+   เลี่ยง backtick literal ทั้งบล็อก (GAS comment-stripper) — สร้าง char 96 เอง */
+var AI_BT_A_ = String.fromCharCode(96);
+var AI_CODE_RE_A_ = new RegExp(AI_BT_A_ + '([^' + AI_BT_A_ + ']+)' + AI_BT_A_, 'g');
+var AI_DISC_A_ = 'เป็นข้อเสนอแนะจาก AI เพื่อประกอบการตัดสินใจของทีมสหวิชาชีพ ไม่ใช่การวินิจฉัย/สั่งการรักษาแทนแพทย์ และข้อมูลถูกตัดข้อมูลระบุตัวตนแล้ว';
+var AI_NOKEY_A_ = '<div class="ai-notice"><b>ยังไม่ได้เปิดใช้งาน AI</b> — ผู้ดูแลระบบยังไม่ได้ตั้งค่า GEMINI_API_KEY (แผนดูแลมาตรฐานด้านบนยังใช้งานได้ครบตามปกติ)</div>';
+var AI_THINK_A_ = '<div class="ai-thinking"><span class="d"></span><span class="d"></span><span class="d"></span> AI กำลังเรียบเรียงแผนดูแล...</div><div class="ai-shimmer"><div></div><div></div><div></div><div></div><div></div></div>';
+var AI_MOCK_CARE_ = '## 💙 คำแนะนำสำหรับผู้สูงอายุและครอบครัว\n- ชวนคุณตาคุณยายลุก-นั่งจากเก้าอี้วันละ 10 ครั้ง เช้า-เย็น เพื่อเสริมแรงขา\n- จัดบ้านให้โล่ง ทางเดินมีแสงสว่างพอ ไม่มีของเกะกะ ป้องกันการล้ม\n- เตรียมอาหารโปรตีนสูงที่หาได้ในพื้นที่ เช่น ไข่ ปลา เต้าหู้\n\n## ✅ สิ่งที่เจ้าหน้าที่ควรทำต่อ\n- นัดติดตามผลการประเมินซ้ำใน 3 เดือน\n- ประสาน อสม. เยี่ยมบ้านประเมินสิ่งแวดล้อม\n- พิจารณาส่งต่อคลินิกกายภาพบำบัดหากเสี่ยงล้มสูง\n\n_(ตัวอย่างจำลอง — เมื่อ deploy จริงจะเรียบเรียงจากผลประเมินสดผ่าน Gemini)_';
+function aiMdA_(txt){
+  var lines=String(txt||'').split(/\r?\n/), html='', inList=false;
+  function cl(){ if(inList){ html+='</ul>'; inList=false; } }
+  function il(s){ s=esc(s); s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>'); s=s.replace(AI_CODE_RE_A_,'<code>$1</code>'); return s; }
+  for(var i=0;i<lines.length;i++){ var ln=lines[i].replace(/\s+$/,'');
+    if(/^###\s+/.test(ln)){ cl(); html+='<h3>'+il(ln.replace(/^###\s+/,''))+'</h3>'; continue; }
+    if(/^##\s+/.test(ln)){ cl(); html+='<h2>'+il(ln.replace(/^##\s+/,''))+'</h2>'; continue; }
+    if(/^\s*[-•]\s+/.test(ln)){ if(!inList){ html+='<ul>'; inList=true; } html+='<li>'+il(ln.replace(/^\s*[-•]\s+/,''))+'</li>'; continue; }
+    if(ln===''){ cl(); continue; } cl(); html+='<p>'+il(ln)+'</p>'; }
+  cl(); return html;
+}
+function aiTypeA_(el,text,done){ var full=String(text||''),i=0,step=Math.max(3,Math.round(full.length/200));
+  if(el.__s) el.__s(); var stop=false; el.__s=function(){ stop=true; };
+  (function tick(){ if(stop) return; i=Math.min(full.length,i+step);
+    el.innerHTML=aiMdA_(full.slice(0,i))+(i<full.length?'<span class="ai-cursor"></span>':'');
+    if(i<full.length) setTimeout(tick,14); else if(done) done(); })();
+}
+function aiCopyA_(btn){ try{ navigator.clipboard.writeText(String(window.__aiCareText||'')); var o=btn.textContent; btn.textContent='✓ คัดลอกแล้ว'; setTimeout(function(){ btn.textContent=o; },1400); }catch(e){} }
+function aiBand_(a){ a=Number(a)||0; return a>=90?'90 ปีขึ้นไป':a>=80?'80-89 ปี':a>=70?'70-79 ปี':a>=60?'60-69 ปี':(a?'ต่ำกว่า 60 ปี':'ไม่ระบุ'); }
+function aiCarePlanCard_(){ return '<div class="ai-card"><div class="ai-inner">'
+  +'<div class="ai-head"><div class="ai-badge">✨</div><div><div class="ai-title">แผนดูแลเฉพาะบุคคล (AI)</div>'
+  +'<div class="ai-sub">ให้ AI เรียบเรียงคำแนะนำสำหรับผู้ป่วย/ญาติ + สิ่งที่เจ้าหน้าที่ควรทำต่อ (ตัดข้อมูลระบุตัวตนก่อนส่ง)</div></div></div>'
+  +'<div class="ai-body" id="aiCareBody"><button class="ai-btn" onclick="aiRunAssess_()">✨ ให้ AI ช่วยวางแผนดูแล</button></div>'
+  +'</div></div>'; }
+function aiRunAssess_(){
+  var bodyEl=document.getElementById('aiCareBody'); if(!bodyEl) return;
+  var payload=window.__aiCarePayload||{conditions:[],scores:[]};
+  bodyEl.innerHTML=AI_THINK_A_;
+  function ok(r){
+    if(!r||r.ok===false){
+      if(r&&r.code==='NO_KEY'){ bodyEl.innerHTML=AI_NOKEY_A_; return; }
+      var msg=(r&&r.code==='QUOTA')?'วันนี้ใช้ AI ครบโควตาแล้ว โปรดลองใหม่พรุ่งนี้':((r&&r.msg)||'ขออภัย AI ทำงานไม่สำเร็จ โปรดลองใหม่');
+      bodyEl.innerHTML='<div class="ai-notice ai-err">⚠️ '+esc(msg)+'</div>'; return;
+    }
+    window.__aiCareText=r.text;
+    var out=document.createElement('div'); out.className='ai-md'; bodyEl.innerHTML=''; bodyEl.appendChild(out);
+    aiTypeA_(out,r.text,function(){
+      var disc=r.disclaimer?'<div class="ai-disc">⚠️ '+esc(r.disclaimer)+(r.model?' · โมเดล '+esc(r.model):'')+'</div>':'';
+      out.insertAdjacentHTML('afterend','<div class="ai-actions"><button class="ai-mini" onclick="aiCopyA_(this)">📋 คัดลอก</button><button class="ai-mini" onclick="aiRunAssess_()">↻ สร้างใหม่</button></div>'+disc);
+    });
+  }
+  if(gasAvailable() && !TEST_MODE){
+    google.script.run.withSuccessHandler(ok).withFailureHandler(function(){ bodyEl.innerHTML='<div class="ai-notice ai-err">⚠️ เชื่อมต่อ AI ไม่สำเร็จ โปรดลองใหม่</div>'; }).aiCarePlanNarrative(payload);
+  } else {
+    setTimeout(function(){ ok({ok:true, model:'จำลอง', disclaimer:AI_DISC_A_, text:AI_MOCK_CARE_}); }, 700);
+  }
+}
 </script>
 </body>
 </html>
