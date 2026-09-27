@@ -12,7 +12,9 @@
   var ENDPOINT = (CFG.proxyUrl && CFG.proxyUrl.trim()) || (CFG.apiUrl && CFG.apiUrl.trim()) || '';
   var LS_AUTH = 'eldpwa_auth_v1';
   var API_METHODS = ['authenticate', 'saveElderlyAssessmentModule', 'saveElderlyAssessmentBatch',
-                     'getElderlyPatientRecord', 'integrityReport', 'createReferral', 'nextClinicDates', 'ping'];
+                     'getElderlyPatientRecord', 'integrityReport', 'createReferral', 'nextClinicDates', 'ping',
+                     'getMyName', 'aiCarePlanNarrative',
+                     'checkDuplicateName', 'markNamePair'];   // v60: เตือนชื่อซ้ำตอนกรอกชื่อ + ปุ่ม "คนละคน → จำไว้" · build_pwa.py ตรวจให้แล้วว่าครบ   // v57: หน้าประเมินเรียก 2 ตัวนี้ด้วย (ชื่อผู้บันทึก · AI แผนดูแลท้ายการประเมิน) — ต้องมีใน API_METHODS_ ฝั่ง Code.gs คู่กัน
 
   /* ---------- เรียก GAS JSON API (POST text/plain = simple request เลี่ยง preflight) ---------- */
   function apiCall(method, args) {

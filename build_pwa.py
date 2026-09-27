@@ -126,5 +126,44 @@ html = html.replace(cid_fld, cid_new)
 # 5) ปรับ title
 html = html.replace('ประเมินคลินิกผู้สูงอายุ • ยะรัง (ตัวอย่างเร็ว)', 'ประเมินผู้สูงอายุ • รพ.ยะรัง')
 
+# 5.5) กันลืม allowlist: ทุกเมธอดที่หน้าประเมินเรียกผ่าน google.script.run ต้องอยู่ใน API_METHODS ของ app.js
+#      และใน API_METHODS_ ของ Code.gs — ขาดฝั่งไหน PWA จะพังตอนเรียก (เจอจริง v60: checkDuplicateName/markNamePair)
+code_gs = (SRC / 'Code.gs').read_text(encoding='utf-8')
+server_fns = set(re.findall(r'^function ([A-Za-z]\w*)\s*\(', code_gs, re.M))   # ฟังก์ชันสาธารณะใน Code.gs (ไม่รวมชื่อลงท้าย _)
+called = set()
+for mm in re.finditer(r'google\.script\.run', html):
+    chain = html[mm.end():mm.end() + 1500]   # handler มี ; ข้างใน ตัดที่ ; ไม่ได้ → เก็บเฉพาะชื่อที่เป็นฟังก์ชันจริงฝั่งเซิร์ฟเวอร์
+    called |= set(x for x in re.findall(r'\.\s*([A-Za-z_]\w*)\s*\(', chain) if x in server_fns and not x.endswith('_'))
+if not called: sys.exit('❌ ตัวตรวจ allowlist หาเมธอดไม่เจอเลย — ตัวตรวจเองพัง')
+app_js = (PWA / 'app.js').read_text(encoding='utf-8')
+m_app = re.search(r'var API_METHODS = \[(.*?)\];', app_js, re.S)
+in_app = set(re.findall(r"'(\w+)'", m_app.group(1))) if m_app else set()
+m_gs = re.search(r'var API_METHODS_ = \{(.*?)\n\};', code_gs, re.S)
+in_gs = set(re.findall(r'^\s*(\w+)\s*:\s*function', m_gs.group(1), re.M)) if m_gs else set()
+miss_app, miss_gs = sorted(called - in_app), sorted(called - in_gs)
+if miss_app or miss_gs:
+    if miss_app: print('❌ app.js API_METHODS ขาด:', ', '.join(miss_app))
+    if miss_gs:  print('❌ Code.gs API_METHODS_ ขาด:', ', '.join(miss_gs))
+    sys.exit('หยุด build — เติม allowlist ให้ครบก่อน')
+print('✓ allowlist ครบ', len(called), 'เมธอด:', ', '.join(sorted(called)))
+
 (PWA / 'index.html').write_text(html, encoding='utf-8')
 print('✓ wrote elderly-pwa/index.html (', len(html), 'bytes )')
+
+# 6) เลื่อนเวอร์ชันแคชของ Service Worker อัตโนมัติตามเนื้อไฟล์ที่ build ได้
+#    (เดิมต้องแก้มือ — ลืมทีเดียว เครื่องที่ติดตั้ง PWA ไว้จะใช้ของเก่าต่อไปเรื่อย ๆ โดยไม่มีใครรู้)
+import hashlib, re as _re
+sw_path = PWA / 'sw.js'
+if sw_path.exists():
+    sw = sw_path.read_text(encoding='utf-8')
+    stamp = 'eld-pwa-' + hashlib.sha1(html.encode('utf-8')).hexdigest()[:8]
+    sw2, n = _re.subn(r"const CACHE = '[^']*';", "const CACHE = '" + stamp + "';", sw, count=1)
+    if n:
+        if sw2 != sw:
+            sw_path.write_text(sw2, encoding='utf-8')
+            print('✓ เลื่อนแคช Service Worker →', stamp, '(เครื่องที่ติดตั้งไว้จะได้ของใหม่)')
+        else:
+            print('• Service Worker คงเดิม', stamp, '(เนื้อไฟล์ไม่เปลี่ยน)')
+    else:
+        print('  ⚠️ หา const CACHE ใน sw.js ไม่เจอ — ต้องเลื่อนเวอร์ชันเอง')
+
