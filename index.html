@@ -521,7 +521,7 @@ body.light .ai-md,body.light .ai-md strong{color:#0b1220}body.light .ai-sub,body
     </div>
     <div style="margin-top:9px"><button class="btn ghost" style="padding:9px 15px;font-size:13px" onclick="loadPatient()">🔍 ดึงข้อมูลผู้ป่วยที่เคยประเมิน (จาก CID)</button></div>
     <div class="grid c3" style="margin-top:13px">
-      <div class="fld"><label>ชื่อ-สกุล</label><input id="pname" placeholder="นางสมศรี ใจดี" onblur="checkDupName()">
+      <div class="fld"><label>ชื่อ-สกุล</label><input id="pname" placeholder="นางสมศรี ใจดี" oninput="nameTyped_()" onblur="checkDupName()">
         <div id="dupWarn" class="dupwarn hidden"></div></div>
       <div class="fld"><label>เพศ</label><select id="gender"><option value="">—</option><option>หญิง</option><option>ชาย</option></select></div>
       <div class="fld"><label>อายุ (ปี)</label><input id="age" type="number" inputmode="numeric" placeholder="65"></div>
@@ -600,18 +600,27 @@ body.light .ai-md,body.light .ai-md strong{color:#0b1220}body.light .ai-sub,body
     <div id="suicidebox"></div>
 
     <div id="autoWrap" class="hidden">
+      <!-- v60.5 2Q plus+ → เลือกแบบประเมินต่อ (เหมือนเลือกฉบับ MoCA) -->
+      <div id="dtoolBox"></div>
+      <div id="wrap9q">
       <!-- 9Q -->
       <div class="sectitle">9Q (0=ไม่มีเลย, 1=มีบางวัน 1-7 วัน, 2=มีบ่อย >7 วัน, 3=มีเกือบทุกวัน)</div>
       <div class="qgrid" id="q9box"></div>
       <div class="scorebox" id="q9score"><div><div class="big" id="q9num">0</div><div class="lbl">9Q (เต็ม 27)</div></div><div class="res" id="q9res">—</div></div>
+      </div>
+      <div id="wrap8q">
+      <div class="dw-meta hidden" id="q8why" style="margin:12px 0 -4px;font-size:12.5px;color:var(--gold)">⚠️ 2Q plus ข้อความเสี่ยงฆ่าตัวตาย = มี → ต้องทำ 8Q ด้วย (ไม่ว่าจะเลือกแบบประเมินใด)</div>
       <!-- 8Q -->
       <div class="sectitle">8Q แบบประเมินการฆ่าตัวตาย (8 คำถาม • คะแนนถ่วงน้ำหนักรายข้อ)</div>
       <div class="qgrid" id="q8box"></div>
       <div class="scorebox" id="q8score"><div><div class="big" id="q8num">0</div><div class="lbl">8Q</div></div><div class="res" id="q8res">—</div></div>
+      </div>
+      <div id="wrapTgds">
       <!-- TGDS-30 -->
       <div class="sectitle">TGDS-30 Thai Geriatric Depression Scale (ตอบ ใช่ / ไม่ใช่ — ระบบกลับคะแนนข้อเชิงบวกให้เอง)</div>
       <div class="qgrid" id="tgdsbox"></div>
       <div class="scorebox" id="tgdsscore"><div><div class="big" id="tgdsnum">0</div><div class="lbl">TGDS-30 (เต็ม 30)</div></div><div class="res" id="tgdsres">—</div></div>
+      </div>
     </div>
 
     <div class="nav" style="flex-wrap:wrap">
@@ -671,7 +680,7 @@ const Q8=[['คิดอยากตาย หรือ คิดว่าตา
 const TGDS=['คุณพอใจกับชีวิตความเป็นอยู่ในตอนนี้','คุณไม่อยากทำในสิ่งที่เคยสนใจหรือเคยทำเป็นประจำ','คุณรู้สึกชีวิตของคุณช่วงนี้ว่างเปล่าไม่รู้จะทำอะไร','คุณรู้สึกเบื่อหน่ายบ่อยๆ','คุณหวังว่าจะมีสิ่งที่ดีเกิดขึ้นในวันหน้า','คุณมีเรื่องกังวลตลอดเวลา และเลิกคิดไม่ได้','คุณรู้สึกอารมณ์ดี','คุณรู้สึกกลัวว่าจะมีเรื่องไม่ดีเกิดขึ้นกับคุณ','คุณรู้สึกมีความสุข','บ่อยครั้งที่คุณรู้สึกไม่มีที่พึ่ง','คุณรู้สึกกระวนกระวาย กระสับกระส่ายบ่อยๆ','คุณชอบอยู่กับบ้านมากกว่าที่จะออกนอกบ้าน','บ่อยครั้งที่คุณรู้สึกวิตกกังวลเกี่ยวกับชีวิตข้างหน้า','คุณคิดว่าความจำของคุณไม่ดีเท่าคนอื่น','การที่มีชีวิตอยู่ถึงปัจจุบัน เป็นเรื่องน่ายินดี','คุณรู้สึกหมดกำลังใจ หรือเศร้าใจบ่อยๆ','คุณรู้สึกว่าชีวิตคุณไม่ค่อยมีคุณค่า','คุณรู้สึกกังวลมากกับชีวิตที่ผ่านมา','คุณรู้สึกว่าชีวิตนี้ยังมีเรื่องน่าสนุกอีกมาก','คุณรู้สึกลำบากที่จะเริ่มต้นอะไรใหม่ๆ','คุณรู้สึกกระตือรือร้น','คุณรู้สึกสิ้นหวัง','คุณคิดว่าคนอื่นดีกว่าคุณ','คุณอารมณ์เสียง่ายกับเรื่องเล็กๆ น้อยๆ อยู่เสมอ','คุณรู้สึกอยากร้องไห้บ่อยๆ','คุณมีความตั้งใจในการทำสิ่งหนึ่งสิ่งใดได้ไม่นาน','คุณรู้สึกสดชื่นในเวลาตื่นนอนตอนเช้า','คุณไม่อยากพบปะพูดคุยกับคนอื่น','คุณตัดสินใจอะไรได้เร็ว','คุณมีจิตใจ สบาย แจ่มใสเหมือนก่อน'];
 const TGDS_REVERSE={1:1,5:1,7:1,9:1,15:1,19:1,21:1,27:1,29:1,30:1}; // 1-based
 
-const ST={ q2:[null,null], suicide:null, q9:Array(9).fill(null), q8:Array(9).fill(null), tgds:Array(30).fill(null), dx:{} };
+const ST={ q2:[null,null], suicide:null, q9:Array(9).fill(null), q8:Array(9).fill(null), tgds:Array(30).fill(null), dx:{}, dtool:null };   // dtool: '9q8q' | 'tgds' | 'both'(ข้อมูลเก่าที่ทำครบทั้งคู่)
 
 /* ---- ที่อยู่ทั้งประเทศ (cascade จังหวัด→อำเภอ→ตำบล + รหัสไปรษณีย์อัตโนมัติ) — ต้องอยู่ก่อน init เพราะ initAddress() ใช้ ADDR ---- */
 function normGeo(s){ return String(s==null?'':s).replace(/เเ/g,'แ').replace(/\s+/g,' ').trim(); } // เเ→แ
@@ -853,7 +862,53 @@ function setTgds(i,val,el){ ST.tgds[i]=val; var rev=TGDS_REVERSE[i+1]; sib(el, (
 /* ---- 2Q flow: เปิดทั้งหมดเมื่อ 2Q+ ---- */
 function q2Score(){ return (ST.q2[0]||0)+(ST.q2[1]||0); }
 function q2Positive(){ return q2Score()>0 || ST.suicide===1; }
-function flow(){ autoWrap.classList.toggle('hidden', !q2Positive()); score9Q(); score8Q(); scoreTgds(); gate(); }
+function flow(){ autoWrap.classList.toggle('hidden', !q2Positive()); renderDtool_(); score9Q(); score8Q(); scoreTgds(); gate(); }
+
+/* ---- v60.5 2Q plus+ → เลือกแบบประเมินต่อ 1 แบบ: 9Q+8Q (กรมสุขภาพจิต) หรือ TGDS-30 (เฉพาะผู้สูงอายุ) ----
+   บันทึกเฉพาะแบบที่เลือก · 8Q บังคับเสมอถ้า 2Q plus ข้อฆ่าตัวตาย = มี (ความปลอดภัยมาก่อน) */
+function dtUse9q_(){ return ST.dtool==='9q8q'||ST.dtool==='both'; }
+function dtUseTgds_(){ return ST.dtool==='tgds'||ST.dtool==='both'; }
+function dtNeed8q_(){ return dtUse9q_() || (ST.dtool==='tgds' && ST.suicide===1); }
+function dtInfer_(d){ d=d||{};   // ข้อมูลก่อน v60.5 ไม่มี tool → เดาจากคำตอบที่มี
+  var a9=(d.q9||[]).some(function(v){return v!=null;}), aT=(d.tgds||[]).some(function(v){return v==='yes'||v==='no';});
+  return a9&&aT?'both':a9?'9q8q':aT?'tgds':null; }
+function renderDtool_(){
+  var box=document.getElementById('dtoolBox'); if(!box) return;
+  var t=ST.dtool, on=q2Positive();
+  ['wrap9q','wrap8q','wrapTgds'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.add('hidden'); });
+  if(!on){ box.innerHTML=''; return; }
+  if(!t){
+    function card(k,cls,icon,title,sub,pts){
+      return '<div class="mv-card '+cls+'" role="button" tabindex="0" onclick="setDtool(\''+k+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();setDtool(\''+k+'\');}">'
+        +'<div class="mv-ic">'+icon+'</div><div class="mv-t">'+title+'</div><div class="mv-s">'+sub+'</div>'
+        +'<ul>'+pts.map(function(p){ return '<li>'+p+'</li>'; }).join('')+'</ul><div class="mv-go">เริ่มประเมินแบบนี้ →</div></div>'; }
+    box.innerHTML='<div class="mv-hero" style="margin-top:14px"><div class="mv-hero-t">2Q plus ผิดปกติ</div>'
+      +'<div class="mv-hero-v"><b>เลือกแบบประเมินต่อ 1 แบบ</b> แล้วทำให้ครบก่อนบันทึก</div>'
+      +(ST.suicide===1?'<div class="mv-hero-r">⚠️ ตอบว่ามีความคิดทำร้ายตนเอง — ไม่ว่าจะเลือกแบบใด ระบบจะให้ทำ 8Q ด้วยเสมอ</div>':'')+'</div>'
+      +'<div class="mv-grid">'
+      +card('9q8q','s','📋','9Q + 8Q','แนวทางกรมสุขภาพจิต (มาตรฐานประเทศ)',['9Q วัดความรุนแรงซึมเศร้า 9 ข้อ (0–3 คะแนน)','8Q ประเมินความเสี่ยงฆ่าตัวตาย 8 ข้อ','ตรงกับระบบรายงาน/ส่งต่อของกระทรวง'])
+      +card('tgds','b','🧓','TGDS-30','แบบวัดภาวะซึมเศร้าในผู้สูงอายุไทย',['30 ข้อ ตอบแค่ ใช่ / ไม่ใช่ — ผู้สูงอายุตอบง่าย','ระบบกลับคะแนนข้อเชิงบวกให้เอง · ≥13 = ซึมเศร้า','ถ้ามีความคิดทำร้ายตนเอง ระบบเปิด 8Q ให้ทำต่อ'])
+      +'</div>';
+    return;
+  }
+  var lbl=t==='9q8q'?'📋 9Q + 8Q':t==='tgds'?'🧓 TGDS-30':'📋 9Q/8Q + 🧓 TGDS-30';
+  var sub=t==='9q8q'?'แนวทางกรมสุขภาพจิต':t==='tgds'?('แบบวัดซึมเศร้าผู้สูงอายุไทย'+(ST.suicide===1?' · + 8Q (มีความคิดทำร้ายตนเอง)':'')):'ข้อมูลเดิมทำครบทั้ง 2 แบบ';
+  box.innerHTML='<div class="mv-bar" style="margin-top:14px"><span class="mv-pill'+(t==='tgds'?' b':'')+'">'+lbl+'</span><span class="mv-bar-t">'+sub+'</span>'
+    +'<button type="button" class="mv-switch" onclick="switchDtool()">⇄ เปลี่ยนแบบประเมิน</button></div>';
+  if(dtUse9q_()) wrap9q.classList.remove('hidden');
+  if(dtNeed8q_()) wrap8q.classList.remove('hidden');
+  if(dtUseTgds_()) wrapTgds.classList.remove('hidden');
+  var w=document.getElementById('q8why'); if(w) w.classList.toggle('hidden', !(ST.dtool==='tgds'&&ST.suicide===1));
+}
+function dtClearUi_(boxId){ var b=document.getElementById(boxId); if(b) [].forEach.call(b.querySelectorAll('.opt'),function(o){ o.classList.remove('on','risk'); }); }
+function setDtool(t){ if(t!=='9q8q'&&t!=='tgds') return; ST.dtool=t; flow();
+  var first=document.getElementById(t==='tgds'?'wrapTgds':'wrap9q'); if(first){ try{ first.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} } }
+function switchDtool(){
+  var has9=ST.q9.some(function(v){return v!=null;})||ST.q8.some(function(v){return v!=null;}), hasT=ST.tgds.some(function(v){return v==='yes'||v==='no';});
+  if((has9||hasT) && !confirm('เปลี่ยนแบบประเมิน?\n\nคำตอบที่กรอกไว้ของแบบเดิมจะถูกล้าง (บันทึกได้ทีละแบบ)')) return;
+  ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null);
+  dtClearUi_('q9box'); dtClearUi_('q8box'); dtClearUi_('tgdsbox');
+  ST.dtool=null; flow(); }
 
 /* ---- SCORING (สูตรเป๊ะ) ---- */
 function q9Sum(){ return ST.q9.reduce(function(a,b){return a+(b||0);},0); }
@@ -1145,7 +1200,7 @@ function buildSummary(){
     '<div style="font-size:13px;color:var(--ink-dim);margin-top:4px">'+(esc(gender.value)||'-')+' · '+(esc(age.value)||'-')+' ปี · ต.'+(esc(tambon.value)||'-')+(document.getElementById('smoke')&&document.getElementById('smoke').checked?' · 🚬 สูบบุหรี่':'')+'</div></div>');
   cards.push('<div class="sumcard"><h4>⚖️ BMI / ความดัน</h4><div class="v">'+(bmi?bmi.toFixed(1):'—')+' <small>'+(bmi?bmiCat(bmi):'')+'</small></div>'+
     '<div style="font-size:13px;color:var(--ink-dim);margin-top:4px">BP '+(esc(sbp.value)||'-')+'/'+(esc(dbp.value)||'-')+' · ชีพจร '+(esc(pulse.value)||'-')+'</div></div>');
-  cards.push('<div class="sumcard" style="border-left:3px solid '+(suicide||conf?'var(--risk)':q2Positive()?'var(--warn)':'var(--ok)')+'"><h4>🧠 คัดกรองอารมณ์</h4><div style="font-size:12.5px;color:var(--ink-dim)">2Q='+q2Score()+' · 9Q='+(q2Positive()?q9Sum():'—')+' · 8Q='+(q8Any()?q8Sum():'—')+' · TGDS='+(ST.tgds.some(function(x){return x;})?tgdsSum():'—')+'</div>'+
+  cards.push('<div class="sumcard" style="border-left:3px solid '+(suicide||conf?'var(--risk)':q2Positive()?'var(--warn)':'var(--ok)')+'"><h4>🧠 คัดกรองอารมณ์</h4><div style="font-size:12.5px;color:var(--ink-dim)">2Q='+q2Score()+' · 9Q='+(q2Positive()&&dtUse9q_()?q9Sum():'—')+' · 8Q='+(q8Any()?q8Sum():'—')+' · TGDS='+(ST.tgds.some(function(x){return x;})?tgdsSum():'—')+'</div>'+
     moodPills.map(function(d){return '<div class="pill '+d.k+'">'+d.t+'</div>';}).join('')+'</div>');
   var doms=domainResults();
   doms.forEach(function(d){
@@ -3466,18 +3521,47 @@ function showInlineLogin_(){
     google.script.run.withSuccessHandler(function(r){
       go.disabled=false; go.textContent='เข้าสู่ระบบ';
       if(!r||!r.ok||!r.token){ er.textContent=(r&&r.message)||'เข้าสู่ระบบไม่สำเร็จ'; return; }
+      if(r.mustChange){ ilForceChange_(r, u, pw, function(){ onOk(r, u); }); return; }   // v60.5 รหัสชั่วคราว → ตั้งรหัสใหม่ก่อน
+      onOk(r, u);
+    }).withFailureHandler(function(e){ go.disabled=false; go.textContent='เข้าสู่ระบบ'; er.textContent='ผิดพลาด: '+(e&&e.message||e); }).authenticate(u,pw);
+  }
+  function onOk(r, u){
       window.__pocToken=r.token; window.__pocBy=r.displayName||u; window.__pocRole=r.role||'';
       if(typeof window.__eldAuthStash==='function') window.__eldAuthStash();
       try{ if(typeof ensureAssessor_==='function') ensureAssessor_(); }catch(e){}
       bk.remove();
       try{ toast('✓ เข้าสู่ระบบแล้ว ('+(r.displayName||u)+') — กดบันทึกซ้ำได้เลย'); }catch(e){ alert('เข้าสู่ระบบแล้ว — กดบันทึกซ้ำได้เลย'); }
       try{ if(typeof flushSync==='function') flushSync(); }catch(e){}
-    }).withFailureHandler(function(e){ go.disabled=false; go.textContent='เข้าสู่ระบบ'; er.textContent='ผิดพลาด: '+(e&&e.message||e); }).authenticate(u,pw);
   }
   go.addEventListener('click',doIt);
   document.getElementById('ilPass').addEventListener('keydown',function(ev){ if(ev.key==='Enter') doIt(); });
   document.getElementById('ilX').addEventListener('click',function(){ bk.remove(); });
   setTimeout(function(){ try{ document.getElementById('ilUser').focus(); }catch(e){} },80);
+}
+/* v60.5 เข้าด้วยรหัสชั่วคราว (ลืมรหัสผ่าน/ลงทะเบียนใหม่) → ต้องตั้งรหัสใหม่ก่อนใช้งาน · ไม่เก็บโทเค็นจนกว่าจะเปลี่ยนสำเร็จ */
+function ilForceChange_(r, u, oldPw, done){
+  var card=document.querySelector('#inlineLogin > div'); if(!card){ done(); return; }
+  var IN='width:100%;margin-bottom:9px;padding:11px 13px;border-radius:11px;border:1px solid rgba(125,211,252,.25);background:rgba(7,11,22,.7);color:#e8eefc;font-family:inherit;font-size:14px';
+  card.innerHTML='<div style="font-size:16.5px;font-weight:800;margin-bottom:4px;color:#e8eefc">🔑 ตั้งรหัสผ่านใหม่</div>'
+    +'<div style="font-size:12px;color:#fde68a;line-height:1.6;margin-bottom:14px">คุณเข้าระบบด้วยรหัสชั่วคราว — ตั้งรหัสผ่านใหม่ที่จำง่ายก่อนใช้งาน (อย่างน้อย 6 ตัวอักษร)</div>'
+    +'<input id="ilNew1" type="password" placeholder="รหัสผ่านใหม่" autocomplete="new-password" style="'+IN+'">'
+    +'<input id="ilNew2" type="password" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password" style="'+IN+'">'
+    +'<div id="ilErr2" style="min-height:16px;font-size:12px;color:#fb7185;margin-bottom:8px"></div>'
+    +'<button id="ilSave" style="width:100%;padding:12px;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:800;color:#04121a;background:linear-gradient(120deg,#5eead4,#38bdf8);cursor:pointer">บันทึกรหัสผ่านใหม่</button>';
+  var b=document.getElementById('ilSave'), er=document.getElementById('ilErr2');
+  setTimeout(function(){ try{ document.getElementById('ilNew1').focus(); }catch(e){} },60);
+  b.addEventListener('click', function(){
+    var n1=document.getElementById('ilNew1').value||'', n2=document.getElementById('ilNew2').value||'';
+    if(n1.length<6){ er.textContent='รหัสผ่านใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
+    if(n1!==n2){ er.textContent='ยืนยันรหัสผ่านใหม่ไม่ตรงกัน'; return; }
+    if(n1===oldPw){ er.textContent='ตั้งรหัสใหม่ที่ไม่ซ้ำกับรหัสชั่วคราว'; return; }
+    b.disabled=true; b.textContent='กำลังบันทึก...'; er.textContent='';
+    google.script.run.withSuccessHandler(function(x){
+      if(!x||!x.ok){ b.disabled=false; b.textContent='บันทึกรหัสผ่านใหม่'; er.textContent=(x&&x.message)||'เปลี่ยนรหัสผ่านไม่สำเร็จ'; return; }
+      try{ toast('ตั้งรหัสผ่านใหม่แล้ว ✓'); }catch(e){}
+      done();
+    }).withFailureHandler(function(e){ b.disabled=false; b.textContent='บันทึกรหัสผ่านใหม่'; er.textContent='ผิดพลาด: '+(e&&e.message||e); }).changeMyPassword(r.token, oldPw, n1);
+  });
 }
 /* guard บันทึก: บล็อกเฉพาะเมื่อ "ยังไม่ได้เข้าสู่ระบบจริง" (ไม่มีโทเค็น) — ถ้ามีโทเค็นแต่ชื่อว่าง ปล่อยผ่าน (server เติมชื่อจากโทเค็นให้) */
 function assessorGuard_(){
@@ -3536,7 +3620,10 @@ function restoreProfile(o){ if(!o) return; PROFILE_FIELDS.forEach(function(id){ 
   sumDx(); calcBMI(); calcBP(); updateGeoUI(); }
 
 function collectModuleData(key){
-  if(key==='mood') return {q2:ST.q2.slice(),suicide:ST.suicide,q9:ST.q9.slice(),q8:ST.q8.slice(),tgds:ST.tgds.slice()};
+  if(key==='mood'){ var on=q2Positive();   // v60.5 เก็บเฉพาะแบบที่เลือก
+    return {q2:ST.q2.slice(),suicide:ST.suicide,tool:on?(ST.dtool||null):null,
+      q9:(on&&dtUse9q_())?ST.q9.slice():Array(9).fill(null), q8:(on&&dtNeed8q_())?ST.q8.slice():Array(9).fill(null),
+      tgds:(on&&dtUseTgds_())?ST.tgds.slice():Array(30).fill(null)}; }
   if(key==='basic') return collectProfile();
   if(key==='note'){ var dn=document.getElementById('doctorNote'); return {text:dn?dn.value:''}; }
   if(key==='moca') return mocaNormData_(MOD.moca);   // v53: เก็บเฉพาะฉบับ MoCA ที่เลือก
@@ -3548,7 +3635,7 @@ function deepMergeInto(target,src){ if(src==null||typeof src!=='object') return 
     else target[k]=v; });
   return target; }
 function restoreModuleData(key,data){ if(!data) return;
-  if(key==='mood'){ ST.q2=data.q2||[null,null]; ST.suicide=(data.suicide==null?null:data.suicide); ST.q9=data.q9||Array(9).fill(null); ST.q8=data.q8||Array(9).fill(null); ST.tgds=data.tgds||Array(30).fill(null); return; }
+  if(key==='mood'){ ST.q2=data.q2||[null,null]; ST.suicide=(data.suicide==null?null:data.suicide); ST.q9=data.q9||Array(9).fill(null); ST.q8=data.q8||Array(9).fill(null); ST.tgds=data.tgds||Array(30).fill(null); ST.dtool=(data.tool==='9q8q'||data.tool==='tgds'||data.tool==='both')?data.tool:dtInfer_(data); return; }
   if(key==='basic'){ restoreProfile(data); return; }
   if(key==='note'){ var dn=document.getElementById('doctorNote'); if(dn) dn.value=(data&&data.text)||''; return; }
   // ทับลง default สดของโมดูล → คงโครงสร้างย่อย (sel/protein/seg/v/sarc/mtfi) เสมอ กัน crash จากข้อมูลไม่ครบ
@@ -3568,7 +3655,7 @@ function applyMoodUI(){
 function moduleSnapshot(key){
   if(key==='basic'){ var w=+wt.value,h=+ht.value/100,bmi=(w>0&&h>0)?w/(h*h):0; return {scoreText:'BMI '+(bmi?bmi.toFixed(1):'—'),result:(pname.value||'—'),sev:''}; }
   if(key==='mood'){ var conf=depressionConfirmed(),suicide=ST.suicide===1||(ST.q9[8]||0)>=1||q8Sum()>=1;
-    return {scoreText:'2Q='+q2Score()+' · 9Q='+(q2Positive()?q9Sum():'—'), result:(conf?'เข้าเกณฑ์ซึมเศร้า':q2Positive()?'2Q+ ผิดปกติ':'ไม่พบซึมเศร้า')+(suicide?' · เสี่ยงฆ่าตัวตาย':''), sev:(conf||suicide?'risk':q2Positive()?'warn':'ok')}; }
+    return {scoreText:'2Q='+q2Score()+(q2Positive()&&dtUseTgds_()&&!dtUse9q_()?(' · TGDS='+tgdsSum()):(' · 9Q='+(q2Positive()&&dtUse9q_()?q9Sum():'—'))), result:(conf?'เข้าเกณฑ์ซึมเศร้า':q2Positive()?'2Q+ ผิดปกติ':'ไม่พบซึมเศร้า')+(suicide?' · เสี่ยงฆ่าตัวตาย':''), sev:(conf||suicide?'risk':q2Positive()?'warn':'ok')}; }
   if(key==='note'){ var dn=document.getElementById('doctorNote'),t=dn?(dn.value||'').trim():''; return {scoreText:(t?(t.length>40?t.slice(0,40)+'…':t):''),result:(t?'บันทึกความเห็นแล้ว':'(ยังไม่มีความเห็น)'),sev:''}; }
   var KEY2NAME={falls:'หกล้ม (TUG/SPPB/Thai-FRAT)',wfg:'WFG · ความเสี่ยงหกล้มสากล',adl:'Basic / IADL / Advance ADL',mna:'MNA',frail:'FRAIL / MTFI',muscle:'Hand Grip / SARC-CalF',gpaq:'GPAQ',whoqol:'WHOQOL-BREF',oral:'สุขภาพช่องปาก',vision:'การมองเห็น (ICOPE + VA)',hearing:'การได้ยิน (กระซิบ + HHIE-S)',cont:'ICIQ-UI SF',zarit:'Zarit ภาระผู้ดูแล',mmse:'MMSE-Thai',moca:'MoCA'};
   var want=KEY2NAME[key], arr=domainResults();
@@ -3678,7 +3765,8 @@ function moduleConditions(key){
 function moduleDetail(key){
  try{
   if(key==='basic'){ var w=+wt.value,h=+ht.value/100; return {Weight:wt.value,Height:ht.value,BMI:(w>0&&h>0)?(w/(h*h)).toFixed(1):'',Calf_Circumference:calf.value,Systolic_BP:sbp.value,Diastolic_BP:dbp.value,Pulse:pulse.value}; }
-  if(key==='mood'){ var on=q2Positive(); return {Q2_Result:on?'2Q plus ผิดปกติ':'ปกติ',Q9_Score:on?q9Sum():'',Q9_Result:on?q9Result(q9Sum()):'',Q8_Score:q8Any()?q8Sum():'',Q8_Result:q8Any()?q8Result(q8Sum()):'',TGDS_Score:tgdsDone()?tgdsSum():'',TGDS_Result:tgdsDone()?tgdsResult(tgdsSum()):''}; }
+  if(key==='mood'){ var on=q2Positive(), u9=on&&dtUse9q_(), u8=on&&dtNeed8q_()&&q8Any(), uT=on&&dtUseTgds_()&&tgdsDone();   // v60.5 ไม่เขียน 9Q=0 ปลอมเมื่อเลือก TGDS
+    return {Q2_Result:on?'2Q plus ผิดปกติ':'ปกติ',Q9_Score:u9?q9Sum():'',Q9_Result:u9?q9Result(q9Sum()):'',Q8_Score:u8?q8Sum():'',Q8_Result:u8?q8Result(q8Sum()):'',TGDS_Score:uT?tgdsSum():'',TGDS_Result:uT?tgdsResult(tgdsSum()):''}; }
   if(key==='mmse'){ var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL; var t=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO); var cut=mmseCutoff(mmseEduGroup()); return {MMSE_Score:t,MMSE_Result:t<cut?'MMSE ผิดปกติ R/O Dementia':'MMSE ปกติ'}; }
   if(key==='moca'){ var ME=mocaEval(); if(!ME.ver) return {}; return {MoCA_Score:ME.adj,MoCA_Result:mocaResultText(ME),MoCA_Version:ME.label,MoCA_Raw_Score:ME.raw,MoCA_Adjust_Points:ME.adjPts,MoCA_Cutoff:ME.cutoff}; }
   if(key==='falls') return modPartsDetail('falls');   // TUG / SPPB / Thai-FRAT เขียนเฉพาะตัวที่กรอกครบ
@@ -3882,7 +3970,10 @@ function moduleComplete(key){
     case 'basic': return step1Complete();
     case 'mood':
       if(ST.q2[0]==null||ST.q2[1]==null||ST.suicide==null) return false;
-      if(q2Positive()){ if(ST.q9.some(function(v){return v==null;})) return false; if(ST.q8.some(function(v){return v==null;})) return false; if(ST.tgds.some(function(v){return v!=='yes'&&v!=='no';})) return false; }
+      if(q2Positive()){ if(!ST.dtool) return false;   // v60.5 ต้องเลือกแบบประเมินต่อก่อน · ครบเฉพาะแบบที่เลือก (+8Q ถ้าจำเป็น)
+        if(dtUse9q_() && ST.q9.some(function(v){return v==null;})) return false;
+        if(dtNeed8q_() && ST.q8.some(function(v){return v==null;})) return false;
+        if(dtUseTgds_() && ST.tgds.some(function(v){return v!=='yes'&&v!=='no';})) return false; }
       return true;
     case 'note': { var dn=document.getElementById('doctorNote'); return !!(dn&&String(dn.value||'').trim()); }
     case 'falls': { var f=MOD.falls; return f.tug!=null&&f.balance!=null&&f.gait!=null&&f.chair!=null&&fratScorable(); }
@@ -3921,6 +4012,7 @@ function saveModule(key, btn){
     var _st=modPartsStatus(key);
     if(_st) alert('ยังบันทึก “'+saveableName(key)+'” ไม่ได้\n\nต้องกรอกให้ครบอย่างน้อย 1 เครื่องมือก่อน:\n'
       + _st.map(function(p){ return '  ' + (p.done?'✓':'○') + ' ' + p.name + ' — ' + p.hint; }).join('\n'));
+    else if(key==='mood' && q2Positive() && !ST.dtool){ alert('2Q plus ผิดปกติ — เลือกแบบประเมินต่อก่อน:\n  • 9Q + 8Q  หรือ\n  • TGDS-30'); try{ renderDtool_(); document.getElementById('dtoolBox').scrollIntoView({behavior:'smooth'}); }catch(e){} }
     else alert('กรุณากรอก “'+saveableName(key)+'” ให้ครบทุกข้อก่อนบันทึก');
     return false; }
   if(btn){ if(btn.dataset.busy==='1') return false; btn.dataset.busy='1'; setSaveBtn_(btn,'⏳ กำลังบันทึก...',true); }
@@ -3950,7 +4042,8 @@ function clearFormState(){
   adate.value=new Date().toISOString().slice(0,10); if(typeof dateThHint_==='function')dateThHint_('adate');
   ST.dx={}; document.querySelectorAll('#diseases .chip').forEach(function(c){ c.classList.remove('on'); });
   sumDx(); bmiHint.textContent=''; bpHint.textContent='';
-  ST.q2=[null,null]; ST.suicide=null; ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null);
+  ST.q2=[null,null]; ST.suicide=null; ST.q9=Array(9).fill(null); ST.q8=Array(9).fill(null); ST.tgds=Array(30).fill(null); ST.dtool=null;
+  try{ dupResetName_(); cidWarn_(''); }catch(e){}   // v60.5 ล้างคำเตือนชื่อซ้ำ/เลขบัตรของคนเดิม
   MOD.falls=JSON.parse(JSON.stringify(freshMod().falls));
   MOD.adl={barthel:{},iadl:{},aadl:{}}; MOD.mna={sel:{},protein:{milk:false,legumeEgg:false,meat:false}};
   MOD.frail={fatigue:null,resistance:null,ambulation:null,diseases:{},prevWeight:null,mtfi:{}};
@@ -4206,8 +4299,10 @@ function formIsFresh(){
   return true;
 }
 /* กรอก CID ครบ → ถ้ามีการประเมินเดิม (จากเครื่อง/ผู้ประเมินอื่น) ให้ดึงผลมาแสดงอัตโนมัติเมื่อฟอร์มยังว่าง; ถ้ากรอกไปแล้วแค่เตือน */
-function peekCase(){ var cid=currentCid(); if(cid.length!==13) return;
-  try{ _dupLast=''; checkDupName(); }catch(e){}   // v60: เลขบัตรครบแล้ว ตรวจชื่อซ้ำอีกรอบด้วยเลขจริง
+function peekCase(){ var cid=currentCid();
+  try{ cidWarn_(''); if(cid.length===13 && !thaiCidOk_(cid)) cidWarn_('⚠️ <b>เลขบัตรนี้ไม่ผ่านการตรวจหลักสุดท้าย</b> — น่าจะพิมพ์ผิด ตรวจกับบัตรจริงอีกครั้งก่อนบันทึก'); }catch(e){}
+  if(cid.length!==13){ try{ hideDupWarn(); }catch(e){} return; }
+  try{ hideDupWarn(); _dupLast=''; checkDupName(); }catch(e){}   // v60.5: ตรวจเฉพาะชื่อที่พิมพ์ให้เลขบัตรนี้ (ชื่อค้างของคนก่อนไม่นับ)
   function handle(rec){ if(!rec||!rec.modules) return; var keys=Object.keys(rec.modules).filter(function(k){return k!=='basic';});
     if(!keys.length) return;
     var who={}; keys.forEach(function(k){ if(rec.modules[k].assessor) who[rec.modules[k].assessor]=1; });
@@ -4220,27 +4315,53 @@ function peekCase(){ var cid=currentCid(); if(cid.length!==13) return;
 }
 
 /* ---------- v60 เตือน "ชื่อ-สกุลนี้มีอยู่แล้วในระบบ แต่คนละเลขบัตร" ----------
-   เจตนา: กันเคสสลับคน/บันทึกซ้ำคน · ถ้าเจ้าหน้าที่ยืนยันว่าคนละคน ระบบจะจำไว้ ไม่ถามซ้ำอีก */
-var _dupLast='';
+   เจตนา: กันเคสสลับคน/บันทึกซ้ำคน · ถ้าเจ้าหน้าที่ยืนยันว่าคนละคน ระบบจะจำไว้ ไม่ถามซ้ำอีก
+   v60.5 แก้เตือนผิดคน: เดิมพอกรอกเลขบัตรคนใหม่ ระบบเอา "ชื่อของคนก่อนหน้าที่ค้างในช่อง" ไปเช็ก → เจอชื่อคนเก่าทุกครั้ง
+         ตอนนี้เช็กเฉพาะชื่อที่ "เจ้าหน้าที่พิมพ์เองให้เลขบัตรนี้" เท่านั้น (_nameTypedFor) · ชื่อที่ระบบดึงมา/ค้างจากคนก่อน = ไม่เช็ก */
+var _dupLast='', _nameTypedFor=null;   // null = ชื่อในช่องไม่ได้พิมพ์เอง · '*' = พิมพ์ก่อนกรอกเลขบัตรครบ · เลขบัตร = พิมพ์ให้คนนี้
+function nameTyped_(){ var c=currentCid(); _nameTypedFor=(c.length===13)?c:'*'; _dupLast=''; }
 function dupBox_(){ return document.getElementById('dupWarn'); }
 function hideDupWarn(){ var b=dupBox_(); if(b){ b.className='dupwarn hidden'; b.innerHTML=''; } }
+function dupResetName_(){ _nameTypedFor=null; _dupLast=''; hideDupWarn(); }
+/* เลขบัตรไทย: หลักที่ 13 = ตัวตรวจ (mod 11) → จับพิมพ์ผิดได้เกือบทุกกรณี โดยไม่ต้องต่อเน็ต */
+function thaiCidOk_(c){ if(!/^\d{13}$/.test(c)) return false; var s=0; for(var i=0;i<12;i++) s+=(+c.charAt(i))*(13-i); return ((11-(s%11))%10)===(+c.charAt(12)); }
+function cidWarn_(msg){
+  var el=document.getElementById('cid'); if(!el||!el.parentNode) return;
+  var w=document.getElementById('cidWarn');
+  if(!w){ w=document.createElement('div'); w.id='cidWarn'; w.className='dupwarn hidden'; el.parentNode.appendChild(w); }
+  if(msg){ w.className='dupwarn'; w.innerHTML=msg; } else { w.className='dupwarn hidden'; w.innerHTML=''; }
+}
 function checkDupName(){
   var box=dupBox_(); if(!box) return;
   var nm=(document.getElementById('pname').value||'').trim(), cid=currentCid();
   if(!nm || nm.length<4){ hideDupWarn(); return; }
+  if(_nameTypedFor===null){ hideDupWarn(); return; }                       // ชื่อนี้ระบบดึงมา/ค้างจากคนก่อน ไม่ได้พิมพ์เอง
+  if(_nameTypedFor!=='*' && cid.length===13 && _nameTypedFor!==cid && thaiCidOk_(_nameTypedFor)){ hideDupWarn(); return; }   // พิมพ์ให้เลขบัตรอื่น (ที่ถูกต้อง) = ชื่อค้างของคนก่อน
+  if(cid.length===13 && (_nameTypedFor==='*' || !thaiCidOk_(_nameTypedFor))) _nameTypedFor=cid;   // พิมพ์ชื่อก่อนเลขบัตร หรือเพิ่งแก้เลขบัตรที่พิมพ์ผิด = ยังเป็นคนเดิม
   if(TEST_MODE || !gasAvailable()){ hideDupWarn(); return; }
   var key=nm+'|'+cid; if(key===_dupLast) return; _dupLast=key;
+  function val(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; }
+  var hint={hn:val('hn'), phone:val('phone'), gender:val('gender'), age:val('age')};
   google.script.run
-    .withSuccessHandler(function(r){ renderDupWarn_(r, cid, nm); })
+    .withSuccessHandler(function(r){ if(currentCid()!==cid || (document.getElementById('pname').value||'').trim()!==nm) return; renderDupWarn_(r, cid, nm); })
     .withFailureHandler(function(){ hideDupWarn(); })
-    .checkDuplicateName(window.__pocToken||'', cid, nm);
+    .checkDuplicateName(window.__pocToken||'', cid, nm, hint);
 }
 function renderDupWarn_(r, myCid, myName){
   var box=dupBox_(); if(!box) return;
+  if(r && r.ok && r.cidOwner){
+    box.className='dupwarn';
+    box.innerHTML='⚠️ <b>เลขบัตร '+esc(myCid)+' ลงทะเบียนไว้แล้วเป็นชื่อ “'+esc(r.cidOwner.name)+'”</b>'
+      +(r.cidOwner.pcu?(' · '+esc(r.cidOwner.pcu)):'')+(r.cidOwner.hn?(' · HN '+esc(r.cidOwner.hn)):'')
+      +'<div class="dw-meta">ชื่อที่พิมพ์ (“'+esc(myName)+'”) คนละชื่อกับในทะเบียน — ตรวจเลขบัตรกับบัตรจริงอีกครั้ง กันบันทึกผลผิดคน</div>'
+      +'<div class="dw-btns"><button type="button" class="same" onclick="dupUseExisting_(\''+myCid+'\')">ใช่คนนี้ → ดึงข้อมูลตามทะเบียน</button></div>';
+    return;
+  }
   if(!r || !r.ok || !r.pending || !r.pending.length){ hideDupWarn(); return; }
-  var h='⚠️ <b>ชื่อ-สกุลนี้มีอยู่แล้วในระบบ</b> ('+r.pending.length+' ราย) — ตรวจก่อนว่าเป็นคนเดียวกันหรือคนละคน';
+  var h='⚠️ <b>พบผู้รับบริการที่ชื่อเหมือน/คล้ายกันในระบบ</b> ('+r.pending.length+' ราย) — ตรวจก่อนว่าเป็นคนเดียวกันหรือคนละคน';
   r.pending.forEach(function(m){
-    h+='<div class="dw-row"><div>เลขบัตร <b>'+esc(m.cid)+'</b>'+(m.hn?(' · HN '+esc(m.hn)):'')+'</div>'
+    h+='<div class="dw-row"><div><b>'+esc(m.name||'')+'</b> · เลขบัตร <b>'+esc(m.cid)+'</b>'+(m.hn?(' · HN '+esc(m.hn)):'')+'</div>'
+      +(m.reason?('<div class="dw-meta">🔎 '+esc(m.reason)+'</div>'):'')
       +'<div class="dw-meta">'+esc(m.pcu||'-')+(m.tambon?(' · ต.'+esc(m.tambon)):'')+' · ประเมินแล้ว '+(m.visits||0)+' ครั้ง</div>'
       +(m.decision==='check'?('<div class="dw-flag">🚩 '+esc(m.note||'มีข้อสังเกต ควรตรวจเลขบัตรกับระบบ สปสช.')+'</div>'):'')
       +'<div class="dw-btns">'
@@ -4253,7 +4374,7 @@ function renderDupWarn_(r, myCid, myName){
 }
 function dupUseExisting_(cid){
   var el=document.getElementById('cid'); if(!el) return;
-  el.value=cid; hideDupWarn(); _dupLast='';
+  el.value=cid; dupResetName_(); cidWarn_('');
   if(typeof loadPatient==='function') loadPatient(cid);
   toast('ใช้เลขบัตรเดิมของผู้รับบริการรายนี้แล้ว ✓');
 }

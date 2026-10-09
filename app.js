@@ -14,7 +14,7 @@
   var API_METHODS = ['authenticate', 'saveElderlyAssessmentModule', 'saveElderlyAssessmentBatch',
                      'getElderlyPatientRecord', 'integrityReport', 'createReferral', 'nextClinicDates', 'ping',
                      'getMyName', 'aiCarePlanNarrative',
-                     'checkDuplicateName', 'markNamePair'];   // v60: เตือนชื่อซ้ำตอนกรอกชื่อ + ปุ่ม "คนละคน → จำไว้" · build_pwa.py ตรวจให้แล้วว่าครบ   // v57: หน้าประเมินเรียก 2 ตัวนี้ด้วย (ชื่อผู้บันทึก · AI แผนดูแลท้ายการประเมิน) — ต้องมีใน API_METHODS_ ฝั่ง Code.gs คู่กัน
+                     'checkDuplicateName', 'markNamePair', 'changeMyPassword'];   // v60: เตือนชื่อซ้ำตอนกรอกชื่อ + ปุ่ม "คนละคน → จำไว้" · build_pwa.py ตรวจให้แล้วว่าครบ   // v57: หน้าประเมินเรียก 2 ตัวนี้ด้วย (ชื่อผู้บันทึก · AI แผนดูแลท้ายการประเมิน) — ต้องมีใน API_METHODS_ ฝั่ง Code.gs คู่กัน
 
   /* ---------- เรียก GAS JSON API (POST text/plain = simple request เลี่ยง preflight) ---------- */
   function apiCall(method, args) {
@@ -87,6 +87,12 @@
           '<input id="pwaPass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">' +
           '<button id="pwaLoginBtn">เข้าสู่ระบบ</button>' +
         '</div>' +
+        '<div id="pwaChangeForm" class="hidden">' +
+          '<p class="pwa-sub" style="margin:2px 0 0;color:#fde68a">🔑 คุณเข้าระบบด้วยรหัสชั่วคราว — ตั้งรหัสผ่านใหม่ที่จำง่ายก่อนใช้งาน (อย่างน้อย 6 ตัวอักษร)</p>' +
+          '<input id="pwaNew1" type="password" placeholder="รหัสผ่านใหม่" autocomplete="new-password">' +
+          '<input id="pwaNew2" type="password" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password">' +
+          '<button id="pwaChangeBtn">บันทึกรหัสผ่านใหม่แล้วเข้าใช้งาน</button>' +
+        '</div>' +
         '<div id="pwaGuestForm" class="hidden">' +
           '<p class="pwa-sub" style="margin:2px 0 0">ไม่ต้องมีรหัสผ่าน — กรอกข้อมูลผู้ประเมินเพื่อยืนยันตัวตน (ใช้งานออฟไลน์ได้)</p>' +
           '<input id="pwaGCid" inputmode="numeric" maxlength="13" placeholder="เลขบัตรประชาชนผู้ประเมิน (13 หลัก)">' +
@@ -137,6 +143,7 @@
       btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ...'; err.textContent = '';
       apiCall('authenticate', [u, p]).then(function (r) {
         if (!r || !r.ok) { err.textContent = (r && r.message) || 'เข้าสู่ระบบไม่สำเร็จ'; btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ'; return; }
+        if (r.mustChange) { forceChange(r, u, p); return; }   // v60.5: รหัสชั่วคราว → บังคับตั้งรหัสใหม่ก่อน (เดิมข้ามไปเลย)
         setAuth({ token: r.token, by: r.displayName || u, role: r.role || '' });
         location.reload();
       }, function (e) {
@@ -145,6 +152,28 @@
       });
     }
     btn.addEventListener('click', doLogin);
+
+    // v60.5 บังคับตั้งรหัสใหม่หลังเข้าด้วยรหัสชั่วคราว (ไม่เก็บโทเค็นจนกว่าจะเปลี่ยนสำเร็จ)
+    function forceChange(r, u, oldPw) {
+      formS.classList.add('hidden'); tabS.parentNode.classList.add('hidden');
+      var fc = document.getElementById('pwaChangeForm'), cb = document.getElementById('pwaChangeBtn');
+      fc.classList.remove('hidden'); err.textContent = '';
+      document.getElementById('pwaNew1').focus();
+      cb.onclick = function () {
+        var n1 = document.getElementById('pwaNew1').value, n2 = document.getElementById('pwaNew2').value;
+        if (n1.length < 6) { err.textContent = 'รหัสผ่านใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
+        if (n1 !== n2) { err.textContent = 'ยืนยันรหัสผ่านใหม่ไม่ตรงกัน'; return; }
+        if (n1 === oldPw) { err.textContent = 'ตั้งรหัสใหม่ที่ไม่ซ้ำกับรหัสชั่วคราว'; return; }
+        cb.disabled = true; cb.textContent = 'กำลังบันทึก...'; err.textContent = '';
+        apiCall('changeMyPassword', [r.token, oldPw, n1]).then(function (x) {
+          if (!x || !x.ok) { err.textContent = (x && x.message) || 'เปลี่ยนรหัสผ่านไม่สำเร็จ'; cb.disabled = false; cb.textContent = 'บันทึกรหัสผ่านใหม่แล้วเข้าใช้งาน'; return; }
+          setAuth({ token: r.token, by: r.displayName || u, role: r.role || '' });
+          location.reload();
+        }, function (e) {
+          err.textContent = 'เชื่อมต่อไม่ได้: ' + (e && e.message || e); cb.disabled = false; cb.textContent = 'บันทึกรหัสผ่านใหม่แล้วเข้าใช้งาน';
+        });
+      };
+    }
     document.getElementById('pwaPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
 
     // ผู้ช่วยประเมิน (อสม.) — เปิดตลอด + ออฟไลน์ได้
