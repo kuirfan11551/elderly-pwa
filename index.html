@@ -953,7 +953,7 @@ function mmseEval(){
   var total=mmseSumArr(MMSE_TIME)+mmseSumArr(placeArr)+mmseSumArr(MMSE_REG)+(exempt?0:mmseSumArr(attArr))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(exempt?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO);
   var complete=mmseAllAns(MMSE_TIME)&&mmseAllAns(placeArr)&&mmseAllAns(MMSE_REG)&&mmseAllAns(MMSE_RECALL)&&mmseAllAns(MMSE_LANG)&&mmseAllAns(MMSE_VISUO)&&(exempt||(mmseAllAns(attArr)&&mmseAllAns(MMSE_WRITE)));
   var cutoff=mmseCutoff(mmseEduGroup()), max=exempt?23:30;
-  return { complete:complete, total:total, max:max, cutoff:cutoff, abnormal:total<cutoff };
+  return { complete:complete, total:total, max:max, cutoff:cutoff, abnormal:mmseAbn(total,cutoff) };
 }
 function cogLock(key){
   if(cogGate().state==='blocked') return { locked:true, msg:'🛑 งดตามผลคัดกรองอารมณ์' };
@@ -982,7 +982,7 @@ function domainResults(){
     var exempt=isExempt(), placeArr=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP, attArr=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL;
     var total=mmseSumArr(MMSE_TIME)+mmseSumArr(placeArr)+mmseSumArr(MMSE_REG)+(exempt?0:mmseSumArr(attArr))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(exempt?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO);
     var complete=mmseAllAns(MMSE_TIME)&&mmseAllAns(placeArr)&&mmseAllAns(MMSE_REG)&&mmseAllAns(MMSE_RECALL)&&mmseAllAns(MMSE_LANG)&&mmseAllAns(MMSE_VISUO)&&(exempt||(mmseAllAns(attArr)&&mmseAllAns(MMSE_WRITE)));
-    var cutoff=mmseCutoff(mmseEduGroup()), max=exempt?23:30, abn=total<cutoff;
+    var cutoff=mmseCutoff(mmseEduGroup()), max=exempt?23:30, abn=mmseAbn(total,cutoff);
     add('การรู้คิด','MMSE-Thai',total+'/'+max, complete?(abn?'ผิดปกติ R/O Dementia':'ปกติ'):'กรอกยังไม่ครบ', complete?(abn?'risk':'ok'):'warn', complete&&abn?['สงสัยภาวะสมองเสื่อม']:[]);
   } else if(cogGate().state==='blocked'){ add('การรู้คิด','MMSE/MoCA','—','🛑 งดตามผลคัดกรองอารมณ์','warn',[]); }
   // การรู้คิด — MoCA / MoCA-B (ตัวคิดคะแนนชุดเดียว mocaEval)
@@ -999,8 +999,7 @@ function domainResults(){
     if(!(f.tug!=null||sppbDone||anyFrat)) return;
     var conds=[];
     if(cpg!=null&&cpg>=4) conds.push('เสี่ยงพลัดตกหกล้ม');
-    else if(f.tug!=null&&f.tug>12) conds.push('เสี่ยงพลัดตกหกล้ม');
-    else if(sppbDone&&sppb<=9) conds.push('เสี่ยงพลัดตกหกล้ม');
+    else if(f.tug!=null&&f.tug>=12) conds.push('เสี่ยงพลัดตกหกล้ม');   // v61: ≥ 12 ตาม STEADI · SPPB ไม่ใช่เกณฑ์คัดกรองหกล้ม (ใช้เป็นสมรรถภาพทางกาย/AWGS)
     var sc='Thai-FRAT '+(cpg==null?'—':cpg+'/'+FRAT_MAX)
       +' · TUG '+(f.tug==null?'—':f.tug+' วิ')+' · SPPB '+(sppbDone?sppb:'—');
     var risk=conds.length>0;
@@ -1081,7 +1080,7 @@ function domainResults(){
   // การมองเห็น — ICOPE + VA (Snellen/E-chart)
   (function(){ if(!visionAny()) return;
     var m=visionBest(), complete=moduleComplete('vision'), abn=complete&&m!=null&&m>0.3;
-    add('การมองเห็น','การมองเห็น (ICOPE + VA)','VA ตาข้างดี '+(m==null?'—':vaLabel(m)), complete?(abn?visionResult(m):'ไม่เข้าเกณฑ์การมองเห็นบกพร่อง'):'กรอกยังไม่ครบ', complete?(abn?(m>0.6?'risk':'warn'):'ok'):'warn', abn?['การมองเห็นบกพร่อง']:[]);
+    add('การมองเห็น','การมองเห็น (ICOPE + VA)','VA ตาข้างดี '+(m==null?'—':vaLabel(m)), complete?(abn?visionResult(m):'ไม่เข้าเกณฑ์การมองเห็นบกพร่อง'):'กรอกยังไม่ครบ', complete?(abn?(visionLevel(m)>=2?'risk':'warn'):'ok'):'warn', abn?['การมองเห็นบกพร่อง']:[]);
   })();
   // การได้ยิน — เสียงกระซิบ + HHIE-S
   (function(){ if(!hearingAny()) return;
@@ -1471,7 +1470,9 @@ var VA_ROWS=[[0,'6/6 (ปกติ)'],[0.18,'6/9'],[0.3,'6/12'],[0.48,'6/18'],[0
 function vaLabel(v){ for(var i=0;i<VA_ROWS.length;i++) if(VA_ROWS[i][0]===v) return VA_ROWS[i][1].replace(/ \(.*\)$/,''); return '—'; }
 function visionAny(){ var v=MOD.vision; return v.screenFar!=null||v.screenRead!=null||v.glasses!=null||v.vaR!=null||v.vaL!=null; }
 function visionBest(){ var v=MOD.vision; if(v.vaR==null&&v.vaL==null) return null; if(v.vaR==null) return v.vaL; if(v.vaL==null) return v.vaR; return Math.min(v.vaR,v.vaL); }
-function visionResult(m){ return m==null?'':(m<=0.3?'การมองเห็นปกติ/ใกล้เคียงปกติ':m<=0.6?'การมองเห็นบกพร่องเล็กน้อย-ปานกลาง':'การมองเห็นบกพร่องรุนแรง')+' (ตาข้างดี '+vaLabel(m)+')'; }
+/* v61: ระดับตาม WHO (ICD-11): ≤ 6/12 ปกติ · แย่กว่า 6/12–6/18 เล็กน้อย · แย่กว่า 6/18–6/60 ปานกลาง · แย่กว่า 6/60 รุนแรง/ตาบอด (logMAR 0.3 / 0.48 / 1.0) */
+function visionLevel(m){ return m==null?null:(m<=0.3?0:m<=0.48?1:m<=1.0?2:3); }
+function visionResult(m){ var l=visionLevel(m); return l==null?'':(['การมองเห็นปกติ/ใกล้เคียงปกติ','การมองเห็นบกพร่องเล็กน้อย','การมองเห็นบกพร่องปานกลาง','การมองเห็นบกพร่องรุนแรง/ตาบอด'][l])+' (ตาข้างดี '+vaLabel(m)+')'; }
 function setVision(k,v){ MOD.vision[k]=v===''?null:+v; scoreVision(); renderModules(); }
 function visionForm(){
   var v=MOD.vision, yn=[['0','ไม่มี = 0'],['1','มี = 1']];
@@ -1497,7 +1498,7 @@ function scoreVision(){
   var m=visionBest(), complete=moduleComplete('vision'), abn=m!=null&&m>0.3;
   adlSet_('visV', m==null?'—':vaLabel(m));
   adlSet_('visR', visionAny()?(complete?(abn?'พบการมองเห็นบกพร่อง':'ไม่เข้าเกณฑ์บกพร่อง'):'กรอกยังไม่ครบ'):'—');
-  adlCls_('visBox', !visionAny()?'':(complete?(m>0.6?'risk':abn?'warn':'ok'):'warn'));
+  adlCls_('visBox', !visionAny()?'':(complete?(visionLevel(m)>=2?'risk':abn?'warn':'ok'):'warn'));
   var el=document.getElementById('visConcl'); if(!el) return;
   if(complete){ el.className='note'+(abn?' alert':''); el.innerHTML=abn?('<b>'+visionResult(m)+'</b> — แนะนำส่งตรวจตากับจักษุแพทย์ (ต้อกระจก/จอตา/วัดแว่น) + จัดแสงสว่างในบ้าน ระวังหกล้ม'):'ตาข้างดี '+vaLabel(m)+' — ไม่เข้าเกณฑ์การมองเห็นบกพร่อง (ตรวจซ้ำอย่างน้อยปีละครั้ง)'; }
   else { el.className='note'; el.innerHTML='ตอบคัดกรอง 3 ข้อ + วัด VA ครบ 2 ตา ระบบจะแปลผลให้อัตโนมัติ'; }
@@ -2289,8 +2290,10 @@ function thaiFratScore(){
 function fratScoringVersion(){ return FRAT_CPG_VERSION; }
 function fratResult(s){ return fratCpgResult(s); }         // ใช้เกณฑ์แปลผลเดียวกัน (<4 / 4-11)
 
-function tugResult(v){ return v>=20?'TUG เสี่ยงล้มสูง':v>=12?'TUG เข้าเกณฑ์เสี่ยงล้ม':'TUG ยังไม่เข้าเกณฑ์'; }
-function sppbResult(t){ return t<=3?'SPPB เสี่ยงล้มสูงมาก':t<=6?'SPPB เสี่ยงล้มสูง':t<=9?'SPPB เสี่ยงล้มปานกลาง':'SPPB เสี่ยงล้มต่ำ'; }
+/* v61: TUG ≥ 12 วิ = เสี่ยงหกล้ม (CDC STEADI) · > 15 วิ = การเดิน/ทรงตัวบกพร่อง (World Falls Guidelines 2022) — เดิมมีขั้น ≥20 ที่ไม่มีใน guideline */
+function tugResult(v){ return v>15?'TUG เสี่ยงหกล้ม · การเดิน/ทรงตัวบกพร่อง (> 15 วิ)':v>=12?'TUG เข้าเกณฑ์เสี่ยงหกล้ม (≥ 12 วิ)':'TUG ยังไม่เข้าเกณฑ์ (< 12 วิ)'; }
+/* v61: SPPB วัดสมรรถภาพทางกาย ไม่ใช่เครื่องมือคัดกรองหกล้ม (Guralnik 1994) · ≤ 9 = สมรรถภาพทางกายต่ำ (AWGS 2019) */
+function sppbResult(t){ return t<=3?'SPPB สมรรถภาพทางกายต่ำมาก':t<=6?'SPPB สมรรถภาพทางกายต่ำ':t<=9?'SPPB สมรรถภาพทางกายปานกลาง (≤ 9 ต่ำตาม AWGS)':'SPPB สมรรถภาพทางกายดี'; }
 /* ---------- กล่องคะแนน Thai-FRAT สด (ใต้ส่วน B) ---------- */
 function fratConsoleHtml(){
   var cpg=thaiFratCpgScore(), core=fratCoreSum();
@@ -2341,13 +2344,13 @@ function fallSummaryHtml(){
   var pf='';
   if(tug!=null){
     pf+='<div class="ar" style="font-size:18px">TUG = '+tug+' วินาที</div>'
-      +'<div class="ax">&gt;12 = <b style="color:'+(tug>12?'var(--risk)':'var(--ok)')+'">'+(tug>12?'Positive':'Negative')+'</b>'
+      +'<div class="ax">≥12 = <b style="color:'+(tug>=12?'var(--risk)':'var(--ok)')+'">'+(tug>=12?'Positive':'Negative')+'</b>'
       +' · &gt;15 = <b style="color:'+(tug>15?'var(--risk)':'var(--ok)')+'">'+(tug>15?'Positive':'Negative')+'</b><br>'
       +'SPPB = '+(sppbDone?(sppb+'/12'):'—')+(sppbDone?(' · '+sppbResult(sppb)):'')+'</div>';
   } else {
     pf='<div class="ar">—</div><div class="ax">ยังไม่มีค่า TUG · SPPB = '+(sppbDone?(sppb+'/12'):'—')+'</div>';
   }
-  H+=card('③','Physical performance',pf,tug==null?'unc':(tug>12?'mid':'low'));
+  H+=card('③','Physical performance',pf,tug==null?'unc':(tug>15?'high':tug>=12?'mid':'low'));
   H+='</div>';
   H+='<div class="wfg-note" style="margin-top:12px;padding:11px 14px;border-radius:11px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.22);font-size:12px;line-height:1.75;color:var(--ink-dim)">'
     +'⚠️ <b>ไม่สรุปรวมเป็น “ความเสี่ยงหกล้ม สูง/ต่ำ” ค่าเดียว</b> — เครื่องมือแต่ละตัวมีนิยาม กรอบเวลา และการนำไปใช้ต่างกัน '
@@ -2399,7 +2402,7 @@ function fallValidateHtml(){
 function scoreFalls(){ var f=MOD.falls;
   if(f.tug!=null){ var tv=document.getElementById('tugV'); if(tv){ tv.textContent=f.tug;
     document.getElementById('tugR').textContent=tugResult(f.tug);
-    document.getElementById('tugBox').className='scorebox '+(f.tug>=20?'risk':f.tug>=12?'warn':'ok'); } }
+    document.getElementById('tugBox').className='scorebox '+(f.tug>15?'risk':f.tug>=12?'warn':'ok'); } }
   var sppb=(f.balance||0)+(f.gait||0)+(f.chair||0); var sppbDone=f.balance!=null&&f.gait!=null&&f.chair!=null;
   var sv=document.getElementById('sppbV');
   if(sv){ sv.textContent=sppb; document.getElementById('sppbR').textContent=sppbDone?sppbResult(sppb):'—';
@@ -2468,8 +2471,10 @@ function adlSum(grp,arr){ var s=0,done=true,any=false;
   arr.forEach(function(it){ var v=MOD.adl[grp][it[0]]; if(v==null){done=false;}else{any=true;s+=v;} });
   return {s:s,done:done,any:any}; }
 function barthelResult(s){ return s>=20?'อิสระดี':s>=12?'พึ่งพาเล็กน้อย':s>=9?'พึ่งพาปานกลาง':s>=5?'พึ่งพามาก':'พึ่งพาทั้งหมด'; }
-function iadlResult(s){ return s>=8?'ทำได้อิสระ':s>=6?'ข้อจำกัดเล็กน้อย':s>=3?'พึ่งพาปานกลาง':'พึ่งพามาก'; }
-function aadlResult(s){ return s>=5?'ทำได้ดี':s>=3?'ลดลงบางส่วน':s>=1?'ลดลงชัดเจน':'แทบไม่มีกิจกรรมขั้นสูง'; }
+/* v61: Lawton IADL ไม่มีจุดตัดแบ่งระดับ — 8 = อิสระ · < 8 = บกพร่อง (ระบุจำนวนด้าน) */
+function iadlResult(s){ return s>=8?'ทำได้อิสระ':'IADL บกพร่อง '+(8-s)+' ด้าน'; }
+/* v61: เกณฑ์คลินิก (ไม่มีจุดตัดมาตรฐาน) — ≥ 5 ทำได้ดี · < 5 ลดลง */
+function aadlResult(s){ return s>=5?'ทำได้ดี':'กิจกรรมขั้นสูงลดลง'; }
 function adlSet_(id,txt){ var el=document.getElementById(id); if(el) el.textContent=txt; }
 function adlCls_(id,cls){ var el=document.getElementById(id); if(el) el.className='scorebox '+cls; }
 function scoreAdl(){
@@ -3028,6 +3033,8 @@ function genSelHtml(handler,cur,opts,ph){
 function mmseEduGroup(){ var v=edu.value; if(v==='ไม่ได้เรียนหนังสือ')return 'none'; if(v==='ประถมศึกษา')return 'primary'; return 'higher'; }
 function mmseEduLabel(g){ return g==='none'?'ไม่ได้เรียนหนังสือ':g==='primary'?'ประถมศึกษา':'มัธยมศึกษาขึ้นไป'; }
 function mmseCutoff(g){ return g==='none'?14:g==='primary'?17:22; }
+/* v61: MMSE-Thai 2002 — คะแนน "เท่ากับหรือต่ำกว่า" จุดตัด = สงสัยภาวะสมองเสื่อม (เดิมใช้ < ทำให้คนที่ได้พอดีจุดตัดถูกแปลว่าปกติ) */
+function mmseAbn(total,cutoff){ return total<=cutoff; }
 /* MoCA +1 เฉพาะการศึกษา ≤ 6 ปี (ไม่ได้เรียน/ประถม) ตามเกณฑ์ */
 function mocaLowEdu(){ var v=edu.value; return v==='ไม่ได้เรียนหนังสือ'||v==='ประถมศึกษา'; }
 function isExempt(){ return !!illit.checked; }
@@ -3098,7 +3105,7 @@ function mmseMethodSel(){ var m=MOD.mmse.method; return '<select onchange="setMm
 function mmseRows(arr){ return arr.map(function(it){ return modFld(it[1], genSelHtml('setMmse(\''+it[0]+'\',this.value)', MOD.mmse.v[it[0]], MMSE_BIN)); }).join(''); }
 function mmseForm(){
   var exempt=isExempt(), ctx=MOD.mmse.ctx, method=MOD.mmse.method, grp=mmseEduGroup();
-  var notice='<div class="note" style="margin-top:0">ระดับการศึกษา (ขั้นตอนที่ 1): <b>'+(edu.value||'— ยังไม่เลือก')+'</b> · กลุ่ม MMSE: <b>'+mmseEduLabel(grp)+'</b> · จุดตัด &lt; '+mmseCutoff(grp)+
+  var notice='<div class="note" style="margin-top:0">ระดับการศึกษา (ขั้นตอนที่ 1): <b>'+(edu.value||'— ยังไม่เลือก')+'</b> · กลุ่ม MMSE: <b>'+mmseEduLabel(grp)+'</b> · ผิดปกติเมื่อ ≤ '+mmseCutoff(grp)+
     (exempt?' · <b style="color:var(--warn)">อ่านไม่ออก/เขียนไม่ได้ → งดข้อ 4, 9, 10 อัตโนมัติ (เต็ม 23)</b>':' (เต็ม 30)')+'</div>';
   var attentionBlock = exempt
     ? '<div class="sectitle">4. Attention / Calculation</div><div class="note">🛑 งดข้อนี้อัตโนมัติ (ผู้รับบริการอ่านไม่ออก/เขียนไม่ได้)</div>'
@@ -3132,11 +3139,11 @@ function scoreMmse(){
   if(!exempt) complete=complete&&mmseAllAns(attArr)&&mmseAllAns(MMSE_WRITE);
   var grp=mmseEduGroup(), cutoff=mmseCutoff(grp), max=exempt?23:30;
   adlSet_('mmseV',total); adlSet_('mmseMax','MMSE (เต็ม '+max+')');
-  adlSet_('mmseR', complete?(total<cutoff?'ผิดปกติ R/O Dementia':'ปกติ'):(mmseAny()?'กรอกยังไม่ครบ':'—'));
-  adlCls_('mmseBox', !mmseAny()?'':(complete?(total<cutoff?'risk':'ok'):'warn'));
+  adlSet_('mmseR', complete?(mmseAbn(total,cutoff)?'ผิดปกติ R/O Dementia':'ปกติ'):(mmseAny()?'กรอกยังไม่ครบ':'—'));
+  adlCls_('mmseBox', !mmseAny()?'':(complete?(mmseAbn(total,cutoff)?'risk':'ok'):'warn'));
   var el=document.getElementById('mmseConcl'); if(!el) return;
-  if(complete){ var abn=total<cutoff; el.className='note'+(abn?' alert':'');
-    el.innerHTML=(abn?'⚠️ <b>MMSE ผิดปกติ R/O Dementia</b>':'✅ <b>MMSE ปกติ</b>')+' — คะแนน '+total+'/'+max+' (จุดตัดกลุ่ม'+mmseEduLabel(grp)+' &lt; '+cutoff+')'; }
+  if(complete){ var abn=mmseAbn(total,cutoff); el.className='note'+(abn?' alert':'');
+    el.innerHTML=(abn?'⚠️ <b>MMSE ผิดปกติ R/O Dementia</b>':'✅ <b>MMSE ปกติ</b>')+' — คะแนน '+total+'/'+max+' (กลุ่ม'+mmseEduLabel(grp)+' ผิดปกติเมื่อ ≤ '+cutoff+')'; }
   else { el.className='note'; el.innerHTML='ให้คะแนนรายข้อให้ครบ ระบบรวมและเทียบจุดตัดตามระดับการศึกษาให้อัตโนมัติ'+(exempt?' (งดข้อ 4, 9, 10)':''); }
 }
 
@@ -3681,7 +3688,7 @@ function moduleConditions(key){
     var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL;
     var total=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO);
     var ok=mmseAllAns(MMSE_TIME)&&mmseAllAns(pa)&&mmseAllAns(MMSE_REG)&&mmseAllAns(MMSE_RECALL)&&mmseAllAns(MMSE_LANG)&&mmseAllAns(MMSE_VISUO)&&(ex||(mmseAllAns(at)&&mmseAllAns(MMSE_WRITE)));
-    if(ok&&total<mmseCutoff(mmseEduGroup())) add('dementia','high','MMSE ผิดปกติ R/O Dementia');
+    if(ok&&mmseAbn(total,mmseCutoff(mmseEduGroup()))) add('dementia','high','MMSE ผิดปกติ R/O Dementia');
     return C;
   }
   if(key==='moca'){ if(cogGate().state==='blocked') return C;
@@ -3700,8 +3707,8 @@ function moduleConditions(key){
   }
   if(key==='falls'){ var f=MOD.falls,sppb=(f.balance||0)+(f.gait||0)+(f.chair||0),sppbDone=f.balance!=null&&f.gait!=null&&f.chair!=null;
     var cpg=thaiFratCpgScore();
-    var hi=(f.tug!=null&&f.tug>=20)||(cpg!=null&&cpg>=8)||(sppbDone&&sppb<=6);
-    if((cpg!=null&&cpg>=4)||(f.tug!=null&&f.tug>12)||(sppbDone&&sppb<=9)) add('fall_risk',hi?'high':'medium',
+    var hi=(f.tug!=null&&f.tug>15);   // v61: > 15 วิ = การเดิน/ทรงตัวบกพร่องตาม WFG
+    if((cpg!=null&&cpg>=4)||(f.tug!=null&&f.tug>=12)) add('fall_risk',hi?'high':'medium',
       (cpg!=null?('Thai-FRAT CPG '+cpg+'/11'):'')+(f.tug!=null?(' · TUG '+f.tug+' วิ'):''));
     return C;
   }
@@ -3743,7 +3750,7 @@ function moduleConditions(key){
     return C;
   }
   if(key==='vision'){ if(!moduleComplete('vision')) return C; var vm=visionBest();
-    if(vm!=null&&vm>0.3) add('vision_impair', vm>0.6?'high':'medium', 'ตาข้างดี '+vaLabel(vm)+(vm>0.6?' — บกพร่องรุนแรง':' — บกพร่องเล็กน้อย-ปานกลาง'));
+    if(vm!=null&&vm>0.3) add('vision_impair', visionLevel(vm)>=2?'high':'medium', 'ตาข้างดี '+vaLabel(vm)+' — '+visionResult(vm).replace(/\s*\(ตาข้างดี.*$/,''));
     return C;
   }
   if(key==='hearing'){ if(!moduleComplete('hearing')) return C; var hs=hhieSum(), wf=MOD.hearing.whisperR===1||MOD.hearing.whisperL===1;
@@ -3767,7 +3774,7 @@ function moduleDetail(key){
   if(key==='basic'){ var w=+wt.value,h=+ht.value/100; return {Weight:wt.value,Height:ht.value,BMI:(w>0&&h>0)?(w/(h*h)).toFixed(1):'',Calf_Circumference:calf.value,Systolic_BP:sbp.value,Diastolic_BP:dbp.value,Pulse:pulse.value}; }
   if(key==='mood'){ var on=q2Positive(), u9=on&&dtUse9q_(), u8=on&&dtNeed8q_()&&q8Any(), uT=on&&dtUseTgds_()&&tgdsDone();   // v60.5 ไม่เขียน 9Q=0 ปลอมเมื่อเลือก TGDS
     return {Q2_Result:on?'2Q plus ผิดปกติ':'ปกติ',Q9_Score:u9?q9Sum():'',Q9_Result:u9?q9Result(q9Sum()):'',Q8_Score:u8?q8Sum():'',Q8_Result:u8?q8Result(q8Sum()):'',TGDS_Score:uT?tgdsSum():'',TGDS_Result:uT?tgdsResult(tgdsSum()):''}; }
-  if(key==='mmse'){ var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL; var t=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO); var cut=mmseCutoff(mmseEduGroup()); return {MMSE_Score:t,MMSE_Result:t<cut?'MMSE ผิดปกติ R/O Dementia':'MMSE ปกติ'}; }
+  if(key==='mmse'){ var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL; var t=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO); var cut=mmseCutoff(mmseEduGroup()); return {MMSE_Score:t,MMSE_Result:mmseAbn(t,cut)?'MMSE ผิดปกติ R/O Dementia':'MMSE ปกติ'}; }
   if(key==='moca'){ var ME=mocaEval(); if(!ME.ver) return {}; return {MoCA_Score:ME.adj,MoCA_Result:mocaResultText(ME),MoCA_Version:ME.label,MoCA_Raw_Score:ME.raw,MoCA_Adjust_Points:ME.adjPts,MoCA_Cutoff:ME.cutoff}; }
   if(key==='falls') return modPartsDetail('falls');   // TUG / SPPB / Thai-FRAT เขียนเฉพาะตัวที่กรอกครบ
   if(key==='wfg'){ var w=MOD.wfg,D=wfgDerive(),bo=function(v){ return v==null?'':(v?'1':'0'); };
