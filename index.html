@@ -1069,7 +1069,7 @@ function domainResults(){
   (function(){ if(!ORAL_KEYS.some(function(k){return MOD.oral[k]!=null;})) return;
     var score=0,ans=0; ORAL_KEYS.forEach(function(k){ if(MOD.oral[k]!=null){ans++;score+=MOD.oral[k];} });
     var complete=ans===ORAL_KEYS.length;
-    add('ช่องปาก','สุขภาพช่องปาก',score+'/10 ปัญหา', complete?oralResult(score):'กรอก '+ans+'/10', complete?(score<=0?'ok':score<=3?'warn':'risk'):'warn', complete&&score>3?['ปัญหาสุขภาพช่องปากหลายด้าน']:[]);
+    add('ช่องปาก','สุขภาพช่องปาก',score+'/10 ด้านที่พบปัญหา', complete?oralResult(score):'กรอก '+ans+'/10', complete?(score<=0?'ok':'risk'):'warn', complete&&score>0?['พบปัญหาสภาวะช่องปาก ควรส่งต่อทันตบุคลากร']:[]);
   })();
   // ผู้ดูแล — Zarit
   (function(){ if(!zaritAny()) return;
@@ -2097,7 +2097,8 @@ function fallsForm(){
       +sel('cpgMed',[[1,'กินยาเสี่ยง ≥1 ชนิด หรือกินยาใดก็ได้ ≥4 ชนิด = 1'],[0,'ไม่กินยาเสี่ยง และกินยาน้อยกว่า 4 ชนิด = 0']])
       +'<div class="hint" style="color:var(--ink-faint);margin-top:5px">ยาเสี่ยง: ยานอนหลับ · ยากล่อมประสาท · ยาลดความดันโลหิต · ยาขับปัสสาวะ · (นับยาทุกชนิดรวมกัน ≥4 ก็เข้าเกณฑ์ ไม่รวมวิตามิน)</div></div>'
     +'<div class="fld"><label>6. สภาพบ้าน ที่อยู่อาศัย</label>'
-      +sel('cpgHouse',[[1,'บ้านยกพื้นสูง ≥1.5 ม. หรือบ้าน 2 ชั้น ต้องขึ้นลงบันได = 1'],[0,'ไม่ได้อยู่บ้านลักษณะดังกล่าว = 0']])+'</div>'
+      +sel('cpgHouse',[[1,'อยู่บ้านยกพื้นสูงตั้งแต่ 1.5 เมตรขึ้นไป = 1'],[0,'ไม่ได้อยู่บ้านยกพื้นสูงตั้งแต่ 1.5 เมตรขึ้นไป = 0']])
+      +'<div class="hint" style="color:var(--ink-faint);margin-top:5px">ถ้อยคำตามต้นฉบับ CPG หกล้ม ภาคผนวก เอกสาร 7 · v62 ตัด “หรือบ้าน 2 ชั้น” ออก เพราะไม่มีในต้นฉบับ (บ้านยกพื้นสูงที่มีบันไดเป็นปัจจัยเสี่ยงด้านสภาพแวดล้อม แต่ไม่ใช่เกณฑ์ให้คะแนนข้อนี้)</div></div>'
     +'</div>';
 
   /* ===== B · ประวัติการหกล้มแบบละเอียด (ข้อ 5 CPG + ค่าดิบ) ===== */
@@ -2573,7 +2574,7 @@ function toFixed1(n){ return (Math.round(n*10)/10).toString(); }
 /* ---- FRAIL + Modified Thai Frailty Index — สูตร/คำถามเป๊ะจาก ElderlyClinic ---- */
 var FRAIL_FATIGUE=[[1,'ตลอดเวลา'],[2,'เกือบตลอดเวลา'],[3,'บางเวลา'],[4,'ส่วนน้อย'],[5,'ไม่เคยเลย']]; // 1-2 = 1 คะแนน
 var FRAIL_YN=[[0,'ไม่มี'],[1,'มี']];
-var FRAIL_DISEASES=['โรคความดันโลหิตสูง','โรคเบาหวาน','โรคมะเร็ง (ไม่รวมมะเร็งผิวหนัง)','โรคปอดเรื้อรัง','โรคหลอดเลือดหัวใจกำเริบ','ภาวะหัวใจวาย','โรคหอบหืด','อาการแน่นหน้าอกจากโรคหลอดเลือดหัวใจ','ภาวะข้ออักเสบ','โรคหลอดเลือดสมอง','โรคไต']; // ≥5 = 1 คะแนน
+var FRAIL_DISEASES=['โรคความดันโลหิตสูง','โรคเบาหวาน','โรคมะเร็ง (ไม่รวมมะเร็งผิวหนัง)','โรคปอดเรื้อรัง','โรคหลอดเลือดหัวใจกำเริบ','ภาวะหัวใจวาย','โรคหอบหืด','อาการแน่นหน้าอกจากโรคหลอดเลือดหัวใจ','ภาวะข้ออักเสบ','โรคหลอดเลือดสมอง','โรคไต']; // v62: 0-4 โรค = 0 · 5-11 โรค = 1 (คู่มือ 2564 น.39)
 // MTFI: [key, code, text, scored, [[value,label],...]]  — คะแนน = (Number(value)>1 ? 1 : 0) เฉพาะ scored
 var MTFI_YN=[['1','ไม่มี (1)'],['2','มี (2)']], MTFI_YN2=[['1','ไม่ใช่ (1)'],['2','ใช่ (2)']];
 var MTFI_SECTIONS=[
@@ -2586,9 +2587,9 @@ var MTFI_SECTIONS=[
   ['ckd','1.6','โรคไตเรื้อรัง (CKD stage 3 ขึ้นไป)',true,MTFI_YN],
   ['bmiWeightLoss','1.7','BMI < 18.5 หรือ น้ำหนักลด > 5% ใน 1 ปี',true,MTFI_YN2],
   ['teethOrDenture','1.8','มีฟันน้อยกว่า 20 ซี่ หรือใช้ฟันปลอม',true,MTFI_YN2],
-  ['hearingLoss','1.9','มีปัญหาการได้ยินจนรบกวนการสื่อสาร',true,MTFI_YN2],
+  ['hearingLoss','1.9','มีปัญหาการได้ยิน จนต้องตะโกนสื่อสาร',true,MTFI_YN2],
   ['fall6m','1.10','ประวัติหกล้มภายใน 6 เดือนที่ผ่านมา',true,MTFI_YN2],
-  ['handgripLow','1.11','Hand grip dynamometer ต่ำกว่าปกติ',true,MTFI_YN2],
+  ['handgripLow','1.11','Hand grip dynamometer ต่ำกว่าปกติ (แรงบีบมือ ÷ น้ำหนักตัว ≤ 0.48 ในเพศชาย หรือ ≤ 0.35 ในเพศหญิง)',true,MTFI_YN2],
   ['memoryDecline','1.12','ความจำลดลง (จำคำ 3 คำ หลัง 3 นาที)',true,[['1','ไม่ใช่ / จำได้ ≥ 2 คำ (1)'],['2','ใช่ / จำได้ < 2 คำ (2)']]],
   ['calculationImpairment','1.13','การคำนวณผิดปกติ (ลบเลข 100-7 ไป 3 ครั้ง)',true,MTFI_YN2],
   ['medicationHelp','1.14','ต้องการความช่วยเหลือในการจัดยา / กินยา',true,MTFI_YN2]
@@ -2654,8 +2655,8 @@ function frailForm(){
       '<div class="fld"><label>R. เดินขึ้นบันได 10 ขั้นเองโดยไม่พัก มีปัญหาหรือไม่</label>'+frailSel('setFrailR(this.value)',f.resistance,FRAIL_YN)+'</div>'+
       '<div class="fld"><label>A. เดิน 300-400 ม. เองโดยไม่พัก มีปัญหาหรือไม่</label>'+frailSel('setFrailA(this.value)',f.ambulation,FRAIL_YN)+'</div>'+
     '</div>'+
-    '<div class="sectitle">I. โรคที่แพทย์เคยแจ้ง (เลือกได้หลายข้อ • 0-3 โรค = 0 / ตั้งแต่ 4 โรคขึ้นไป = 1 คะแนน — ตามคู่มือกรมการแพทย์ 2567)</div>'+diseases+
-    '<div class="sectitle">L. น้ำหนักลด (เทียบน้ำหนักปัจจุบันในขั้นตอนที่ 1 กับ 1 ปีก่อน • ลด > 5% = 1 คะแนน)</div>'+
+    '<div class="sectitle">I. โรคที่แพทย์เคยแจ้ง (เลือกได้หลายข้อ • 0-4 โรค = 0 / 5-11 โรค = 1 คะแนน — ตามคู่มือคัดกรองและประเมินสุขภาพผู้สูงอายุ 2564)</div>'+diseases+
+    '<div class="sectitle">L. น้ำหนักลด (เทียบน้ำหนักปัจจุบันในขั้นตอนที่ 1 กับ 1 ปีก่อน • ลดตั้งแต่ 5% = 1 คะแนน)</div>'+
     '<div class="grid c2" style="margin-top:4px"><div class="fld"><label>น้ำหนัก 1 ปีก่อน (กก.)</label>'+
       '<input type="number" inputmode="decimal" value="'+(f.prevWeight==null?'':f.prevWeight)+'" oninput="setFrailPrevWeight(this.value)" placeholder="เช่น 58.0"></div>'+
       '<div class="fld"><label>น้ำหนักปัจจุบัน (จากขั้นตอนที่ 1)</label><input value="'+(wt.value||'—')+'" readonly></div></div>'+
@@ -2701,8 +2702,8 @@ function pullFrailFromAssessment(){
   // 1.7 BMI<18.5 หรือ น้ำหนักลด >5%
   var bmi=(+wt.value>0&&+ht.value>0)?(+wt.value/Math.pow(+ht.value/100,2)):0, pct=frailLossPct();
   if(bmi>0||pct!=null){ MOD.frail.mtfi.bmiWeightLoss=((bmi>0&&bmi<18.5)||(pct!=null&&pct>=5))?'2':'1'; n++; }
-  // 1.11 แรงบีบมือต่ำ (จากโมดูลมวลกล้ามเนื้อ)
-  var gl=gripLow(gripBest()); if(gl!=null){ MOD.frail.mtfi.handgripLow=gl?'2':'1'; n++; }
+  // 1.11 แรงบีบมือต่ำ (จากโมดูลมวลกล้ามเนื้อ) — v62 ใช้แรงบีบมือ ÷ น้ำหนักตัว ตามแนวทางเปราะบาง ไม่ใช่ AWGS
+  var gl=gripRatioLow(gripBest()); if(gl!=null){ MOD.frail.mtfi.handgripLow=gl?'2':'1'; n++; }
   // 1.10 ประวัติหกล้ม (จาก SARC-CalF ข้อ 5)
   if(MOD.muscle&&MOD.muscle.sarc&&MOD.muscle.sarc.falls!=null){ MOD.frail.mtfi.fall6m=MOD.muscle.sarc.falls>=1?'2':'1'; n++; }
   openModule('frail');
@@ -2714,7 +2715,7 @@ function frailLossPct(){ var cur=+wt.value, prev=MOD.frail.prevWeight; if(cur>0&
 function frailScore(){
   var f=MOD.frail;
   var F=frailFatigueScore(), R=f.resistance||0, A=f.ambulation||0;
-  var I=frailIllnessCount()>=4?1:0;   // ตามคู่มือ กรมการแพทย์ 2567: 0-3 โรค=0, 4-11 โรค=1 (ฉบับสากล Morley ใช้ ≥5)
+  var I=frailIllnessCount()>=5?1:0;   // v62: คู่มือคัดกรองและประเมินสุขภาพผู้สูงอายุ 2564 น.39 — 0-4 โรค=0, 5-11 โรค=1 (ตรงกับฉบับสากลของ Morley) · แก้คู่กับข้อความหัวข้อ I ใน frailForm()
   var pct=frailLossPct(), L=(pct!=null&&pct>=5)?1:0;
   return {F:F,R:R,A:A,I:I,L:L,total:F+R+A+I+L,
     answered:(f.fatigue!=null)+(f.resistance!=null)+(f.ambulation!=null)+(frailIllnessCount()>0?1:0)+(f.prevWeight!=null?1:0)}; }
@@ -2789,6 +2790,11 @@ function muscleAny(){ var m=MOD.muscle; return m.gripR!=null||m.gripL!=null||Obj
 function gripBest(){ var m=MOD.muscle, vals=[m.gripR,m.gripL].filter(function(x){return x!=null&&x>0;}); return vals.length?Math.max.apply(null,vals):null; }
 function gripLow(best){ if(best==null||best<=0) return null; var g=gender.value;
   if(g==='ชาย') return best<28; if(g==='หญิง') return best<18; return null; }
+/* v62: MTFI ข้อ 1.11 ใช้นิยามของแนวทางป้องกันภาวะเปราะบาง กรมการแพทย์ (เอกสารแนบ 2 ฉบับปรับเพิ่ม น.94)
+   = แรงบีบมือ ÷ น้ำหนักตัว ≤ 0.48 ชาย / ≤ 0.35 หญิง — คนละเกณฑ์กับ AWGS 28/18 ที่ gripLow() ใช้กับภาวะมวลกล้ามเนื้อน้อย */
+function gripRatioLow(best){ if(best==null||best<=0) return null; var g=gender.value, w=+wt.value;
+  if(!(w>0)) return null; var r=best/w;
+  if(g==='ชาย') return r<=0.48; if(g==='หญิง') return r<=0.35; return null; }
 function gripResultText(best){ if(best==null||best<=0) return '—'; var g=gender.value;
   if(g==='ชาย') return best<28?'แรงบีบมือต่ำ (< 28 กก.)':'แรงบีบมือปกติ';
   if(g==='หญิง') return best<18?'แรงบีบมือต่ำ (< 18 กก.)':'แรงบีบมือปกติ';
@@ -3044,29 +3050,39 @@ var ORAL_GENERAL=[
  ['chewSwallow','3. ความสามารถในการเคี้ยว กิน กลืนอาหาร',[[0,'ปกติ'],[1,'มีปัญหา']]],
  ['painStatus','4. การเจ็บปวดในช่องปาก',[[0,'ไม่มี'],[1,'มี']]]
 ];
+/* v62: ข้อคำถามตรงตามคู่มือคัดกรองและประเมินสุขภาพผู้สูงอายุ 2564 น.14-15 (แบบประเมินโดยทันตบุคลากร)
+   ⚠️ คีย์ 'jawRelation' คงไว้ตามเดิมเพื่อไม่ให้ข้อมูลเก่าหลุด — ข้อความเดิมคือ "ความสัมพันธ์ของขากรรไกรไม่ดี"
+   ซึ่งไม่มีในต้นฉบับ · ข้อมูลที่บันทึกก่อน v62 ในช่องนี้จึงมาจากคำถามคนละข้อ */
 var ORAL_EXAM=[
- ['toothLoss','1. การสูญเสียฟัน'],['jawRelation','2. ความสัมพันธ์ของขากรรไกรไม่ดี'],
- ['caries','3. ฟันผุ / รากฟันผุ'],['periodontal','4. เหงือกและเนื้อเยื่อปริทันต์'],
- ['lesion','5. แผล / ติ่ง / ก้อนผิดปกติ'],['dryMouth','6. สภาวะปากแห้ง น้ำลายน้อย'],
- ['toothWear','7. ฟันสึก'],['hygiene','8. การดูแลอนามัยช่องปาก']
+ ['toothLoss','1. การสูญเสียฟัน','ฟันแท้ที่ใช้งานได้ < 20 ซี่ หรือคู่สบฟันหลัง < 4 คู่สบ'],
+ ['jawRelation','2. ความจำเป็นในการใส่ฟันเทียม','สูญเสียฟันจนเคี้ยวอาหารไม่ได้ หรือฟันเทียมที่ใช้อยู่หลวม/สึกจนเคี้ยวไม่ได้ มีการผุใต้ครอบฟัน จำเป็นต้องทำฟันเทียมใหม่'],
+ ['caries','3. ฟันผุ / รากฟันผุ','ฟัน/รากฟันมีรูผุ ผุเหลือแต่รากฟัน มีฝีหนองปลายราก หรือเหงือกร่นจนรากฟันโผล่ เสี่ยงต่อรากฟันผุ'],
+ ['periodontal','4. เหงือกและเนื้อเยื่อปริทันต์','เหงือกอักเสบ (มีเลือดออก) · มีหินปูน · โรคปริทันต์ (ฟันโยก หรือมีฝีหนองที่เหงือก)'],
+ ['lesion','5. แผล / มะเร็งช่องปาก','ริมฝีปาก แก้ม ลิ้น เพดาน เหงือก มีก้อนเนื้อหรือแผลสีแดง/ขาว · ใต้ฐานหรือขอบฟันเทียมมีแผลเรื้อรัง'],
+ ['dryMouth','6. สภาวะปากแห้ง น้ำลายน้อย','เนื้อเยื่อในช่องปากแห้ง ไม่มีน้ำลายหรือน้ำลายเหนียวข้น กระจกส่องปากติดข้างแก้ม กินอาหารแห้งต้องจิบน้ำตาม'],
+ ['toothWear','7. ฟันสึก','ฟันสึกด้านบดเคี้ยวเกินครึ่งหนึ่งของตัวฟัน'],
+ ['hygiene','8. การดูแลอนามัยช่องปาก','มีคราบจุลินทรีย์ที่เห็นได้ชัด มีหินปูน มีกลิ่นปาก ไม่ใช้อุปกรณ์เสริมที่จำเป็น']
 ];
 var ORAL_PROBLEM_OPTS=[[0,'ไม่พบปัญหา'],[1,'พบปัญหา']];
 var ORAL_ADL_OPTS=[['1','กลุ่มที่ 1 ช่วยเหลือตัวเอง/ผู้อื่นได้'],['2','กลุ่มที่ 2 ช่วยเหลือตนเองได้บ้าง'],['3','กลุ่มที่ 3 ช่วยเหลือตัวเองไม่ได้']];
 var ORAL_KEYS=['chewSwallow','painStatus','toothLoss','jawRelation','caries','periodontal','lesion','dryMouth','toothWear','hygiene'];
 function oralAny(){ return ORAL_KEYS.some(function(k){return MOD.oral[k]!=null;}) || MOD.oral.adlGroup!=null; }
-function oralResult(s){ return s<=0?'สุขภาพช่องปากไม่พบปัญหาเด่น':s<=3?'พบปัญหาสุขภาพช่องปาก ควรติดตาม/ดูแลต่อ':'พบปัญหาสุขภาพช่องปากหลายด้าน ควรส่งต่อทันตบุคลากร'; }
+/* v62: ต้นฉบับ (คู่มือ 2564 น.14-15) ไม่มีคะแนนรวมและไม่มีช่วงแปลผล — พบปัญหาข้อใดก็ส่งต่อทันตบุคลากร
+   ตัวเลขที่เก็บเป็น "จำนวนด้านที่พบปัญหา" (0-10) ไม่ใช่คะแนนที่มีจุดตัด · แก้คู่กับ resOral_ ใน Code.gs */
+function oralResult(s){ return s<=0?'ไม่พบปัญหาสภาวะช่องปาก':'พบปัญหาสภาวะช่องปาก '+s+' ด้าน ควรส่งต่อทันตบุคลากร'; }
 function oralForm(){
   var o=MOD.oral;
   var general=ORAL_GENERAL.map(function(it){ return modFld(it[1], genSelHtml('setOral(\''+it[0]+'\',this.value)', o[it[0]], it[2])); }).join('');
-  var exam=ORAL_EXAM.map(function(it){ return modFld(it[1], genSelHtml('setOral(\''+it[0]+'\',this.value)', o[it[0]], ORAL_PROBLEM_OPTS)); }).join('');
+  var exam=ORAL_EXAM.map(function(it){ return modFld(it[1], genSelHtml('setOral(\''+it[0]+'\',this.value)', o[it[0]], ORAL_PROBLEM_OPTS)+
+    (it[2]?'<div class="hint" style="color:var(--ink-faint);margin-top:5px">กรณีพบปัญหา: '+it[2]+'</div>':'')); }).join('');
   return '<div class="modpanel"><h3>🦷 สุขภาพช่องปาก</h3>'+
     '<div class="sectitle">ข้อมูลทั่วไป & การเคี้ยว/กลืน</div>'+
     ogrid()+
       modFld('1. กลุ่มตามการปฏิบัติกิจวัตร (ADL) <small style="color:var(--ink-faint)">(ไม่คิดคะแนน)</small>', genSelHtml('setOralAdl(this.value)', o.adlGroup, ORAL_ADL_OPTS,'เลือกกลุ่ม'))+
       general+'</div>'+
-    '<div class="sectitle">การตรวจสภาวะช่องปาก (พบปัญหา = 1 คะแนน/ข้อ)</div>'+
+    '<div class="sectitle">การตรวจสภาวะช่องปาก (ตรวจโดยทันตบุคลากร · ต้นฉบับไม่มีคะแนนรวม — ระบบนับเป็น “จำนวนด้านที่พบปัญหา” เพื่อติดตามแนวโน้มเท่านั้น)</div>'+
     ogrid()+exam+'</div>'+
-    '<div class="scorebox" id="oralBox"><div><div class="big" id="oralV">0</div><div class="lbl">คะแนนรวมปัญหา (เต็ม 10)</div></div><div class="res" id="oralR">—</div></div>'+
+    '<div class="scorebox" id="oralBox"><div><div class="big" id="oralV">0</div><div class="lbl">จำนวนด้านที่พบปัญหา (จาก 10)</div></div><div class="res" id="oralR">—</div></div>'+
     '<div class="note" id="oralConcl" style="margin-top:12px"></div></div>';
 }
 function setOral(key,v){ MOD.oral[key]=v===''?null:+v; scoreOral(); renderModules(); }
@@ -3077,9 +3093,9 @@ function scoreOral(){
   var complete=answered===ORAL_KEYS.length;
   adlSet_('oralV',score);
   adlSet_('oralR', complete?oralResult(score):(answered?'กรอก '+answered+'/'+ORAL_KEYS.length:'—'));
-  adlCls_('oralBox', !answered?'':(complete?(score<=0?'ok':score<=3?'warn':'risk'):'warn'));
+  adlCls_('oralBox', !answered?'':(complete?(score<=0?'ok':'risk'):'warn'));
   var el=document.getElementById('oralConcl'); if(!el) return;
-  if(complete){ el.className='note'+(score>3?' alert':''); el.innerHTML=(score<=0?'✅ ':(score>3?'⚠️ ':''))+'<b>'+oralResult(score)+'</b> (รวม '+score+'/10)'; }
+  if(complete){ el.className='note'+(score>0?' alert':''); el.innerHTML=(score<=0?'✅ ':'⚠️ ')+'<b>'+oralResult(score)+'</b> (พบปัญหา '+score+' จาก 10 ด้าน · ต้นฉบับไม่มีคะแนนรวม)'; }
   else { el.className='note'; el.innerHTML='ตรวจให้ครบทั้ง 10 ข้อ ระบบจะรวมคะแนนปัญหาและแปลผลให้อัตโนมัติ'; }
 }
 
@@ -3170,7 +3186,7 @@ function mocaStdForm_(){
   var delayed=MOCA_WORDS.map(function(w){ return modFld('คำว่า '+w[1], genSelHtml('setMocaDelayed(\''+w[0]+'\',this.value)', v['dr_'+w[0]], MOCA_RECALL_OPTS,'เลือกผลการนึกได้')); }).join('');
   var fluencyInput='<input type="number" min="0" inputmode="numeric" value="'+(MOD.moca.fluencyCount==null?'':MOD.moca.fluencyCount)+'" oninput="setMocaFluency(this.value)" placeholder="เช่น 12">';
   return '<div class="modpanel"><h3>💭 MoCA (ฉบับภาษาไทย)</h3>'+mocaVerBar_('std')+
-    '<div class="note" style="margin-top:0">ระดับการศึกษา: <b>'+(edu.value||'—')+'</b> '+(low?'· ไม่ได้เรียน/ประถม → ปรับ +1 คะแนนอัตโนมัติ (รวมไม่เกิน 30)':'· สูงกว่าประถม → ไม่ปรับคะแนน')+' · จุดตัด &lt; '+MOCA_STD_CUTOFF+'</div>'+
+    '<div class="note" style="margin-top:0">ระดับการศึกษา: <b>'+(edu.value||'—')+'</b> '+(low?'· ไม่ได้เรียน/ประถม → ปรับ +1 คะแนนอัตโนมัติ (รวมไม่เกิน 30)':'· สูงกว่าประถม → ไม่ปรับคะแนน')+' · จุดตัด &lt; '+MOCA_STD_CUTOFF+' (ตั้งแต่ '+MOCA_STD_CUTOFF+' ขึ้นไป = ปกติ · คำแนะนำการให้คะแนน MoCA ฉบับภาษาไทย 8.1)</div>'+
     '<div class="sectitle">1. Visuospatial / Executive (5)</div>'+
       refCard(MOCA_VISUO_IMG,'ภาพต้นฉบับจากแบบประเมิน MoCA ฉบับภาษาไทย 8.1 — ลากเส้นสลับ 1-ก-2-ข-3-ค-4-ง-5 · คัดลอกลูกบาศก์ · วาดหน้าปัดนาฬิกา 11.10 น.')+
       ogrid()+mocaRows(MOCA_VISUO)+'</div>'+
@@ -3192,7 +3208,7 @@ function setMocaDelayed(key,v){ MOD.moca.v['dr_'+key]=v===''?null:v; scoreMoca()
 function setMocaFluency(v){ MOD.moca.fluencyCount=v===''?null:+v; scoreMoca(); renderModules(); }
 /* ===== MoCA — ตัวคิดคะแนนชุดเดียว ใช้ร่วมทุกจุด (หน้าจอ · สรุป · ภาวะ · บันทึกลงชีต) =====
    v53: เพิ่ม MoCA-B (Basic) — เลือกฉบับตอนเปิดโมดูล · คำตอบแยก namespace (v = ฉบับมาตรฐาน · b = MoCA-B) · บันทึกเฉพาะฉบับที่เลือก */
-var MOCA_STD_CUTOFF=26;
+var MOCA_STD_CUTOFF=25;   // v62: MoCA ฉบับภาษาไทย 8.1 — "คะแนนรวมสุดท้ายมากกว่าหรือเท่ากับ 25 คะแนนให้พิจารณาว่าเป็นปกติ" (คำแนะนำการให้คะแนน MoCA Thai 8.1 + CPG สมองเสื่อม 2563) → ต่ำกว่า 25 = สงสัย MCI · แก้คู่กับ MOCA_STD_CUTOFF_ ใน Code.gs
 var MOCA_B_CUTOFF=25;   // MoCA-B: ≤ 24 = สงสัย MCI (จุดตัด 24/25 · Julayanont et al., J Am Geriatr Soc 2015) — คู่มือไทยที่แนบไม่ระบุจุดตัด: แก้ที่นี่ + MOCA_B_CUTOFF_ ใน Code.gs คู่กัน
 function mocaVer(){ var m=MOD.moca; if(m.ver==='basic'||m.ver==='std') return m.ver; if(m.ver==='') return null; return mocaStdAny()?'std':null; }   // ข้อมูลก่อน v53 (ไม่มี ver แต่มีคำตอบ) = ฉบับมาตรฐาน
 function mocaAny(){ var v=mocaVer(); return v==='basic'?mocaBAny():(v==='std'?mocaStdAny():false); }
@@ -3741,7 +3757,7 @@ function moduleConditions(key){
     return C;
   }
   if(key==='oral'){ var score=0,ans=0; ORAL_KEYS.forEach(function(k){ if(MOD.oral[k]!=null){ans++;score+=MOD.oral[k];} });
-    if(ans===ORAL_KEYS.length&&score>=1) add('oral_issue',score>=3?'high':'medium',oralResult(score)); return C;
+    if(ans===ORAL_KEYS.length&&score>=1) add('oral_issue','high',oralResult(score)); return C;
   }
   if(key==='adl'){ var b=adlSum('barthel',BARTHEL),i=adlSum('iadl',IADL),a=adlSum('aadl',AADL);
     if(b.done&&b.s<20) add('adl_dependency',b.s<=8?'high':b.s<=11?'medium':'low','');
