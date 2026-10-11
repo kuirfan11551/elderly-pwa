@@ -3688,6 +3688,14 @@ function moduleSnapshot(key){
 function savedMeta(key){ var rec=recOf(currentCid()); return (rec&&rec.modules&&rec.modules[key])?rec.modules[key]:null; }
 
 /* ภาวะ (engine key/severity ตรงเครื่องยนต์เดิม) ต่อโมดูล → ส่งให้ adapter union ลง Dashboard */
+/** MMSE ของครั้งนี้เข้าเกณฑ์สมองเสื่อมหรือยัง (กรอกครบ + ≤ จุดตัดตามการศึกษา) — ใช้ทั้งตอนติดป้ายสมองเสื่อม และตอนกัน MCI ซ้อน */
+function mmseSaysDementia(){
+  var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL;
+  var ok=mmseAllAns(MMSE_TIME)&&mmseAllAns(pa)&&mmseAllAns(MMSE_REG)&&mmseAllAns(MMSE_RECALL)&&mmseAllAns(MMSE_LANG)&&mmseAllAns(MMSE_VISUO)&&(ex||(mmseAllAns(at)&&mmseAllAns(MMSE_WRITE)));
+  if(!ok) return false;
+  var total=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO);
+  return mmseAbn(total,mmseCutoff(mmseEduGroup()));
+}
 var ENG_COND_LABEL={depression:'ภาวะซึมเศร้า',suicide_risk:'เสี่ยงฆ่าตัวตาย',dementia:'ภาวะสมองเสื่อม',mci:'การรู้คิดบกพร่องเล็กน้อย (MCI)',fall_risk:'เสี่ยงพลัดตกหกล้ม',malnutrition:'ทุพโภชนาการ',nutrition_risk:'เสี่ยงทุพโภชนาการ',frailty:'ภาวะเปราะบาง',prefrailty:'ภาวะก่อนเปราะบาง',low_muscle_strength:'แรงกล้ามเนื้อต่ำ',sarcopenia_risk:'เสี่ยงมวลกล้ามเนื้อน้อย',low_physical_activity:'กิจกรรมทางกายไม่เพียงพอ',poor_quality_of_life:'คุณภาพชีวิตไม่ดี',poor_physical_qol:'คุณภาพชีวิตด้านกายไม่ดี',poor_psychological_qol:'คุณภาพชีวิตด้านจิตใจไม่ดี',poor_social_qol:'คุณภาพชีวิตด้านสังคมไม่ดี',poor_environment_qol:'คุณภาพชีวิตด้านสิ่งแวดล้อมไม่ดี',oral_issue:'ปัญหาสุขภาพช่องปาก',adl_dependency:'กิจวัตรพื้นฐานบกพร่อง (ADL)',iadl_limitation:'กิจวัตรที่ซับซ้อนบกพร่อง (IADL)',aadl_limitation:'กิจกรรมขั้นสูงลดลง (Advanced ADL)',caregiver_burden:'ภาระผู้ดูแลสูง',caregiver_burden_mod:'ภาระผู้ดูแลปานกลาง',vision_impair:'การมองเห็นบกพร่อง',hearing_impair:'การได้ยินบกพร่อง',incontinence:'กลั้นปัสสาวะไม่อยู่',wfg_high:'WFG ความเสี่ยงสูง',wfg_intermediate:'WFG ความเสี่ยงปานกลาง',wfg_recurrent:'ล้มซ้ำ 2 ครั้งขึ้นไปใน 12 เดือน',wfg_long_lie:'นอนติดพื้นนานเกิน 1 ชั่วโมง',wfg_severe_fall:'การล้มรุนแรง (WFG 2022)',wfg_syncope:'สงสัยเป็นลม/หมดสติขณะล้ม',wfg_unclassifiable:'ข้อมูล WFG ไม่พอจัดกลุ่ม'};
 function moduleConditions(key){
   var C=[]; function add(k,sev,note){ C.push({key:k,label:ENG_COND_LABEL[k]||k,severity:sev,note:note||''}); }
@@ -3701,13 +3709,12 @@ function moduleConditions(key){
     return C;
   }
   if(key==='mmse'){ if(cogGate().state==='blocked') return C;
-    var ex=isExempt(),pa=MOD.mmse.ctx==='home'?MMSE_HOME:MMSE_HOSP,at=MOD.mmse.method==='spell'?MMSE_SPELL:MMSE_SERIAL;
-    var total=mmseSumArr(MMSE_TIME)+mmseSumArr(pa)+mmseSumArr(MMSE_REG)+(ex?0:mmseSumArr(at))+mmseSumArr(MMSE_RECALL)+mmseSumArr(MMSE_LANG)+(ex?0:mmseSumArr(MMSE_WRITE))+mmseSumArr(MMSE_VISUO);
-    var ok=mmseAllAns(MMSE_TIME)&&mmseAllAns(pa)&&mmseAllAns(MMSE_REG)&&mmseAllAns(MMSE_RECALL)&&mmseAllAns(MMSE_LANG)&&mmseAllAns(MMSE_VISUO)&&(ex||(mmseAllAns(at)&&mmseAllAns(MMSE_WRITE)));
-    if(ok&&mmseAbn(total,mmseCutoff(mmseEduGroup()))) add('dementia','high','MMSE ผิดปกติ R/O Dementia');
+    if(mmseSaysDementia()) add('dementia','high','MMSE ผิดปกติ R/O Dementia');
     return C;
   }
   if(key==='moca'){ if(cogGate().state==='blocked') return C;
+    // v62: MCI กับสมองเสื่อมเป็นคนละระดับของเส้นทางเดียวกัน ถ้า MMSE เข้าเกณฑ์สมองเสื่อมแล้ว ไม่ติดป้าย MCI ซ้ำ
+    if(mmseSaysDementia()) return C;
     var ME=mocaEval(); if(ME.complete&&ME.abnormal) add('mci','medium',mocaResultText(ME));
     return C;
   }
